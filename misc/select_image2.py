@@ -25,8 +25,7 @@ import numpy as np
 from sklearn.cluster import MeanShift
 
 sns.set(style="darkgrid")
-
-filePath = r'C:\Myfile\File\工作\PhD\Development cognitive map\exp\task\Image_Rating\见数/2021_08_23_09_06_37.xlsx'
+filePath = r'C:\Myfile\File\工作\PhD\Development cognitive map\experiment\task\Image_Rating\见数/2021_08_23_09_06_37.xlsx'
 rating_data = pd.read_excel(filePath)
 rating_data = rating_data.iloc[:,19:-8]
 

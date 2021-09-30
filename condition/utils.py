@@ -108,30 +108,82 @@ def genTrainCondition(pairs_df,mapDir):
     return pairs_df
 
 
-def infer1DCondition(pairs_df,mapDir,save=False):
+def uniformSampling(pairs_df,sampleNum):
+    # unifrom sampling from every bin
+    sampledAngle = [] 
+    for i in range(1,13):
+        iBinAngle = pairs_df[pairs_df.bin == i]
+        iBinSampleAngle = iBinAngle.sample(sampleNum).copy()
+        sampledAngle.append(iBinSampleAngle)    
+    sampledAngle = pd.concat(sampledAngle,axis=0)
+    return sampledAngle
+
+
+def getBestAngle(pairs_df,sampleNum,sampleTrials):
+    minInverseNum = 9999
+    bestAngleSet = []
+    for i in range(sampleTrials):
+        trialNangle = pairs_df.sample(sampleNum).copy()
+        repeatNum = 0 
+        index = trialNangle.index
+        for idx in index:
+        	inverseIndex = 600 - idx - 1
+        	if inverseIndex in index:
+        		repeatNum += 1 
+        inverseNum = repeatNum/2      
+        if inverseNum < minInverseNum:
+            minInverseNum = inverseNum
+            bestAngleSet = trialNangle
+    return bestAngleSet
+
+
+def megBlcok(mapDir):
+    mapPath = mapDir.split('\\')[-3:]
+    blockCondition = ['meg_apBlock1.xlsx','meg_dpBlock1.xlsx',
+                      'meg_dpBlock2.xlsx','meg_apBlock2.xlsx']
+    blockConditionPath = os.path.join(mapPath[0],mapPath[1],mapPath[3])
+    blockCondition = [os.path.join(blockConditionPath,block) 
+                      for block in blockCondition]
+    blockCondition_df = pd.DataFrame({'blockN':blockCondition})
+    blockCondition_df.to_excel(os.path.join(mapDir,'megBlock.xlsx',index=False))
+                     
+    
+def infer1DCondition(pairs_df,mapDir):
     # generate the condition files for 1D inference, which contain ap_test,
     # dp_test, interleaved_dim_test(ap_test+dp_test), ap_fmri, dp_fmri
+    pairs_df['angles'] = np.rad2deg(np.arctan2(pairs_df['ap_diff'],pairs_df['dp_diff']))
+    angles = pairs_df['angles'].tolist()
+    # use binNum label each angle 
+    alignedD_360 = [a % 360 for a in angles]
+    anglebinNum = [round(a/30)+1 for a in alignedD_360]
+    anglebinNum = [1 if binN == 13 else binN for binN in anglebinNum]
+    pairs_df['bin'] = anglebinNum
     
     dims = ['ap', 'dp']
-    pairs_num = int(len(pairs_df) * 0.5)
-    pairs_tophalf = pairs_df[:pairs_num]
-    
+    select_column = ['pairs_id','pic1','pic2','ap_diff','dp_diff',
+                     'fightRule','correctAns']
     for dim in dims:
-        infer1DTestIndex = pairs_tophalf[pairs_tophalf['{}_inference'.format(dim)]==1].sample(frac=0.2).index 
-        inverse_index = 2 * pairs_num - infer1DTestIndex - 1
-        infer1DTestIndex = infer1DTestIndex.tolist() + inverse_index.tolist()
-        pairs_df['{}_test'.format(dim)] = pairs_df['{}_train'.format(dim)].copy()
-        pairs_df.loc[infer1DTestIndex,'{}_test'.format(dim)] = True
-        pairs_df['{}_fmri'.format(dim)] = pairs_df['{}_inference'.format(dim)].copy()
-        pairs_df.loc[infer1DTestIndex,'{}_fmri'.format(dim)] = False
-        if save == True:
-            condition = '{}_test'.format(dim)
-            saveCondition(pairs_df, mapDir, condition)
-    pairs_df['interleaved_dim_test'] = pairs_df['ap_test'].copy()
-    pairs_df.loc[pairs_df.dp_test==True,'interleaved_dim_test'] = True
-    if save == True:
-        condition = 'interleaved_dim_test'
-        saveCondition(pairs_df, mapDir, condition)
+        dimInferPair = pairs_df.query('{}_inference == True'.format(dim)).copy()
+        dimInferPair['fightRule'] = dim.upper()
+        dimInferPair['correctAns'] = dimInferPair.apply(cal_correctAns, axis=1)
+        dimInferPair.loc[:,'pic1'] = 'Image_pool/game1/'+ dimInferPair['pic1']
+        dimInferPair.loc[:,'pic2'] = 'Image_pool/game1/'+ dimInferPair['pic2']
+        
+        # sample meg pairs
+        sampleAngleSet = getBestAngle(dimInferPair,240,3000) # MEG pairs        
+        sampleAngleSet = sampleAngleSet.sample(frac=1)
+        megDimBlock1 = sampleAngleSet[:60][select_column]
+        megDimBlock2 = sampleAngleSet[60:120][select_column]
+        
+        megDimBlock1.to_excel(os.path.join(mapDir,'meg_{}Block1.xlsx'.format(dim)),index=False)
+        megDimBlock2.to_excel(os.path.join(mapDir,'meg_{}Block2.xlsx'.format(dim)),index=False)
+        
+        # sample paris for 1D inference test         
+        oneDtest1 = sampleAngleSet[120:180][select_column]
+        oneDtest2 = sampleAngleSet[180:][select_column]
+        oneDtest1.to_excel(os.path.join(mapDir,'{}_1Dtest1.xlsx'.format(dim)),index=False)
+        oneDtest2.to_excel(os.path.join(mapDir,'{}_1Dtest2.xlsx'.format(dim)),index=False)
+        megBlcok(mapDir)
     return pairs_df
 
 
@@ -163,16 +215,10 @@ def cal_correctAns(df):
     return correctAns
 
 
-def saveCondition(pairs_df,mapDir,condition):
+def saveCondition(pairs_df,mapDir,dim):
     select_column = ['pairs_id','pic1','pic2','ap_diff','dp_diff']
-    if condition != 'interleaved_dim_test':
-        pairs_tmp = pairs_df[ pairs_df[condition]==True][select_column]
-    else:
-        pairs_apTest = pairs_df[pairs_df['ap_test']==True][select_column]
-        pairs_apTest['fightRule'] = 'AP'
-        pairs_dpTest = pairs_df[pairs_df['dp_test']==True][select_column]
-        pairs_dpTest['fightRule'] = 'DP'
-        pairs_tmp = pd.concat([pairs_apTest, pairs_dpTest])
+    pairs_tmp = pairs_df[select_column]
+    pairs_tmp['correctAns'] = pairs_df.apply(labelTrain,axis=1,args=(dim,'Ans'))
     pairs_tmp.loc[:,'pic1'] = 'Image_pool/game1/'+ pairs_tmp['pic1']
     pairs_tmp.loc[:,'pic2'] = 'Image_pool/game1/'+ pairs_tmp['pic2']
-    pairs_tmp.to_excel(os.path.join(mapDir,condition+'.xlsx'),index=False)
+    pairs_tmp.to_excel(os.path.join(mapDir,dim+'.xlsx'),index=False)

@@ -60,6 +60,7 @@ def plotAngleHist(angles):
 def plotAngleRadar(angles):
     alignedD_360 = [a % 360 for a in angles]
     anglebinNum = [round(a/30)+1 for a in alignedD_360]
+    anglebinNum = [1 if binN == 13 else binN for binN in anglebinNum]
     
    # Compute pie slices
     N = int(360/30)

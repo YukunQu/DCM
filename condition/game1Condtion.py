@@ -5,55 +5,91 @@ Created on Sat Sep  4 16:14:13 2021
 @author: qyk
 """
 import os 
+from os.path import join
+import numpy as np
 import pandas as pd
-from condition.utils import cal_correctAns
+from condition.utils import uniformSampling
 
 
-def game1Condtion(pairsR,mapDir):
-    # generate the condition files for behaviral training and fmri experiment
-    # of Game 1
-    # 留待加入训练和核磁实验的condition分离,下面的重复代码可以合并
-    # queryRule = ['ap_fmri==1','dp_fmri==1',
-    #'(ap_inference==1)&(dp_inference==1)','(ap_inference==1)&(dp_inference==1)']
-    # fightRule = ['AP','DP',1A2D',1D2A'] 
-    # 弄一个字典
-    # for fR in fightRule
-    # 1D inference in ap 
-    ap_fmri = pairsR.query('ap_fmri==1')
-    # game1TrainIndex = ap_fmri.sample(frac=0.05).index
-    ap_fmri = ap_fmri.sample(frac=0.05)
-    ap_fmri = ap_fmri[['pairs_id','pic1','pic2','pic1_ap','pic1_dp','pic2_ap','pic2_dp']]
-    ap_fmri.loc[:,'pic1'] = 'Image_pool/game1/'+ ap_fmri['pic1']
-    ap_fmri.loc[:,'pic2'] = 'Image_pool/game1/'+ ap_fmri['pic2']
-    ap_fmri['fightRule'] = 'AP'
+def sampleAngleSet(pairs_df):
+    bestSampleAngle = []
+    maxInferNum = 0
     
-    # 1D inference in dp 
-    dp_fmri = pairsR.query('dp_fmri==1')
-    dp_fmri = dp_fmri.sample(frac=0.05)
-    # game1TrainIndex.append()
-    dp_fmri = dp_fmri[['pairs_id','pic1','pic2','pic1_ap','pic1_dp','pic2_ap','pic2_dp']]
-    dp_fmri.loc[:,'pic1'] = 'Image_pool/game1/'+ dp_fmri['pic1']
-    dp_fmri.loc[:,'pic2'] = 'Image_pool/game1/'+ dp_fmri['pic2']
-    dp_fmri['fightRule'] = 'DP'
+    for x in range(500):
+        ntrials = 252
+        angleNumPerbin = int(ntrials / 12)
+        fmriPair = pairs_df.query('(dp_inference == True)|(ap_inference == True)').copy()
+               
+        # drop the point in (1,1) or (5,5)
+        dropPair = fmriPair.query('((pic1_ap==1)&(pic1_dp==1))|((pic1_ap==5)&(pic1_dp==5))|((pic2_ap==1)&(pic2_dp==1))|((pic2_ap==5)&(pic2_dp==5))')
+        drop_index = dropPair.index
+        fmriPair_droped  = fmriPair.drop(drop_index,axis=0)
+        
+        # sampling from each bin
+        sampleAngle = uniformSampling(fmriPair_droped,angleNumPerbin)
+        
+        # calcaute the number of 2D inference trials and find the best angle set.
+        infer2DNum = len(sampleAngle.query('(ap_inference == True)and(dp_inference == True)'))
+        if infer2DNum > maxInferNum:
+            bestSampleAngle = sampleAngle
+            maxInferNum = infer2DNum
+            print(maxInferNum)
+            
+    index = bestSampleAngle.index.to_list()
+    inverseIndex  = [600 - idx - 1 for idx in index]
+    fmriPairIndex = index + inverseIndex
+    pilotPool = fmriPair.drop(fmriPairIndex,axis=0)
+    pilotAngle = pilotPool.sample(24).copy()
+    return bestSampleAngle, pilotAngle
     
-    # 2D inference in two dimension
-    mix_fmri = pairsR.query('(ap_inference==1)&(dp_inference==1)')
-    mix_fmri = mix_fmri.sample(frac=0.05) # 便捷做法，留待采样仿真后修正
-    # game1TrainIndex.append()
-    mix_fmri = mix_fmri[['pairs_id','pic1','pic2','pic1_ap','pic1_dp','pic2_ap','pic2_dp']]
-    mix_fmri.loc[:,'pic1'] = 'Image_pool/game1/'+ mix_fmri['pic1']
-    mix_fmri.loc[:,'pic2'] = 'Image_pool/game1/'+ mix_fmri['pic2']
     
-    mix_fmri_1a2d = mix_fmri.copy()
-    mix_fmri_1d2a = mix_fmri.copy()
+def game1Condtion(taskDir,mapDir,pairs_df):
+    bestAngleSet,pilotAngle = sampleAngleSet(pairs_df) # find the best angle set.
+    bestAngleSet['j1'] = [round(j,1) for j in np.random.random(252) * (3-1) + 1]
+    bestAngleSet['j2'] = [round(j,1) for j in np.random.random(252) * (3-1) + 1]
+    bestAngleSet['j3'] = [round(j,1) for j in np.random.random(252) * (3-1) + 1]
+    bestAngleSet = bestAngleSet.sample(frac=1) # random the order of angle pairs and split into 6 blocks
+    fightRule = ['1A2D']*126 + ['1D2A']*126
+    bestAngleSet['fightRule'] = fightRule
+    bestAngleSet = bestAngleSet.sample(frac=1)
     
-    mix_fmri_1a2d['fightRule'] = '1A2D'
-    mix_fmri_1d2a['fightRule'] = '1D2A'
+    pilotAngle['j1'] = [round(j,1) for j in np.random.random(24) * (3-1) + 1]
+    pilotAngle['j2'] = [round(j,1) for j in np.random.random(24) * (3-1) + 1]
+    pilotAngle['j3'] = [round(j,1) for j in np.random.random(24) * (3-1) + 1]
+    pilotAngle = pilotAngle.sample(frac=1) # random the order of angle pairs and split into 6 blocks
+    fightRule = ['1A2D']*12 + ['1D2A']*12
+    pilotAngle['fightRule'] = fightRule
+    pilotAngle = pilotAngle.sample(frac=1)
     
-    game1_fmri = pd.concat((mix_fmri_1a2d,mix_fmri_1d2a,ap_fmri,dp_fmri))
-    game1_fmri['correctAns'] = game1_fmri.apply(cal_correctAns, axis=1)
-    game1_fmri.to_excel(os.path.join(mapDir,'game1_train.xlsx'),index=False)
+    saveDir = join(taskDir,mapDir,'fmri')
+    if not os.path.exists(saveDir):
+        os.mkdir(saveDir)
+
+    blockFile = []
+    part = 6
+    blockTrials= int(252/part)
+    pairsIndex = bestAngleSet.index
+    for block in range(1,part+1):
+        block_first = int((block-1) * blockTrials)
+        block_last = int(block * blockTrials)
+        blockPairsIndex = pairsIndex[block_first:block_last]           
+        blockPairs = bestAngleSet.loc[blockPairsIndex]     
+        # save the block condition file
+        blockFileName = 'fmri_Block{}.xlsx'.format(block)
+        savePath = join(saveDir,blockFileName)
+        blockPairs.to_excel(savePath,index=False)            
+        blockFile.append(join(mapDir,'fmri',blockFileName).replace('\\', '/'))
+    fmriBlocks = pd.DataFrame({'blockN':blockFile})
+    fmriBlocks.to_excel(join(saveDir,'fmriBlocks.xlsx'),index=False)
+    pilotAngle.to_excel(join(saveDir,'pilotTrials.xlsx'),index=False)
     
-    # pairR.loc[game1TrainIndex,'game1Train'] = True
-    # pairR.loc[game1ExpIndex,'game1Train'] =True
-    # return pairR
+    
+if __name__ == '__main__':
+    levels=5
+    setNum=10
+    taskDir = r'C:\Myfile\File\工作\PhD\Development cognitive map\experiment\task\dcm_day4\fMRI\game1'
+    for mapid in range(1,setNum+1):
+        mapDir = join('map_set','{}x{}','map{}').format(levels,levels,mapid)
+        pairs_df_path = join(taskDir,mapDir,'pairs_relationship.xlsx')
+        pairs_df = pd.read_excel(pairs_df_path) 
+        game1Condtion(taskDir,mapDir,pairs_df)
