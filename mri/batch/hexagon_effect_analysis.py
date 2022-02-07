@@ -8,20 +8,22 @@ Created on Thu Dec  9 20:42:40 2021
 
 import os   
 from os.path import join
-from mri.analysis.event import hexagon_effect_onM2_event,testFai_effect_event,hexagon_effect_onM2_event_spec
+from mri.analysis.event import testFai_effect_event
 from mri.analysis.estimate_fai import estimate_fai
 from mri.analysis.estimate_hexagon_effect import estimate_hexagon_effect
 
-subjects = ['017','018','021','022']
-train_run =  [1,2,3,4]
-test_run = [5,6]
-mask_path = r'/mnt/data/Template/EC_anatomy_roi.nii.gz'
+
+#subjects =   ['005','010','024','032','036','043','046']
+subjects =   ['024']
+train_run =  [1,2,3,4,5,6]
+test_run =   [1,2,3,4,5,6]
+mask_path = r'/mnt/data/Project/DCM/BIDS/derivatives/nilearn/sub-024/game1/6fold/func_mask.nii.gz'
 
 
 for subid in subjects:
-    hexagon_effect_onM2_event_spec(subid)
+    #hexagon_effect_onM2_event(subid)
     # make result data structure
-    save_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/nilearn/cv1'
+    save_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/nilearn'
     save_dir = join(save_dir,'sub-{}'.format(subid), 'game1')
 
     if not os.path.exists(save_dir):

@@ -55,6 +55,7 @@ def sourcedata_structure(sourcedata_dir):
         os.mkdir(os.path.join(sub_dir,'Behaviour','fmri_task-game1'))
         os.mkdir(os.path.join(sub_dir,'Behaviour','fmri_task-game2-train'))
         os.mkdir(os.path.join(sub_dir,'Behaviour','fmri_task-game2-test'))
+        os.mkdir(os.path.join(sub_dir,'Behaviour','placement'))
         os.mkdir(os.path.join(sub_dir,'NeuroData'))
         os.mkdir(os.path.join(sub_dir,'NeuroData','MRI'))
         os.mkdir(os.path.join(sub_dir,'NeuroData','MEG'))

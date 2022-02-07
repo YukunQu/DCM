@@ -19,7 +19,7 @@ def estimateMeanOrientation_Tim(beta_sin_map,beta_cos_map,mask,ifold=6):
     beta_sin = beta_sin_masked.mean()
     beta_cos_masked = apply_mask(beta_cos_map, mask)
     beta_cos = beta_cos_masked.mean()
-    mean_oritation = np.rad2deg(np.arctan(beta_sin/beta_cos))/ifold
+    mean_oritation = np.rad2deg(np.arctan2(beta_sin,beta_cos))/ifold
     return mean_oritation 
         
 

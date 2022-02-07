@@ -23,12 +23,12 @@ def estimate_fai(subj,runs,mask_path,save_dir):
     
     # set functional data name,events file name and some basic parameter
     func_name = 'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
-    events_name = 'hexagon_on_M2/cv1/{}fold/sub-{}_task-game1_run-{}_events.tsv'
+    events_name = 'hexonM2Long/{}fold/sub-{}_task-game1_run-{}_events.tsv'
     motion_name = 'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv'
     tr = 3 
     
     ifold_fai = {}
-    for ifold in range(1,10):
+    for ifold in range(4,9):
         func_all, design_matrices = prepare_data(subj, runs, func_name, 
                                                  events_name, motion_name,tr,ifold,True)
         

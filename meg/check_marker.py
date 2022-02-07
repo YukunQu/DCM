@@ -6,10 +6,10 @@ Created on Tue Nov 30 23:13:37 2021
 """
 
 # detect marker 
-
 import os
 import mne 
 import numpy as np
+
 
 fif_file_path = r'/mnt/data/Project/DCM/BIDS/sourcedata/sub_012/NeuroData/MEG/run4.fif'
 raw = mne.io.read_raw_fif(fif_file_path,allow_maxshield=True)

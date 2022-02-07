@@ -9,27 +9,17 @@ Created on Mon Nov 15 17:40:18 2021
 import os
 import pandas as pd 
 import nibabel as nib
-from analysis.hexagon.prepare_data import smoothData
+from mri.analysis.prepare_data import smoothData
 from nilearn.image import load_img
 
 
 if __name__ =="__main__":
+    data_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/fmriprep'
+    subjects = ['024']
+    subjects.sort()
+    func_name = r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
     
-    run_sessions = r'D:\Data\Development_Cognitive_Map\bids\derivatives\analysis\glm1/run_sessions.xlsx'
-    session_condition = pd.read_excel(run_sessions)
-    
-    save_dir = r'D:\Data\Development_Cognitive_Map\bids\derivatives\analysis\glm1\result'
-    
-    for row in session_condition.itertuples():
-        subj= row.subject
-        run = row.run_list
-        tr = row.tr    
-
-        func_name = row.func_name
-        events_name = row.events_name
-        motion_name = row.motion_name
-        
-        run = run.split(',')
-        
+    run = [1,2,3,4,5,6]
+    for subj in subjects:
         # --------可替换的脚本----------#
         smoothData(subj,run,func_name)

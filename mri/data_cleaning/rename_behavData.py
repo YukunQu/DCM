@@ -23,7 +23,6 @@ def rename_game1_behav_data(subjects):
             if ('sub' not in file) and ('.csv' in file):
                 file_path = os.path.join(game1_behav_data_dir, file)
                 file_data = pd.read_csv(file_path)
-                
                 if 'loop' in file:
                     run = file_data.at[45,'pic1']
                     file_data = file_data[0:42]
@@ -39,6 +38,6 @@ def rename_game1_behav_data(subjects):
 
 
 if __name__ =="__main__":
-    subjects= [19,20]
+    subjects= range(48,50)
     rename_game1_behav_data(subjects)
     

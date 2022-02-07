@@ -18,8 +18,8 @@ from nilearn.glm.first_level import make_first_level_design_matrix
 def prepare_data(subj,run_list,func_name,events_name,motion_name,tr,ifold,fixed_effect=True):
     """concatenate images and design matrixs from different run """
     
-    func_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/fmriprep/sub-{}/func'.format(subj)
-    event_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/fmriprep/sub-{}/events'.format(subj)        
+    func_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/fmriprep_surfer/sub-{}/func'.format(subj)
+    event_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/Events/sub-{}'.format(subj)        
     func_all = []
     design_matrices = []
     for i,run_id in enumerate(run_list):
@@ -59,13 +59,13 @@ def prepare_data(subj,run_list,func_name,events_name,motion_name,tr,ifold,fixed_
     
 
 def smoothData(subj,run_list,func_name):
-    func_dir = r'D:\Data\Development_Cognitive_Map\bids\derivatives\fmriprep\sub-{}\func'.format(subj)
+    func_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/fmriprep/sub-{}/func'.format(subj)
 
     for i,run_id in enumerate(run_list):
         # load image
         func_path = join(func_dir,func_name.format(subj,run_id))
         func_img = load_img(func_path)
         func_img = smooth_img(func_path,8)
-        save_path = os.path.join(func_dir,'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii.gz'.format(subj,run_id))
+        save_path = os.path.join(func_dir,r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii'.format(subj,run_id))
         func_img.to_filename(save_path)
-        print('Output:sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii.gz'.format(subj,run_id))
+        print('Output:sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii'.format(subj,run_id))

@@ -38,7 +38,7 @@ def estimate_hexagon_effect(subj,runs,mask_path,save_dir):
     tr = 3 
     
     ifold_beta = {}
-    for ifold in range(1,10):
+    for ifold in range(4,9):
         func_all, design_matrices = prepare_data(subj, runs, func_name, 
                                                  events_name, motion_name, tr, ifold,True)
         
