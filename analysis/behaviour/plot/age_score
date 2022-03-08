@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Dec 15 21:23:15 2021
+
+@author: dell
+"""
+
+import pandas as pd 
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import spearmanr
+sns.set_theme(style="darkgrid")
+#%%
+#age-1D-game1
+beha_total_score = r'/mnt/data/Project/DCM/participants_exp.xlsx'
+data = pd.read_excel(beha_total_score)
+data = data[data['usable']==1]
+data = data[data['Age']<28]
+# cal correlation
+res = spearmanr(data['Age'],data['1D_acc'])
+r = round(res[0],3)
+p = round(res[1],5)
+
+# plot
+g = sns.jointplot(x="Age", y="1D_acc", data=data,
+                  kind="reg", truncate=False,
+                  xlim=(8, 30), ylim=(0.4, 1),
+                  color="m", height=6)
+
+#move overall title up
+g.fig.subplots_adjust(top=0.92)
+g.fig.suptitle('r:{}  p:{}'.format(r,p))
+
+savepath = r'/mnt/data/Project/DCM/BIDS/derivatives/behaviour/result/analysis/age-1D_youth.png'
+g.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300)
+#%%
+#age-game1-2D
+beha_total_score =r'/mnt/data/Project/DCM/participants_exp.xlsx'
+data = pd.read_excel(beha_total_score)
+data = data[data['usable']==1]
+#data = data[data['Age']<28]
+# cal correlation
+res = spearmanr(data['Age'],data['game1_acc'])
+r = round(res[0],3)
+p = round(res[1],5)
+
+# plot
+g = sns.jointplot(x="Age", y="game1_acc", data=data,
+                  kind="reg", truncate=False,
+                  xlim=(8, 30), ylim=(0.4, 0.9),
+                  color="m", height=6)
+
+#move overall title up
+g.fig.subplots_adjust(top=0.92)
+g.fig.suptitle('r:{}  p:{}'.format(r,p))
+
+savepath = r'/mnt/data/Project/DCM/BIDS/derivatives/behaviour/result/analysis/age-game1_youth.png'
+g.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300)
+
+#%%
+#age-game2
+beha_total_score = r'/mnt/data/Project/DCM/participants_exp.xlsx'
+data = pd.read_excel(beha_total_score)
+data = data[data['usable']==1]
+#data = data[data['Age']<28]
+# cal correlation
+res = spearmanr(data['Age'],data['game2_test_acc'])
+r = round(res[0],3)
+p = round(res[1],5)
+
+# plot
+g = sns.jointplot(x="Age", y="game2_test_acc", data=data,
+                  kind="reg", truncate=False,
+                  xlim=(8, 30), ylim=(0.4, 1),
+                  color="m", height=6)
+
+#move overall title up
+g.fig.subplots_adjust(top=0.92)
+g.fig.suptitle('r:{}  p:{}'.format(r,p))
+
+savepath = r'/mnt/data/Project/DCM/BIDS/derivatives/behaviour/result/analysis/age-game2.png'
+g.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300)
+
+#%%
+#game1-game2
+beha_total_score = r'/mnt/data/Project/DCM/participants.csv'
+data = pd.read_csv(beha_total_score)
+data = data[data['usable']==1]
+#data = data[data['Age']<28]
+# cal correlation
+res = spearmanr(data['game1_acc'],data['game2_test_acc'])
+r = round(res[0],3)
+p = round(res[1],5)
+
+# plot
+g = sns.jointplot(x="game1_acc", y="game2_test_acc", data=data,
+                  kind="reg", truncate=False,
+                  xlim=(0.4, 0.9), ylim=(0.4, 1),
+                  color="m", height=6)
+
+#move overall title up
+g.fig.subplots_adjust(top=0.92)
+g.fig.suptitle('r:{}  p:{}'.format(r,p))
+
+savepath = r'/mnt/data/Project/DCM/BIDS/derivatives/behaviour/result/analysis/game1-game2.png'
+g.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300)
+
+#%%
+#age-training
+beha_total_score = r'/mnt/data/Project/DCM/participants.csv'
+data = pd.read_csv(beha_total_score)
+data = data[data['usable']==1]
+data['training_acc'] = (data['train_ap'] + data['train_dp'])/2
+#data = data[data['Age']<28]
+# cal correlation
+res = spearmanr(data['Age'],data['training_acc'])
+r = round(res[0],3)
+p = round(res[1],5)
+
+
+
+
+#%%
+# age-game1- Multiple Regression
+import pandas
+import statsmodels.api as sm
+
+beha_total_score = r'/mnt/data/Project/DCM/participants.csv'
+data = pd.read_csv(beha_total_score)
+data = data[data['usable']==1]
+#data = data[data['Age']<28]
+
+data['training_acc'] = (data['train_ap'] + data['train_dp'])/2
+
+X = data[['training_acc','Age']]
+y = data['game1_acc']
+
+model = sm.OLS(y,X).fit()
+predictions = model.predict(X)
+model.summary()
