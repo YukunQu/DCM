@@ -8,15 +8,15 @@ Created on Wed Sep  8 16:00:38 2021
 """
 import random
 import pandas as pd
-from simulation import utils
-from simulation import plot
+from preparation.simulation import utils
+from preparation.simulation import plot
 
 # setting parameters
 
 levels = 5
-ntrials = 300
+ntrials = 252
 nsub=20
-ampNoise = 0.2
+ampNoise = 10
 
 #%%
 # grid-like coding simulation #

@@ -12,10 +12,10 @@ from os.path import join
 import pandas as pd
 
 
-def game1_acc(subject,trial_check=True):
+def game1_acc(subject, trial_check=True):
     """Calculat the accuracy of task game1"""
-    behDataDir = r'/mnt/data/Project/DCM/sourcedata'
-    taskDataDir = join(behDataDir,'sub_{}'.format(subject),'Behaviour','fmri_task-game1')
+    behDataDir = r'/mnt/workdir/DCM/sourcedata'
+    taskDataDir = join(behDataDir,'sub_{}'.format(subject), 'Behaviour','fmri_task-game1')
     behData = []
     for i in range(1,7):
         file_name = 'sub-{}_task-game1_run-{}.xlsx'.format(subject,i)
@@ -55,6 +55,7 @@ def game1_acc(subject,trial_check=True):
                 keyResp_list.append(k[1])
                 
     trial_corr = []
+    none_trial = 0
     for keyResp,row in zip(keyResp_list, behData.itertuples()):
         rule = row.fightRule
         if rule == '1A2D':
@@ -71,16 +72,18 @@ def game1_acc(subject,trial_check=True):
                 correctAns = 1               
         if (keyResp == 'None') or (keyResp == None):
             trial_corr.append(False)
+            none_trial += 1
         elif int(keyResp) == correctAns:
             trial_corr.append(True)
         else:
             trial_corr.append(False)
     accuracy = np.round(np.sum(trial_corr) / len(behData),3)
+    print(f'the number of miss trials of sub-{subject} :',none_trial)
     return trial_corr, accuracy
 
 
 if __name__ == "__main__":
-    subjects = range(65,66)
+    subjects = range(66,68)
     subjects = [(str(s).zfill(3)) for s in subjects]
     #subjects.remove('054')
     #subjects.remove('041')
@@ -89,7 +92,7 @@ if __name__ == "__main__":
         trial_corr,accuracy = game1_acc(subject, trial_check=True)
         subject_acc['sub_{}'.format(subject)] = accuracy
 #%%
-    participants_tsv = r'/mnt/data/Project/DCM/BIDS/participants.tsv'
+    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
     for sub_id, acc in subject_acc.items():
        participants_data.loc[participants_data['Participant_ID']==sub_id,'game1_acc'] = acc

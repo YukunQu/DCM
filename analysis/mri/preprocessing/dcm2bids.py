@@ -13,8 +13,8 @@ def dcm2bids(subjects,config_file):
         subj = str(subj).zfill(3)
         config = config_file
         
-        ori_dir = r'/mnt/data/Project/DCM/sourcedata/sub_{}/NeuroData/MRI'.format(subj) 
-        out_dir = r'/mnt/data/Project/DCM/BIDS'
+        ori_dir = r'/mnt/workdir/DCM/sourcedata/sub_{}/NeuroData/MRI'.format(subj)
+        out_dir = r'/mnt/workdir/DCM/BIDS'
         command = r'dcm2bids -d {} -p {} -c {} -o {} --forceDcm2niix'.format(ori_dir,subj,config,out_dir)
         print("Command:",command)
         subprocess.call(command,shell=True)
@@ -22,8 +22,8 @@ def dcm2bids(subjects,config_file):
 
 if __name__ == "__main__":
     # Peking scaning
-    subjects_pk = [23]  
-    config_pk = r'/mnt/data/Project/DCM/config/config_sub023.json'
+    subjects_pk = [65]
+    config_pk = r'/mnt/rkdir/DCM/config/config_Peking.json'
     dcm2bids(subjects_pk, config_pk)
     
     # ibp scaning

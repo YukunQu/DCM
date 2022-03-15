@@ -14,7 +14,7 @@ from nibabel.affines import apply_affine
 
 
 def get_coordinate(image, mask):
-    # return voxel coordinates
+    # return voxel coordinates of peak point
     mask = resample_to_img(mask,image,interpolation='nearest')
     img_masked = apply_mask(image, mask)
     peak_value = np.max(img_masked)
@@ -64,10 +64,11 @@ def sphere_roi(voxloc, radius, value, datashape = (91,109,91), data = None):
     return data, loc
 
 
-def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1):
+def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None):
     image = load_img(imgpath)
     mask = load_img(mask_path)
-    coords = get_coordinate(image,mask)
+    if coords == None:
+        coords = get_coordinate(image,mask)
     # mni_coords = apply_affine(image.affine, coords)
     
     datashape = image.shape
@@ -80,7 +81,13 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1):
     roi_img.to_filename(savepath)
 
 
-ftest_path = r'/mnt/data/Project/DCM/BIDS/derivatives/Nipype/M2/hp_sub/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
-ec_roi = r'/mnt/data/Template/EC_roi_sum.nii.gz'
-savepath = r'/mnt/data/Project/DCM/BIDS/derivatives/Nipype/M2/hp_sub/2ndLevel/_contrast_id_ZF_0004/EC_ROI.nii'
-makeSphereMask(ftest_path,ec_roi,savepath)
+if __name__ == "__main__":
+    ftest_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
+    
+    ec_roi = r'/mnt/data/Template/EC_prob_roi.nii.gz'
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/EC_func_roi.nii'
+    makeSphereMask(ftest_path,ec_roi,savepath,radius=(5/3,5/3,5/3))
+    
+    vmpfc_roi = r'/mnt/data/Template/VMPFC_roi.nii'
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/vmpfc_func_roi.nii'
+    makeSphereMask(ftest_path, vmpfc_roi, savepath,radius=(5/3,5/3,5/3),coords=(45,87,37))

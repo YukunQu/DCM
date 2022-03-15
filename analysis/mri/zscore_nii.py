@@ -27,9 +27,9 @@ def zscore_nii(source_dir,file,prefix):
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
 
 
-data_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/Nipype/M2/1stLevel_part2'
+data_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/specificTo6/test_set/testsetall/6fold'
 sub_list = os.listdir(data_dir)
 for sub in sub_list:
     data_sub_dir = os.path.join(data_dir,sub)
-    zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
+    zscore_nii(data_sub_dir, 'spmT_0001.nii', 'Z')
     print(sub,'was zscored.')

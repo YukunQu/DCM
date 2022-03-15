@@ -6,10 +6,10 @@ Created on Sat Sep 11 09:32:48 2021
 """
 import random
 import numpy as np
-from simulation import utils,plot
+from preparation.simulation import utils,plot
 import matplotlib.pyplot as plt
 import pandas as pd
-from simulation.plot import plotAngleRadar
+from preparation.simulation.plot import plotAngleRadar
 
 
 def testSimulation():

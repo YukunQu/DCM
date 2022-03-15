@@ -9,14 +9,13 @@
 #     4. Normalize 1st-level contrasts
 
 import time 
-import os
 import pandas as pd 
 from os.path import join as pjoin
 
 from nipype import Node, MapNode, Workflow
 from nipype.interfaces.utility import Function,IdentityInterface
 
-from nipype.interfaces.base import Bunch
+
 from nipype.algorithms.modelgen import SpecifySPMModel
 from nipype.interfaces.spm import Smooth
 from nipype.interfaces.spm import Level1Design
@@ -83,19 +82,17 @@ participants_data = pd.read_csv(participants_tsv,sep='\t')
 data = participants_data.query('usable==1')
 pid = data['Participant_ID'].to_list()
 subject_list = [p.split('_')[-1] for p in pid]
-#subject_list = ['010','011','012','015','023','033','040','048','049','050',
-#                '055','056','058','059','060','061','062','063','064']
-#subject_list = ['010','024','032','036','043','046','053','061','062']
+
 # set parameters
 tr = 3.
 runs_list = [1,2,3]
-analysis_type = 'M2short'
+analysis_type = 'M2'
 
 # input files
 data_root = '/mnt/data/Project/DCM/BIDS/derivatives/fmriprep_volume'
 event_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/Events'
 templates = {'func': pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
-             'event': pjoin(event_dir,'sub-{subj_id}/hexonM2short/6fold/sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
+             'event': pjoin(event_dir,'sub-{subj_id}/hexonM2Long/6fold/sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
              'regressors':pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
             }
 

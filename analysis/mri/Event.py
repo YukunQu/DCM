@@ -195,7 +195,7 @@ class Game1EV(object):
     
 
 if __name__ == "__main__":
-    
+    """
     subjects = ['033', '048', '049', '050', '055', '056', '058',
                 '059', '060', '061', '062', '063', '064']
     participants_tsv = r'/mnt/data/Project/DCM/BIDS/participants.tsv'
@@ -203,13 +203,13 @@ if __name__ == "__main__":
     data = participants_data.query('usable==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
-    
-    #subjects = [5]
+    """
+    subjects = ['065']
     runs = range(1,7)
     ifolds = range(4,9)
     
-    template = {'behav_path':r'/mnt/data/Project/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
-                'save_dir':r'/mnt/data/Project/DCM/BIDS/derivatives/Events/sub-{}/hexonM2short/{}fold',
+    template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
+                'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/hexonM2short/{}fold',
                 'event_file':'sub-{}_task-game1_run-{}_events.tsv'}
     
     for subj in subjects:

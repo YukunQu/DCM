@@ -48,7 +48,7 @@ def genSimulateData(angles,omega=None,ampNoise=0.1):
     y_true = []
     for angle in angles:
         noise =  ampNoise * np.random.rand()
-        y_true.append(1 + 1*np.cos(np.deg2rad(6*(angle - omega))) + noise)
+        y_true.append(12 + 1*np.cos(np.deg2rad(6*(angle - omega))) + noise)
     return y_true
 
 

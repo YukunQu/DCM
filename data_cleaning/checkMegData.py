@@ -20,13 +20,13 @@ def check_meg(data_fname):
         
 if __name__ == "__main__":
     # load subject file and check it
-    data_dir = r'/mnt/data/Project/DCM/BIDS/sourcedata'
+    data_dir = r'/mnt/data/Sourcedata/DCM'
     ndata_type = 'MEG'  # neuron data type
     
     sub_list = os.listdir(data_dir)
     sub_list.sort()
     info_list = []
-    for sub in sub_list[35:60]:
+    for sub in sub_list[64:65]:
         ndata_dir = os.path.join(data_dir,sub,'NeuroData',ndata_type)
         ndata_list = os.listdir(ndata_dir)
         fileNum = 0

@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from stimuli.condition.utils import genPairRelation
+from preparation.stimuli.utils import genPairRelation
 
 
 def plot6foldSpecificity(paramEsti_df):
@@ -33,9 +33,6 @@ def alignVSmisalign(testAngles,ytrue_test,omega_estimate):
             label.append('align')
         elif binNum in range(2,13,2):
             label.append('misalign')
-    #binlist= list(range(1,13))
-    # data = pd.DataFrame({'BinNumber':binlist,'binActivation':binsActivation,
-    #        'label':label})
     data = pd.DataFrame({'BinNumber':anglebinNum,'Activation':ytrue_test,
                          'label':label})
     sns.catplot(data=data,kind='bar',x='BinNumber',

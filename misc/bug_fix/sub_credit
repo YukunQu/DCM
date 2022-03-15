@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Mar  8 17:52:41 2022
+
+@author: dell
+"""
+import os
+import pandas as pd 
+from os.path import join as pjoin
+
+# set subject 
+subjects = [str(s).zfill(3) for s in range(55,66)]
+subjects.remove('056')
+subjects.remove('057')
+subjects.remove('058')
+subjects_credit = pd.DataFrame(columns=['Participant_ID','Name','Credit','Credit_beh','Credit_hm'])
+
+participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+participants_data = pd.read_csv(participants_tsv,sep='\t').dropna(subset=['game1_acc'])
+
+for sub in subjects:
+    # calculate the mean accuracy in offline experiment
+    sub_id = 'sub_' + sub
+    name = participants_data[participants_data['Participant_ID']==sub_id]['Name'].values[0]
+    sub_data = participants_data.query('Participant_ID=="{}"'.format(sub_id))
+    sub_acc = sub_data[['1D_acc','game1_acc','game2_train_ap','game2_train_dp',
+                        'game2_test_acc']].mean(axis=1).values[0]
+    if sub_acc > 0.9:
+        beh_credit = 300
+    elif sub_acc > 0.75:
+        beh_credit = 200
+    elif sub_acc > 0.70:
+        beh_credit = 150
+    elif sub_acc > 0.70:
+        beh_credit = 100
+    else:
+        beh_credit = 0
+   
+    # read head motion file
+    data_root = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume'
+    head_motion = []
+
+    subj_id = sub
+    data_root = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume'
+    head_motion = []
+    for run_id in range(1,7):
+        confound_file = pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'.format(subj_id=subj_id,run_id=run_id))
+        if os.path.exists(confound_file):
+            confound_data = pd.read_csv(confound_file,sep='\t')
+            fd = confound_data['framewise_displacement'].mean()
+        else:
+            fd = 999
+        head_motion.append(fd)
+    
+    for run_id in range(1,3):
+        confound_file = pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv'.format(subj_id=subj_id,run_id=run_id))
+        if os.path.exists(confound_file):
+            confound_data = pd.read_csv(confound_file,sep='\t')
+            fd = confound_data['framewise_displacement'].mean()
+        else:
+            fd = 999
+        head_motion.append(fd)
+    
+    for run_id in range(1,3):
+        confound_file = pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-rest_run-{run_id}_desc-confounds_timeseries.tsv'.format(subj_id=subj_id,run_id=run_id))
+        if os.path.exists(confound_file):
+            confound_data = pd.read_csv(confound_file,sep='\t')
+            fd = confound_data['framewise_displacement'].mean()
+        else:
+            fd = 999
+        head_motion.append(fd)
+    
+    age = participants_data[participants_data['Participant_ID']=='sub_'+subj_id]['Age'].values[0]
+    
+    if age < 16:
+        hm_thr = 0.5
+    else:
+        hm_thr = 0.3
+    num_goodrun = 0
+    for hm in head_motion:
+        if hm < hm_thr:
+            num_goodrun +=1
+
+    if num_goodrun == 10:             
+        hm_credit = 300
+    elif num_goodrun > 8:
+        hm_credit = 200
+    elif num_goodrun > 6:
+        hm_credit = 100
+    else:
+        hm_credit = 0
+    
+    credit = beh_credit+hm_credit
+    sub_credit = {'Participant_ID':sub_id,'Name':name,'Credit':credit,
+                  'Credit_beh':beh_credit,'Credit_hm':hm_credit}
+    subjects_credit = subjects_credit.append(sub_credit,ignore_index=True)
+    
+    

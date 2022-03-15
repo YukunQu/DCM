@@ -13,7 +13,7 @@ import pandas as pd
 def rename_game1_behav_data(subjects):
     for subid in subjects:
         subid = str(subid).zfill(3)
-        game1_behav_data_dir = r'/mnt/data/Project/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1'
+        game1_behav_data_dir = r'/mnt/data/Sourcedata/DCM/sub_{}/Behaviour/fmri_task-game1'
         game1_behav_data_dir = game1_behav_data_dir.format(subid)
         file_list = os.listdir(game1_behav_data_dir)
         file_list.sort()
@@ -38,6 +38,6 @@ def rename_game1_behav_data(subjects):
 
 
 if __name__ =="__main__":
-    subjects= range(65,66)
+    subjects= range(66,68)
     rename_game1_behav_data(subjects)
     
