@@ -105,7 +105,7 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
     working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/' \
                   'test_set/testset{}/{}'.format(analysis_type, set_id, ifold)
-    container_path = os.path.join('hexonM2Long', 'specificTo6', 'test_set','vmpfc'
+    container_path = os.path.join('hexonM2Long', 'specificTo6', 'test_set','vmpfc',
                                   'testset{}'.format(set_id))
     datasink = Node(DataSink(base_directory=datasink_dir,
                              container=container_path),
@@ -219,6 +219,6 @@ if __name__ == "__main__":
     test_sets = {'all': [1, 2, 3, 4, 5, 6]}
 
     for set_id, runs in test_sets.items():
-        for i in range(6, 7):  # changed
+        for i in [4,5,7,8]:  # changed
             ifold = str(i) + 'fold'
             alignFai_1stLevel(subject_list, set_id, runs, ifold, configs)

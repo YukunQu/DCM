@@ -220,7 +220,7 @@ if __name__ == "__main__":
     # split k training set
     #training_sets = {1: [1, 2, 3],
     #                2: [4, 5, 6]}
-    training_sets = {'all': [1, 2, 3, 4, 5, 6]}
+    training_sets = {'2': [4, 5, 6]}
     for set_id,runs in training_sets.items():
         for i in range(6, 7):
             ifold = str(i) + 'fold'

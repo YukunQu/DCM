@@ -38,7 +38,7 @@ subj_config = {'adult':['010','018','023','024','027','029','033','037','043',
                'hp':['010','024','032','036','043','046','053','061','062','065'],
                'all':sub_all}
 
-sub_type = 'hp'
+sub_type = 'adult'
 subject_list  = subj_config[sub_type]
 #%%
 # data input and ouput
@@ -50,7 +50,7 @@ infosource.inputs.subj_id = subject_list
 
 # SelectFiles - to grab the data (alternativ to DataGrabber)
 data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-templates = {'cons': pjoin(data_root, 'hexonM2Long/specificTo6/test_set/testsetall/6fold',
+templates = {'cons': pjoin(data_root, 'hexonM2Long/specificTo6/test_set/vmpfc/testsetall/6fold',
                            'sub-{subj_id}','{contrast_id}.nii')}  # look out
 
 # Create SelectFiles node
@@ -58,7 +58,7 @@ selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_file
                       name='selectfiles', iterfield=['subj_id'])
 
 # Initiate DataSink node here
-container_path = 'hexonM2Long/specificTo6/test_set/testsetall/{}'.format(sub_type)  # look out
+container_path = 'hexonM2Long/specificTo6/test_set/vmpfc/testsetall/{}'.format(sub_type)  # look out
 datasink = Node(DataSink(base_directory=data_root,
                          container=container_path),
                 name="datasink")
@@ -102,4 +102,4 @@ analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                      '2ndLevel.@con')])
                      ])
 # run 2nd analysis
-analysis2nd.run('MultiProc', plugin_args={'n_procs': 10})
+analysis2nd.run('MultiProc', plugin_args={'n_procs': 2})

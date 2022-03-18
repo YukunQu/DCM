@@ -195,7 +195,6 @@ if __name__ == "__main__":
 
     # default setting
     ifolds = range(4, 9)
-    ifolds = range(6, 7)
     template = {
         'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
         'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/alignPhi/vmpfc/testset{}/{}fold',

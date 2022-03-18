@@ -77,7 +77,7 @@ def run_info(ev_file,motions_file=None):
 
 #%%
 # specify subjects
-participants_tsv = r'/mnt/data/Project/DCM/BIDS/participants.tsv'
+participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
 data = participants_data.query('usable==1')
 pid = data['Participant_ID'].to_list()
@@ -85,20 +85,20 @@ subject_list = [p.split('_')[-1] for p in pid]
 
 # set parameters
 tr = 3.
-runs_list = [1,2,3]
+runs_list = [4,5,6]
 analysis_type = 'M2'
 
 # input files
-data_root = '/mnt/data/Project/DCM/BIDS/derivatives/fmriprep_volume'
-event_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/Events'
+data_root = '/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume'
+event_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events'
 templates = {'func': pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
              'event': pjoin(event_dir,'sub-{subj_id}/hexonM2Long/6fold/sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
              'regressors':pjoin(data_root,'sub-{subj_id}/func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
             }
 
 # outputfiles
-datasink_dir = '/mnt/data/Project/DCM/BIDS/derivatives/Nipype/'
-working_dir = '/mnt/data/Project/DCM/BIDS/derivatives/Nipype/working_dir'
+datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/'
+working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir'
 #%%
 # Specify input & output stream
 infosource = Node(IdentityInterface(fields=['subj_id']),name="infosource")
@@ -190,10 +190,10 @@ analysis1st.connect([(infosource, selectfiles,  [('subj_id','subj_id')]),
                                                      ('beta_images','beta_images'),
                                                      ('residual_image','residual_image')
                                                     ]),
-                     (level1conest, datasink, [('spm_mat_file','1stLevel_part1.@spm_mat'),
-                                               ('spmT_images', '1stLevel_part1.@T'),
-                                               ('con_images',  '1stLevel_part1.@con'),
-                                               ('spmF_images', '1stLevel_part1.@F'),
+                     (level1conest, datasink, [('spm_mat_file','1stLevel_part2.@spm_mat'),
+                                               ('spmT_images', '1stLevel_part2.@T'),
+                                               ('con_images',  '1stLevel_part2.@con'),
+                                               ('spmF_images', '1stLevel_part2.@F'),
                                               ])
                     ])
 

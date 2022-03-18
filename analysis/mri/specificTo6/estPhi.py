@@ -38,10 +38,9 @@ if __name__ =="__main__":
     vmpfc_roi = load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/vmpfc_func_roi.nii')
     
     # define iterator
-    # training_sets = ['trainset1','trainset2']
-    training_sets = ['trainsetall']
+    training_sets = ['trainset1','trainset2']
+
     folds = [str(i)+'fold' for i in range(4,9)]
-    folds = [str(i)+'fold' for i in range(6,7)]
 
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')

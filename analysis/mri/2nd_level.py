@@ -52,16 +52,16 @@ infosource.iterables = [('contrast_id', contrast_list)]
 infosource.inputs.subj_id = subject_list
 
 # SelectFiles - to grab the data (alternativ to DataGrabber)
-data_root = '/mnt/data/Project/DCM/BIDS/derivatives/Nipype'
-templates = {'cons': pjoin(data_root, 'M2short/1stLevel_part2', 'sub-{subj_id}','{contrast_id}.nii')}
+data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
+templates = {'cons': pjoin(data_root, 'M2/1stLevel_part2', 'sub-{subj_id}','{contrast_id}.nii')}
 
 # Create SelectFiles node
 selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                    name='selectfiles', iterfield=['subj_id'])
 
 # Initiate DataSink node here
-datasink = Node(DataSink(base_directory='/mnt/data/Project/DCM/BIDS/derivatives/Nipype/',
-                         container='M2/M2_mod_sess2/{}'.format(sub_type)),
+datasink = Node(DataSink(base_directory='/mnt/workdir/DCM/BIDS/derivatives/Nipype/',
+                         container='M2/M2_mod_part2_0317test/{}'.format(sub_type)),
                 name="datasink")
 
 # Use the following substitutions for the DataSink output
@@ -81,7 +81,7 @@ cont01 = ['Group', 'T', ['mean'], [1]]
 level2conestimate.inputs.contrasts = [cont01]
 
 # 2nd workflow
-analysis2nd = Workflow(name='work_2nd_{}'.format(sub_type), base_dir='/mnt/data/Project/DCM/BIDS/derivatives/Nipype/working_dir')
+analysis2nd = Workflow(name='work_2nd_{}'.format(sub_type), base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir')
 analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                 ('subj_id','subj_id')]),
                     (selectfiles, onesamplettestdes, [('cons', 'in_files')]),

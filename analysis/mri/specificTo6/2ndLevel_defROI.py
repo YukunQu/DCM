@@ -42,7 +42,7 @@ sub_type = 'hp'
 subject_list  = subj_config[sub_type]
 #%%
 # data input and ouput
-contrast_list = ['ZT_0001']
+contrast_list = ['ZF_0004']
 infosource = Node(IdentityInterface(fields=['contrast_id','subj_id']),
                   name="infosource")
 infosource.iterables = [('contrast_id', contrast_list)]
@@ -50,7 +50,7 @@ infosource.inputs.subj_id = subject_list
 
 # SelectFiles - to grab the data (alternativ to DataGrabber)
 data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-templates = {'cons': pjoin(data_root, 'hexonM2Long/specificTo6/test_set/testsetall/6fold',
+templates = {'cons': pjoin(data_root, 'hexonM2Long/specificTo6/training_set/trainset1/6fold',
                            'sub-{subj_id}','{contrast_id}.nii')}  # look out
 
 # Create SelectFiles node
@@ -58,7 +58,7 @@ selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_file
                    name='selectfiles', iterfield=['subj_id'])
 
 # Initiate DataSink node here
-container_path = 'hexonM2Long/specificTo6/test_set/testsetall/{}'.format(sub_type)  # look out
+container_path = 'hexonM2Long/specificTo6/training_set/trainset1/group/{}'.format(sub_type)  # look out
 datasink = Node(DataSink(base_directory=data_root,
                          container=container_path),
                 name="datasink")
@@ -81,7 +81,7 @@ level2conestimate.inputs.contrasts = [cont01]
 
 # 2nd workflow
 # look out
-analysis2nd = Workflow(name= 'work_2nd', 
+analysis2nd = Workflow(name='work_2nd',
                        base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/hexonM2Long/{}'.format(sub_type))
 analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                 ('subj_id','subj_id')]),
