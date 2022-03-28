@@ -51,11 +51,11 @@ import os
 from os.path import join
 import shutil
 
-source_dir = r'/mnt/data/Project/DCM/sourcedata'
+source_dir = r'/mnt/workdir/DCM/sourcedata'
 subjects = os.listdir(source_dir)
 subjects.sort()
 
-analysis_data_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/behaviour/data'
+analysis_data_dir = r'/mnt/workdir/DCM/BIDS/derivatives/behaviour/data'
 
 for subj in subjects:
     ori_meg_datadir = join(source_dir,subj,r'Behaviour','meg_task-1DInfer')

@@ -13,14 +13,15 @@ from analysis.behaviour.utils import game2_acc
 
 """calculate accuracy of game2-test task """
 # subject list
-data_dir = r'/mnt/data/Project/DCM/sourcedata'
+data_dir = r'/mnt/workdir/DCM/sourcedata'
 subjects = os.listdir(data_dir)
 subjects.sort()
 game2test_acc = pd.DataFrame(columns=['Participant_ID', 'game2_test_acc'])
-for sub in subjects[64:65]:
-    if sub in ['sub_052','sub_054']:
+for sub in subjects[64:69]:
+    if sub in ['sub_052','sub_054','sub_066']:
         sub_game2_acc = {'Participant_ID':sub,'game2_test_acc':float('nan')}
         game2test_acc = game2test_acc.append(sub_game2_acc,ignore_index=True)
+        print(sub,"have",0,"runs file.")
         continue
 
     game2_data_dir = os.path.join(data_dir,sub,'Behaviour','fmri_task-game2-test')
@@ -47,7 +48,7 @@ for sub in subjects[64:65]:
     print(sub,": calculation is complete!")
 
 #%%
-participants_tsv = r'/mnt/data/Project/DCM/BIDS/participants.tsv'
+participants_tsv =  r'/mnt/workdir/DCM/docs/被试招募及训练/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
 for index,row in game2test_acc.iterrows():
     sub_id = row['Participant_ID']

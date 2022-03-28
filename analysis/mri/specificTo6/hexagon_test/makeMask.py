@@ -5,7 +5,6 @@ Created on Tue Feb 22 17:54:13 2022
 
 @author: dell
 """
-import os
 import numpy as np
 from nilearn.masking import apply_mask
 from nilearn.image import load_img,resample_to_img,binarize_img,new_img_like
@@ -83,21 +82,12 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None
 
 
 if __name__ == "__main__":
-    subjects = ['010','024','043','046','053',
-                '062','067','068','069']
-
-    for sub in subjects:
-        print('sub-{}'.format(sub))
-        ftest_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/6fold/' \
-                     r'sub-{}/ZF_0004.nii'.format(sub)
-
-        ec_roi = r'/mnt/data/Template/EC_prob_roi.nii.gz'
-        savedir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/sub-{}'.format(sub)
-        if not os.path.exists(savedir):
-            os.mkdir(savedir)
-        savepath = os.path.join(savedir,'EC_func_roi.nii')
-        makeSphereMask(ftest_path,ec_roi,savepath,radius=(5/3,5/3,5/3))
-
-        vmpfc_roi = r'/mnt/data/Template/VMPFC_roi.nii'
-        savepath = os.path.join(savedir,'vmpfc_func_roi.nii')
-        makeSphereMask(ftest_path, vmpfc_roi, savepath,radius=(5/3,5/3,5/3))  # coords=(45,87,37)
+    ftest_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
+    
+    ec_roi = r'/mnt/data/Template/EC_prob_roi.nii.gz'
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/EC_func_roi.nii'
+    makeSphereMask(ftest_path,ec_roi,savepath,radius=(5/3,5/3,5/3))
+    
+    vmpfc_roi = r'/mnt/data/Template/VMPFC_roi.nii'
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/vmpfc_func_roi.nii'
+    makeSphereMask(ftest_path, vmpfc_roi, savepath,radius=(5/3,5/3,5/3),coords=(45,87,37))

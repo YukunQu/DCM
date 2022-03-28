@@ -1,4 +1,5 @@
-
+#!/usr/bin/env python
+# coding: utf-8
 
 # ## 1st-level Analysis Workflow Structure
 # 
@@ -26,7 +27,7 @@ from nipype.interfaces import spm
 
 
 def run_info(ev_file,motions_file=None):
-    import pandas as pd 
+    import pandas as pd
     from nipype.interfaces.base import Bunch
     onsets = []
     conditions = []
@@ -35,9 +36,9 @@ def run_info(ev_file,motions_file=None):
     pmod_names  = []
     pmod_params = []
     pmod_polys  = []
-    
+
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2_corr','M2_error','decision']
+    trial_con = ['M1','M2','decision','hex_corr','hex_error']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -50,31 +51,30 @@ def run_info(ev_file,motions_file=None):
             pmod_polys.append(1)
 
     motions_df = pd.read_csv(motions_file,sep='\t')
-    
+
     motion_columns   = ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
                         'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
                         'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
                         'rot_x', 'rot_x_derivative1', 'rot_x_derivative1_power2', 'rot_x_power2',
                         'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
                         'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
-    
+
     """motion_columns= ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z']"""
 
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
-            
+
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,None],
-                     orth=['No','No','No','No'],regressor_names=motion_columns,regressors=motions)
-    
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,None,None,run_pmod,None],
+                     orth=['No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+
     return run_info
 
 
-def estiFai_1stLevel(subject_list,training_set,ifold,configs):
+def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     
     # start cue
     start_time = time.time()
-    set_id = training_set[0]
     print("Training set",set_id," ",ifold," start!")
     
     # set parameters and specify which SPM to use
@@ -100,11 +100,12 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
     # SelectFiles - to grab the data (alternativ to DataGrabber)
     selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                        name='selectfiles') 
-    selectfiles.inputs.run_id = training_set[1]
+    selectfiles.inputs.run_id = runs
         
     # Datasink - creates output folder for important outputs
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/training_set/trainset{}/{}'.format(analysis_type,set_id,ifold)
+    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir' \
+                  '/{}/training_set/trainset{}/{}'.format(analysis_type,set_id,ifold)
     container_path = os.path.join(analysis_type,'specificTo6','training_set',
                              'trainset{}'.format(set_id))
     datasink = Node(DataSink(base_directory=datasink_dir,
@@ -127,7 +128,6 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
 
     cont04 = ['hexagon_mod',      'F', [cont01, cont02]]
     contrast_list = [cont01, cont02, cont03, cont04, cont05]
-    
     
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
@@ -195,29 +195,32 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
                         ])
 
     # Create 1st-level analysis output graph
-#    analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
+    #  analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
-    analysis1st.run('MultiProc', plugin_args={'n_procs':35})
-
+    analysis1st.run('MultiProc', plugin_args={'n_procs': 35})
+    
     end_time = time.time()
-    run_time = end_time - start_time
-    print("Run time cost {}".format(round(run_time/60/60, 2)))
+    run_time = round((end_time - start_time)/60/60, 2)
+    print(f"Run time cost {run_time}")
 
 
-# specify subjects # not change currently
-
-participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-participants_data = pd.read_csv(participants_tsv,sep='\t')
-data = participants_data.query('(usable==1)&(Age>18)&(game1_acc>0.75)')
-pid = data['Participant_ID'].to_list()
-subject_list = [p.split('_')[-1] for p in pid]
-
-# input files
-configs = {'data_root':r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
-           'event_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-           'analysis_type':'hexagon'}
-
-# split k training set
-training_set = ('all', [1, 2, 3, 4, 5, 6])
-ifold = '6fold'
-estiFai_1stLevel(subject_list,training_set,ifold,configs)
+if __name__ == "__main__":
+    # specify subjects # not change currently
+    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+    participants_data = pd.read_csv(participants_tsv, sep='\t')
+    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
+    pid = data['Participant_ID'].to_list()
+    subject_list = [p.split('_')[-1] for p in pid]
+    
+    # input files
+    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
+               'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+               'analysis_type': 'hexagon'}
+    
+    # split k training set
+    training_sets = {1: [1, 2, 3],
+                    2: [4, 5, 6]}
+    for set_id,runs in training_sets.items():
+        for i in range(4, 9):
+            ifold = str(i) + 'fold'
+            estiFai_1stLevel(subject_list, set_id, runs, ifold, configs)

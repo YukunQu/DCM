@@ -37,7 +37,7 @@ def run_info(ev_file,motions_file=None):
     pmod_polys  = []
     
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2_corr','M2_error','decision']
+    trial_con = ['M1','M2','decision','hex_corr','hex_error']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -62,10 +62,10 @@ def run_info(ev_file,motions_file=None):
 
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
-            
+
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,None],
-                     orth=['No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,None,None,run_pmod,None],
+                     orth=['No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
     
     return run_info
 
@@ -104,7 +104,8 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
         
     # Datasink - creates output folder for important outputs
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/training_set/trainset{}/{}'.format(analysis_type,set_id,ifold)
+    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir' \
+                  '/{}/training_set/trainset{}/{}'.format(analysis_type,set_id,ifold)
     container_path = os.path.join(analysis_type,'specificTo6','training_set',
                              'trainset{}'.format(set_id))
     datasink = Node(DataSink(base_directory=datasink_dir,
@@ -124,11 +125,10 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
     cont02 = ['hex_corrxsin^1',   'T', condition_names, [0, 0, 0, 1]]
     cont03 = ['decision',         'T', condition_names, [0, 1, 0, 0]]
     cont05 = ['M2',               'T', condition_names, [1, 0, 0, 0]]
-
+    
     cont04 = ['hexagon_mod',      'F', [cont01, cont02]]
     contrast_list = [cont01, cont02, cont03, cont04, cont05]
-    
-    
+
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
     
@@ -198,6 +198,7 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
 #    analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
     analysis1st.run('MultiProc', plugin_args={'n_procs':35})
+    #analysis1st.run('Linear')
 
     end_time = time.time()
     run_time = end_time - start_time
@@ -205,10 +206,9 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
 
 
 # specify subjects # not change currently
-
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
-data = participants_data.query('(usable==1)&(Age>18)&(game1_acc>0.75)')
+data = participants_data.query('usable==1')
 pid = data['Participant_ID'].to_list()
 subject_list = [p.split('_')[-1] for p in pid]
 

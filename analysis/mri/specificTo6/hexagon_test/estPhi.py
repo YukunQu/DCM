@@ -5,6 +5,8 @@ Created on Wed Mar  9 16:49:14 2022
 
 @author: dell
 """
+import os.path
+
 import pandas as pd
 from os.path import join as pjoin
 import numpy as np
@@ -33,10 +35,6 @@ def estPhi(beta_sin_map, beta_cos_map, mask, ifold='6fold',method='mean'):
 
 
 if __name__ =="__main__":
-    # load roi
-    ec_roi = load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/EC_func_roi.nii')
-    vmpfc_roi = load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/vmpfc_func_roi.nii')
-    
     # define iterator
     training_sets = ['trainset1','trainset2']
 
@@ -44,13 +42,16 @@ if __name__ =="__main__":
 
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('usable==1')
+    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
     pid = data['Participant_ID'].to_list()
     subjects = [p.replace('_','-') for p in pid]
     
     # define input and output :
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/specificTo6/training_set'
-    datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/specificTo6/Phi'
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set'
+    datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/Phi'
+
+    if not os.path.exists(datasink):
+        os.mkdir(datasink)
     
     for trainset in training_sets:
         datadir = pjoin(dataroot, trainset)
@@ -59,14 +60,18 @@ if __name__ =="__main__":
         
         print("————————{} start!—————————".format(trainset))
         for sub in subjects:
-            print(sub)
+            print(trainset,'-',sub)
             for ifold in folds:
                 # load beta map
                 bsin_path = pjoin(datadir,ifold,sub,'con_0002.nii')
                 bcos_path = pjoin(datadir,ifold,sub,'con_0001.nii')
                 beta_sin_map = load_img(bsin_path)
                 beta_cos_map = load_img(bcos_path)
-                
+
+                #     # load roi
+                ec_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/EC_func_roi.nii')
+                vmpfc_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/vmpfc_func_roi.nii')
+
                 ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi,ifold,'mean')
                 vmpfc_phi = estPhi(beta_sin_map, beta_cos_map, vmpfc_roi,ifold,'mean')
                 

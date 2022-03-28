@@ -27,7 +27,7 @@ def zscore_nii(source_dir,file,prefix):
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
 
 
-data_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/M2/1stLevel_part2'
+data_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2short/specificTo6/training_set/trainsetall/6fold'
 
 for ifold in range(6,7):
     #ifold = f'{ifold}fold'

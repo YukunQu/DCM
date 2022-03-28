@@ -31,11 +31,11 @@ pid = data['Participant_ID'].to_list()
 sub_all = [p.split('_')[-1] for p in pid]
 
 subj_config = {'adult':['010','018','023','024','027','029','033','037','043',
-                        '046','047','053','056','058','062'],
-               'adolescent':[ '022', '031', '032', '036', '049', '050',  # del 016
+                        '046','047','053','056','058','062','067','068','069'],
+               'adolescent':['022', '031', '032', '036', '049', '050',  # del 016
                              '055', '059','060', '061','065'],
                'children':['011', '012', '015', '017', '025', '048', '063','064'],
-               'hp':['010','024','032','036','043','046','053','061','062','065'],
+               'hp':['010','024','043','046','053','062','067','068','069'],
                'all':sub_all}
 
 sub_type = 'hp'
@@ -50,7 +50,7 @@ infosource.inputs.subj_id = subject_list
 
 # SelectFiles - to grab the data (alternativ to DataGrabber)
 data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-templates = {'cons': pjoin(data_root, 'hexonM2Long/specificTo6/training_set/trainset1/6fold',
+templates = {'cons': pjoin(data_root, 'hexonM2short/specificTo6/training_set/trainsetall/6fold',
                            'sub-{subj_id}','{contrast_id}.nii')}  # look out
 
 # Create SelectFiles node
@@ -58,7 +58,7 @@ selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_file
                    name='selectfiles', iterfield=['subj_id'])
 
 # Initiate DataSink node here
-container_path = 'hexonM2Long/specificTo6/training_set/trainset1/group/{}'.format(sub_type)  # look out
+container_path = 'hexonM2short/specificTo6/training_set/trainsetall/group/{}'.format(sub_type)  # look out
 datasink = Node(DataSink(base_directory=data_root,
                          container=container_path),
                 name="datasink")
@@ -82,7 +82,7 @@ level2conestimate.inputs.contrasts = [cont01]
 # 2nd workflow
 # look out
 analysis2nd = Workflow(name='work_2nd',
-                       base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/hexonM2Long/{}'.format(sub_type))
+                       base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/hexonM2short/{}'.format(sub_type))
 analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                 ('subj_id','subj_id')]),
                     (selectfiles, onesamplettestdes, [('cons', 'in_files')]),

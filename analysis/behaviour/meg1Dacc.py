@@ -11,11 +11,11 @@ from analysis.behaviour.utils import meg_1D_acc
 
 """calculate accuracy of MEG 1D task """
 # subject list
-beh_data_dir = r'/mnt/data/Project/DCM/BIDS/derivatives/behaviour/data'
+beh_data_dir =  r'/mnt/workdir/DCM/BIDS/derivatives/behaviour/data'
 subjects = os.listdir(beh_data_dir)
 subjects.sort()
 meg_1d_acc = pd.DataFrame(columns=['Participant_ID', '1D_acc', '1D_ap', '1D_dp'])
-for sub in subjects[48:64]:
+for sub in subjects[64:69]:
     if (sub == 'sub_013') or (sub =='sub_006') or (sub =='sub_035'):
         continue
     meg_data_dir = os.path.join(beh_data_dir,sub,'meg_task-1DInfer')
@@ -39,7 +39,7 @@ for sub in subjects[48:64]:
     sub_meg_acc = {'Participant_ID':sub,'1D_acc':total_acc,'1D_ap':ap_acc,'1D_dp':dp_acc}
     meg_1d_acc = meg_1d_acc.append(sub_meg_acc,ignore_index=True)
 #%%
-participant_tsv = r'/mnt/data/Project/DCM/BIDS/participants.tsv'
+participant_tsv = r'/mnt/workdir/DCM/docs/被试招募及训练/participants.tsv'
 participant_data = pd.read_csv(participant_tsv,sep='\t')
 
 for index,row in meg_1d_acc.iterrows():

@@ -14,7 +14,6 @@ import pandas as pd
 
 class AlignPhi(object):
     """"""
-
     def __init__(self, behDataPath):
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
@@ -101,7 +100,6 @@ class AlignPhi(object):
         return trial_corr, accuracy
 
     def genM2ev(self, trial_corr, type='Long'):
-
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
             if type == 'Long':
