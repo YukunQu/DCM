@@ -13,7 +13,7 @@ from  nilearn.masking import apply_mask
 
 def zscore_nii(source_dir,file,prefix):
     filepath = os.path.join(source_dir,file)
-    mask = load_img(r'/mnt/data/Template/res-02_brainMask.nii')
+    mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii')
     fmap = load_img(filepath)
     
     fmap_mean = apply_mask(fmap, mask).mean()
@@ -22,18 +22,17 @@ def zscore_nii(source_dir,file,prefix):
     
     fmap_data = fmap_zscore.get_fdata()
     mask_data = mask.get_fdata()
-    fmap_data[mask_data!=1]  = np.float64('NaN')
+    fmap_data[mask_data==0]  = np.float64('NaN')
     map_zscore = new_img_like(fmap_zscore, fmap_data)
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
 
+testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/test_set/EC/testset2'
 
-data_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2short/specificTo6/training_set/trainsetall/6fold'
-
-for ifold in range(6,7):
-    #ifold = f'{ifold}fold'
-    #data_dir = os.path.join(testset_dir,ifold)
+for ifold in range(4,9):
+    ifold = f'{ifold}fold'
+    data_dir = os.path.join(testset_dir,ifold)
     sub_list = os.listdir(data_dir)
     for sub in sub_list:
         data_sub_dir = os.path.join(data_dir,sub)
-        zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
+        zscore_nii(data_sub_dir, 'con_0001.nii', 'Z')
         print(sub,'was zscored.')

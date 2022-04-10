@@ -15,7 +15,7 @@ beh_data_dir =  r'/mnt/workdir/DCM/BIDS/derivatives/behaviour/data'
 subjects = os.listdir(beh_data_dir)
 subjects.sort()
 meg_1d_acc = pd.DataFrame(columns=['Participant_ID', '1D_acc', '1D_ap', '1D_dp'])
-for sub in subjects[64:69]:
+for sub in subjects[69:73]:  # sub_id-1 ~ sub_id
     if (sub == 'sub_013') or (sub =='sub_006') or (sub =='sub_035'):
         continue
     meg_data_dir = os.path.join(beh_data_dir,sub,'meg_task-1DInfer')

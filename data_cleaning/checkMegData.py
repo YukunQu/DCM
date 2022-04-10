@@ -27,7 +27,7 @@ if __name__ == "__main__":
     sub_list = os.listdir(data_dir)
     sub_list.sort()
     info_list = []
-    for sub in sub_list[67:69]:
+    for sub in sub_list[71:73]:
         ndata_dir = os.path.join(data_dir,sub,'NeuroData',ndata_type)
         ndata_list = os.listdir(ndata_dir)
         fileNum = 0

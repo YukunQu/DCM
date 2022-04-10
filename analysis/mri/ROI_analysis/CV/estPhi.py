@@ -69,8 +69,12 @@ if __name__ =="__main__":
                 beta_cos_map = load_img(bcos_path)
 
                 #     # load roi
-                ec_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/EC_func_roi.nii')
-                vmpfc_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/vmpfc_func_roi.nii')
+                #ec_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/EC_func_roi.nii')
+                #vmpfc_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/vmpfc_func_roi.nii')
+                ec_roi = load_img(r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/'
+                                  'osfstorage-archive/data/Analysis_ROI_nii/EC_Grid_roi.nii')
+                vmpfc_roi = load_img('/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/'
+                                     'osfstorage-archive/data/Analysis_ROI_nii/mPFC_Grid_roi.nii')
 
                 ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi,ifold,'mean')
                 vmpfc_phi = estPhi(beta_sin_map, beta_cos_map, vmpfc_roi,ifold,'mean')

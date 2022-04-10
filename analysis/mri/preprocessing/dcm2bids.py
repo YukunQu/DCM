@@ -22,10 +22,10 @@ def dcm2bids(subjects,config_file):
 
 if __name__ == "__main__":
     # Peking scaning
-    subjects_pk = [68,69]
+    subjects_pk = [73]
     config_pk = r'/mnt/workdir/DCM/config/config_Peking.json'
     dcm2bids(subjects_pk, config_pk)
-    
+
     # ibp scaning
     #subjects_ibp = [55]
     #config_ibp = r'/mnt/data/Project/DCM/config/config_CS.json'

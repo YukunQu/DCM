@@ -30,15 +30,17 @@ data = participants_data.query('usable==1')
 pid = data['Participant_ID'].to_list()
 sub_all = [p.split('_')[-1] for p in pid]
 
+game1_acc = data['game1_acc'].to_list()
+
 subj_config = {'adult':['010','018','023','024','027','029','033','037','043',
                         '046','047','053','056','058','062','067','068','069'],
                'adolescent':['022', '031', '032', '036', '049', '050',  # del 016
                              '055', '059','060', '061','065'],
                'children':['011', '012', '015', '017', '025', '048', '063','064'],
-               'hp':['010','024','032','036','043','046','053','061','062','065','067','068','069'],
+               'hp':['010','024','043','046','053','062','067','068','069'],
                'all':sub_all}
 
-sub_type = 'hp'
+sub_type = 'all'
 subject_list  = subj_config[sub_type]
 #%%
 # data input and ouput
@@ -58,7 +60,7 @@ selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_file
                    name='selectfiles', iterfield=['subj_id'])
 
 # Initiate DataSink node here
-container_path = 'hexagon/specificTo6/training_set/trainsetall/group/{}'.format(sub_type)  # look out
+container_path = 'hexagon/specificTo6/training_set/trainsetall/group/{}/Acc'.format(sub_type)  # look out
 datasink = Node(DataSink(base_directory=data_root,
                          container=container_path),
                 name="datasink")
@@ -69,6 +71,8 @@ datasink.inputs.substitutions = substitutions
 
 # Node initialize
 onesamplettestdes = Node(OneSampleTTestDesign(), name="onesampttestdes")
+onesamplettestdes.inputs.covariates = [dict(vector=game1_acc, name='game1_acc', centering=1)]
+
 
 level2estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
                       name="level2estimate")
@@ -76,13 +80,15 @@ level2estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
 level2conestimate = Node(EstimateContrast(group_contrast=True),
                          name="level2conestimate")
 # specify contrast
-cont01 = ['Group', 'T', ['mean'], [1]]
-level2conestimate.inputs.contrasts = [cont01]
+condition_names = ['mean','game1_acc']
+cont01 = ['Group',   'T', condition_names, [1,0]]
+cont02 = ['Acc',     'T', condition_names, [0,1]]
+level2conestimate.inputs.contrasts = [cont01, cont02]
 
 # 2nd workflow
 # look out
 analysis2nd = Workflow(name='work_2nd',
-                       base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/hexagon/{}'.format(sub_type))
+                       base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/hexagon/{}/Acc'.format(sub_type))
 analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                 ('subj_id','subj_id')]),
                     (selectfiles, onesamplettestdes, [('cons', 'in_files')]),

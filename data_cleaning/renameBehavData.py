@@ -38,6 +38,6 @@ def rename_game1_behav_data(subjects):
 
 
 if __name__ =="__main__":
-    subjects= range(66,70)
+    subjects= range(70,74)
     rename_game1_behav_data(subjects)
     

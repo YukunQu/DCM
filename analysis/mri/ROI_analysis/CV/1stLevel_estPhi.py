@@ -153,9 +153,11 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     # Level1Design - Generates an SPM design matrix
     level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
                                      timing_units='secs',
-                                     interscan_interval=3., 
+                                     interscan_interval=3.,
                                      model_serial_correlations='AR(1)',
-                                     flags = {'mthresh':0}),
+                                     microtime_resolution=49,
+                                     microtime_onset=25,
+                                     flags = {'mthresh':float('-inf')}),
                         name="level1design")
     
     # EstimateModel - estimate the parameters of the model
@@ -219,7 +221,7 @@ if __name__ == "__main__":
     
     # split k training set
     training_sets = {1: [1, 2, 3],
-                    2: [4, 5, 6]}
+                     2: [4, 5, 6]}
     for set_id,runs in training_sets.items():
         for i in range(4, 9):
             ifold = str(i) + 'fold'

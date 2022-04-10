@@ -14,7 +14,6 @@ import pandas as pd
 
 class AlignPhi(object):
     """"""
-
     def __init__(self, behDataPath):
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
@@ -62,6 +61,45 @@ class AlignPhi(object):
             print("You need specify behavioral data format.")
         return m1ev
 
+    def genM2ev(self):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        else:
+            print("You need specify behavioral data format.")
+        return m2ev
+
+    def genDeev(self):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        else:
+            print("You need specify behavioral data format.")
+        return deev
+
     def label_trial_corr(self):
         if self.dformat == 'trial_by_trial':
             keyResp_list = self.behData['resp.keys']
@@ -100,84 +138,56 @@ class AlignPhi(object):
         accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
         return trial_corr, accuracy
 
-    def genM2ev(self, trial_corr, type='Long'):
-
+    def hexmodev(self, trial_corr):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
-            if type == 'Long':
-                duration = self.behData['cue1.started'] - self.behData['pic2_render.started']
-            elif type == 'Short':
-                duration = [2.5] * len(self.behData)
-            else:
-                print("You need clarify M2 duration.")
+            duration = self.behData['cue1_2.started'] - self.behData['pic2_render.started']
             angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
+            hexmodev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            hexmodev['trial_type'] = 'hexmod'
+            hexmodev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['pic2_render.started_raw'] - self.starttime
-            if type == 'Long':
-                duration = self.behData['cue1.started_raw'] - self.behData['pic2_render.started_raw']
-            elif type == 'Short':
-                duration = [2.5] * len(self.behData)
-            else:
-                print("You need clarify M2 duration.")
+            duration = self.behData['cue1_2.started_raw'] - self.behData['pic2_render.started_raw']
             angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
+            hexmodev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            hexmodev['trial_type'] = 'hexmod'
+            hexmodev['modulation'] = 1
         else:
             print("You need specify behavioral data format.")
 
-        m2ev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        m2ev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        hexev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        hexev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
         for i, trial_label in enumerate(trial_corr):
-            if trial_label:
-                m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
-            elif not trial_label:
-                m2ev_error = m2ev_error.append(m2ev.iloc[i])
+            if trial_label == True:
+                hexev_corr = hexev_corr.append(hexmodev.iloc[i])
+            elif trial_label == False:
+                hexev_error = hexev_error.append(hexmodev.iloc[i])
             else:
                 raise ValueError("The trial label should be True or False.")
-        m2ev_corr['trial_type'] = 'M2_corr'
-        m2ev_error['trial_type'] = 'M2_error'
-        return m2ev_corr, m2ev_error
+        hexev_corr['trial_type'] = 'hex_corr'
+        hexev_error['trial_type'] = 'hex_error'
+        return hexev_corr, hexev_error
 
-    def M2pm(self, m2ev_corr, ifold, phi):
-        angle = m2ev_corr['angle']
-        pmod_alignPhi = m2ev_corr.copy()
+    def hexpm(self, hexev_corr, ifold, phi):
+        angle = hexev_corr['angle']
+        pmod_alignPhi = hexev_corr.copy()
         pmod_alignPhi['trial_type'] = 'alignPhi'
         pmod_alignPhi['modulation'] = np.cos(np.deg2rad(ifold * (angle - phi)))
         return pmod_alignPhi
 
-    def genDeev(self):
-        # generate the event of decision
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1.started'] - self.starttime
-            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        else:
-            print("You need specify behavioral data format.")
-        return deev
-
-    def genEV_alignFai(self, ifold, phi):
+    def game1_alignPhi(self, ifold, phi):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
+        m2ev = self.genM2ev()
         deev = self.genDeev()
         trial_corr, accuracy = self.label_trial_corr()
-        m2ev_corr, m2ev_error = self.genM2ev(trial_corr,'Long')
-        pmod_alignPhi = self.M2pm(m2ev_corr, ifold, phi)
+        hexev_corr, hexev_error = self.hexmodev(trial_corr)
+        pmod_alignPhi = self.hexpm(hexev_corr, ifold, phi)
 
-        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, pmod_alignPhi, deev], axis=0)
+        event_data = pd.concat([m1ev, m2ev, deev,
+                                hexev_corr, hexev_error,
+                                pmod_alignPhi], axis=0)
         return event_data
 
 
@@ -186,28 +196,28 @@ if __name__ == "__main__":
     # define subject list
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('usable==1')
+    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
 
     # define roi
-    phi_type = 'vmpfc_phi'
+    phi_type = 'vmpfc_phi'  # look out ec_phi or vmpfc_phi
 
     # default setting
     ifolds = range(4, 9)
     template = {
         'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
-        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/alignPhi/vmpfc/testset{}/{}fold',
+        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/alignPhi/vmpfc/testset{}/{}fold', # look out ROI
         'event_file': 'sub-{}_task-game1_run-{}_events.tsv'}
 
     # define test set
     test_configs = {'1': [4, 5, 6],
                     '2': [1, 2, 3]}
-    test_configs = {'all': [1, 2, 3, 4, 5, 6]}
+    #test_configs = {'all': [1, 2, 3, 4, 5, 6]}
 
     for test_id, test_runs in test_configs.items():
-        phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/'
-                               r'specificTo6/Phi/trainset{}_estPhi_mean.csv'.format(test_id))
+        phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/'
+                               r'specificTo6/Phi/trainset{}_estPhi.csv'.format(test_id))
         for subj in subjects:
             print('----sub-{}----'.format(subj))
 
@@ -217,10 +227,10 @@ if __name__ == "__main__":
                 if not os.path.exists(save_dir):
                     os.makedirs(save_dir)
 
-                    for idx in test_runs:
-                        run_id = str(idx)
-                        behDataPath = template['behav_path'].format(subj, subj, run_id)
-                        event = AlignPhi(behDataPath)
-                        event_data = event.genEV_alignFai(ifold, sub_ifold_phi)
-                        save_path = join(save_dir, template['event_file'].format(subj, run_id))
-                        event_data.to_csv(save_path, sep="\t", index=False)
+                for idx in test_runs:
+                    run_id = str(idx)
+                    behDataPath = template['behav_path'].format(subj, subj, run_id)
+                    event = AlignPhi(behDataPath)
+                    event_data = event.game1_alignPhi(ifold, sub_ifold_phi)
+                    save_path = join(save_dir, template['event_file'].format(subj, run_id))
+                    event_data.to_csv(save_path, sep="\t", index=False)

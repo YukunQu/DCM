@@ -60,7 +60,7 @@ def check_subj_data(data_dir,ranges,filters=None,stand_form=True):
             
 
 data_dir = '/mnt/data/Sourcedata/DCM'
-check_subj_data(data_dir, (64,69),['MEG','MRI','meg_task-1DInfer','fmri_task-game1',
+check_subj_data(data_dir, (68,72),['MEG','MRI','meg_task-1DInfer','fmri_task-game1',
                                    'fmri_task-game2-train','fmri_task-game2-test'])
 
 

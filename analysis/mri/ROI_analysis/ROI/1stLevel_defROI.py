@@ -155,7 +155,9 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
                                      timing_units='secs',
                                      interscan_interval=3., 
                                      model_serial_correlations='AR(1)',
-                                     flags = {'mthresh':0}),
+                                     microtime_resolution=49,
+                                     microtime_onset=25,
+                                     flags = {'mthresh':float('-inf')}),
                         name="level1design")
     
     # EstimateModel - estimate the parameters of the model
@@ -198,7 +200,6 @@ def estiFai_1stLevel(subject_list,training_set,ifold,configs):
 #    analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
     analysis1st.run('MultiProc', plugin_args={'n_procs':35})
-    #analysis1st.run('Linear')
 
     end_time = time.time()
     run_time = end_time - start_time

@@ -83,7 +83,7 @@ def game1_acc(subject, trial_check=True):
 
 
 if __name__ == "__main__":
-    subjects = range(65,70)
+    subjects = range(70,73)
     subjects = [(str(s).zfill(3)) for s in subjects]
     #subjects.remove('054')
     #subjects.remove('041')

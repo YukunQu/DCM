@@ -17,10 +17,7 @@ import pandas as pd
 from os.path import join as pjoin
 
 # set subject 
-subjects = [str(s).zfill(3) for s in range(55,66)]
-subjects.remove('056')
-subjects.remove('057')
-subjects.remove('058')
+subjects = [str(s).zfill(3) for s in range(66,74)] # last 55-66
 subjects_credit = pd.DataFrame(columns=['Participant_ID','Name','Credit','Credit_beh','Credit_hm'])
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
