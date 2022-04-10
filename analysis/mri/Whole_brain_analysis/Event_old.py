@@ -137,7 +137,7 @@ class Game1EV(object):
 
     def M2pm(self,m2ev,ifold):
         if isinstance(m2ev, tuple):
-            m2ev, _ = m2ev # pmod on correct trials
+            m2ev, _ = m2ev  # pmod on correct trials
 
         angle = m2ev['angle']
         pmod_sin = m2ev.copy()
