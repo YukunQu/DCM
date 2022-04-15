@@ -17,7 +17,7 @@ data_dir = r'/mnt/workdir/DCM/sourcedata'
 subjects = os.listdir(data_dir)
 subjects.sort()
 game2test_acc = pd.DataFrame(columns=['Participant_ID', 'game2_test_acc'])
-for sub in subjects[69:73]:  # sub_id-1 ~ sub_id
+for sub in subjects[71:72]:  # sub_id-1 ~ sub_id
     if sub in ['sub_052','sub_054','sub_066']:
         sub_game2_acc = {'Participant_ID':sub,'game2_test_acc':float('nan')}
         game2test_acc = game2test_acc.append(sub_game2_acc,ignore_index=True)

@@ -130,9 +130,9 @@ def getBestAngle(pairs_df,sampleNum,sampleTrials):
         repeatNum = 0 
         index = trialNangle.index
         for idx in index:
-        	inverseIndex = 600 - idx - 1
-        	if inverseIndex in index:
-        		repeatNum += 1 
+            inverseIndex = 600 - idx - 1
+            if inverseIndex in index:
+                repeatNum += 1
         inverseNum = repeatNum/2      
         if inverseNum < minInverseNum:
             minInverseNum = inverseNum

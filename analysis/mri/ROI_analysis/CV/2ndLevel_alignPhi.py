@@ -45,7 +45,7 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{analysis_type}/specificTo6/test_set/{ROI}/testset{set_id}/group_6fold/{sub_type}'# look out
+    container_path = f'{analysis_type}/specificTo6/test_set/{ROI}/testset{set_id}/group/6fold/{sub_type}'# look out
     datasink = Node(DataSink(base_directory=data_root,
                              container=container_path),
                     name="datasink")
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     # Configs files
     configs = {'data_root': '/mnt/workdir/DCM/BIDS/derivatives/Nipype',
                'analysis_type': 'hexagon',
-               'ROI':'vmpfc',
+               'ROI':'EC',
                'sub_type':'hp'}
 
     # Specify the subjects

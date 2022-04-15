@@ -5,7 +5,10 @@ Created on Tue Feb 22 17:54:13 2022
 
 @author: dell
 """
+import os
+from os.path import join as opj
 import numpy as np
+import pandas as pd
 from nilearn.masking import apply_mask
 from nilearn.image import load_img,resample_to_img,binarize_img,new_img_like
 from nltools.mask import create_sphere
@@ -82,12 +85,28 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None
 
 
 if __name__ == "__main__":
-    ftest_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
-    
-    ec_roi = r'/mnt/data/Template/EC_prob_roi.nii.gz'
-    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/EC_func_roi.nii'
-    makeSphereMask(ftest_path,ec_roi,savepath,radius=(5/3,5/3,5/3))
-    
+    stats_map_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/6fold'
+
+    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+    participants_data = pd.read_csv(participants_tsv,sep='\t')
+    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
+    pid = data['Participant_ID'].to_list()
+    subjects = [p.replace('_','-') for p in pid]
+
+    ec_roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
     vmpfc_roi = r'/mnt/data/Template/VMPFC_roi.nii'
-    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexonM2Long/defROI/adult/vmpfc_func_roi.nii'
-    makeSphereMask(ftest_path, vmpfc_roi, savepath,radius=(5/3,5/3,5/3),coords=(45,87,37))
+
+    savedir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI'
+
+    for sub in subjects:
+        stats_map = opj(stats_map_dir,sub,'ZF_0004.nii')
+        ec_savedir = opj(savedir,'EC')
+        if not os.path.exists(ec_savedir):
+            os.mkdir(ec_savedir)
+        vmpfc_savedir = opj(savedir,'vmpfc')
+        if not os.path.exists(vmpfc_savedir):
+            os.mkdir(vmpfc_savedir)
+        ec_savepath = opj(ec_savedir,f'{sub}_EC_func_roi.nii')
+        vmpfc_savepath = opj(vmpfc_savedir,f'{sub}_vmpfc_func_roi.nii')
+        makeSphereMask(stats_map, ec_roi, ec_savepath, radius=(5/3,5/3,5/3))
+        makeSphereMask(stats_map, vmpfc_roi, vmpfc_savepath, radius=(5/3,5/3,5/3))  # coords=(45,87,37)

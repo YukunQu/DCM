@@ -199,7 +199,7 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     # Create 1st-level analysis output graph
     #  analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
-    analysis1st.run('MultiProc', plugin_args={'n_procs': 35})
+    analysis1st.run('MultiProc', plugin_args={'n_procs': 30})
     
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
@@ -210,7 +210,7 @@ if __name__ == "__main__":
     # specify subjects # not change currently
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
+    data = participants_data.query('usable==1')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
     

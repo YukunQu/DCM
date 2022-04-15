@@ -26,7 +26,7 @@ def zscore_nii(source_dir,file,prefix):
     map_zscore = new_img_like(fmap_zscore, fmap_data)
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
 
-testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/test_set/EC/testset2'
+testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/test_set/EC/testset1'
 
 for ifold in range(4,9):
     ifold = f'{ifold}fold'
@@ -34,5 +34,5 @@ for ifold in range(4,9):
     sub_list = os.listdir(data_dir)
     for sub in sub_list:
         data_sub_dir = os.path.join(data_dir,sub)
-        zscore_nii(data_sub_dir, 'con_0001.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmT_0001.nii', 'Z')
         print(sub,'was zscored.')

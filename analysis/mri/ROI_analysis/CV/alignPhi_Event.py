@@ -192,7 +192,6 @@ class AlignPhi(object):
 
 
 if __name__ == "__main__":
-
     # define subject list
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -201,13 +200,13 @@ if __name__ == "__main__":
     subjects = [p.split('_')[-1] for p in pid]
 
     # define roi
-    phi_type = 'vmpfc_phi'  # look out ec_phi or vmpfc_phi
+    phi_type = 'ec_phi'  # look out ec_phi or vmpfc_phi
 
     # default setting
     ifolds = range(4, 9)
     template = {
         'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
-        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/alignPhi/vmpfc/testset{}/{}fold', # look out ROI
+        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/alignPhi/EC/testset{}/{}fold', # look out ROI
         'event_file': 'sub-{}_task-game1_run-{}_events.tsv'}
 
     # define test set
@@ -217,7 +216,7 @@ if __name__ == "__main__":
 
     for test_id, test_runs in test_configs.items():
         phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/'
-                               r'specificTo6/Phi/trainset{}_estPhi.csv'.format(test_id))
+                               r'specificTo6/Phi/trainset{}_estPhi_individual_ROI.csv'.format(test_id)) # look out ROI
         for subj in subjects:
             print('----sub-{}----'.format(subj))
 

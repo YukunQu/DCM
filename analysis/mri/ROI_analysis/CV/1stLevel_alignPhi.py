@@ -214,16 +214,16 @@ if __name__ == "__main__":
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'analysis_type': 'alignPhi',
-               'ROI':'vmpfc'}
+               'ROI':'EC'}
 
     # split 2 test set
     test_sets = {1: [4, 5, 6],
                  2: [1, 2, 3]}
     #test_sets = {'all': [1, 2, 3, 4, 5, 6]}
 
-    folds = range(4,9)
+    folds = range(4,9) # look out
 
     for set_id, runs in test_sets.items():
-        for i in folds:  # changed
+        for i in folds:
             ifold = str(i) + 'fold'
             alignFai_1stLevel(subject_list, set_id, runs, ifold, configs)

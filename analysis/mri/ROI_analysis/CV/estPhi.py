@@ -55,7 +55,7 @@ if __name__ =="__main__":
     
     for trainset in training_sets:
         datadir = pjoin(dataroot, trainset)
-        save_path = pjoin(datasink,trainset+'_estPhi.csv')
+        save_path = pjoin(datasink,trainset+'_estPhi_individual_ROI.csv')
         subs_phi = pd.DataFrame(columns=['sub_id','ifold','ec_phi','vmpfc_phi'])
         
         print("————————{} start!—————————".format(trainset))
@@ -63,18 +63,18 @@ if __name__ =="__main__":
             print(trainset,'-',sub)
             for ifold in folds:
                 # load beta map
-                bsin_path = pjoin(datadir,ifold,sub,'con_0002.nii')
-                bcos_path = pjoin(datadir,ifold,sub,'con_0001.nii')
+                bsin_path = pjoin(datadir,ifold,sub,'Mcon_0002.nii')
+                bcos_path = pjoin(datadir,ifold,sub,'Mcon_0001.nii')
                 beta_sin_map = load_img(bsin_path)
                 beta_cos_map = load_img(bcos_path)
 
                 #     # load roi
-                #ec_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/EC_func_roi.nii')
-                #vmpfc_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/{sub}/vmpfc_func_roi.nii')
-                ec_roi = load_img(r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/'
-                                  'osfstorage-archive/data/Analysis_ROI_nii/EC_Grid_roi.nii')
-                vmpfc_roi = load_img('/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/'
-                                     'osfstorage-archive/data/Analysis_ROI_nii/mPFC_Grid_roi.nii')
+                ec_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/EC/{sub}_EC_func_roi.nii')
+                vmpfc_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI/vmpfc/{sub}_vmpfc_func_roi.nii')
+                #ec_roi = load_img(r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/'
+                #                  'osfstorage-archive/data/Analysis_ROI_nii/EC_Grid_roi.nii')
+                #vmpfc_roi = load_img('/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/'
+                #                     'osfstorage-archive/data/Analysis_ROI_nii/mPFC_Grid_roi.nii')
 
                 ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi,ifold,'mean')
                 vmpfc_phi = estPhi(beta_sin_map, beta_cos_map, vmpfc_roi,ifold,'mean')
