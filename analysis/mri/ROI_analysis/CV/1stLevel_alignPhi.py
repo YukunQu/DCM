@@ -72,7 +72,6 @@ def run_info(ev_file, motions_file=None):
 
 def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
     # start cue
-    start_time = time.time()
     print("test set", set_id, " ", ifold, " start!")
 
     # set parameters and specify which SPM to use
@@ -91,7 +90,7 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
     templates = {'func': pjoin(data_root, 'sub-{subj_id}/func',
                                'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
                  'event': pjoin(event_dir, 'sub-{subj_id}', analysis_type, ROI, f'testset{set_id}', ifold,
-                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
+                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'), # look out
                  'regressors': pjoin(data_root, 'sub-{subj_id}/func',
                                      'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
                  }
@@ -105,7 +104,7 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
     working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/' \
                   'test_set/{}/testset{}/{}'.format(analysis_type, ROI,set_id, ifold)
-    container_path = os.path.join('hexagon', 'specificTo6', 'test_set',ROI,
+    container_path = os.path.join(analysis_type, 'specificTo6', 'test_set',ROI,
                                   'testset{}'.format(set_id))
     datasink = Node(DataSink(base_directory=datasink_dir,
                              container=container_path),
@@ -197,33 +196,35 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
     # run the 1st analysis
     analysis1st.run('MultiProc', plugin_args={'n_procs': 35})
 
-    end_time = time.time()
-    run_time = end_time - start_time
-    print("Run time cost {}".format(round(run_time / 60 / 60, 2)))
-
 
 if __name__ == "__main__":
     # specify subjects # not change currently
+    start_time = time.time()
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
+    data = participants_data.query('game1_fmri==1')
+    data = data.query('(Age<=18)and(game1_acc<=0.8)')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
 
     # input files
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'analysis_type': 'alignPhi',
-               'ROI':'EC'}
+               'analysis_type': 'alignPhiGame1',
+               'ROI':'EC_group'}
 
     # split 2 test set
     test_sets = {1: [4, 5, 6],
                  2: [1, 2, 3]}
     #test_sets = {'all': [1, 2, 3, 4, 5, 6]}
 
-    folds = range(4,9) # look out
+    folds = range(4,9)  # look out
 
     for set_id, runs in test_sets.items():
         for i in folds:
             ifold = str(i) + 'fold'
             alignFai_1stLevel(subject_list, set_id, runs, ifold, configs)
+
+    end_time = time.time()
+    run_time = end_time - start_time
+    print("Run time cost {}".format(round(run_time / 60 / 60, 2)))

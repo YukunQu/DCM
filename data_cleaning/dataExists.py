@@ -4,7 +4,7 @@
 # @author: qyk
 
 
-#The scripts to check data
+#The scripts check existece of data for each subject
 #%%
 import os
 # 检测fmri&MEG文件是否有缺损
@@ -28,12 +28,8 @@ for sub in subjects[:50]:
 #%%
 import os
 # 检测哪个被试的某个文件夹下为空
-def check_subj_data(data_dir,ranges,filters=None,stand_form=True):
-
-    subjects= os.listdir(data_dir)
-    subjects.sort()
-    
-    for sub in subjects[ranges[0]:ranges[1]]:
+def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
+    for sub in sub_list:
         print('-----------------{} data Index----------------'.format(sub))
         sub_data_dir = os.path.join(data_dir,sub)
         if stand_form:
@@ -60,9 +56,6 @@ def check_subj_data(data_dir,ranges,filters=None,stand_form=True):
             
 
 data_dir = '/mnt/data/Sourcedata/DCM'
-check_subj_data(data_dir, (68,72),['MEG','MRI','meg_task-1DInfer','fmri_task-game1',
+sub_list = ['sub_'+str(i).zfill(3) for i in range(75,79)]
+check_subj_data(data_dir, sub_list,['MEG','MRI','meg_task-1DInfer','fmri_task-game1',
                                    'fmri_task-game2-train','fmri_task-game2-test'])
-
-
-
-

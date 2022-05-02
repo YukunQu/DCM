@@ -11,15 +11,17 @@ from analysis.behaviour.utils import meg_1D_acc
 
 """calculate accuracy of MEG 1D task """
 # subject list
-beh_data_dir =  r'/mnt/workdir/DCM/BIDS/derivatives/behaviour/data'
-subjects = os.listdir(beh_data_dir)
-subjects.sort()
+beh_data_dir =  r'/mnt/workdir/DCM/sourcedata'
+subjects = ['sub_'+str(i).zfill(3) for i in range(54,55)]
 meg_1d_acc = pd.DataFrame(columns=['Participant_ID', '1D_acc', '1D_ap', '1D_dp'])
-for sub in subjects[69:73]:  # sub_id-1 ~ sub_id
-    if (sub == 'sub_013') or (sub =='sub_006') or (sub =='sub_035'):
-        continue
-    meg_data_dir = os.path.join(beh_data_dir,sub,'meg_task-1DInfer')
-    meg_file_list = os.listdir(meg_data_dir)
+for sub in subjects:  # sub_id-1 ~ sub_id
+    meg_data_dir = os.path.join(beh_data_dir,sub,'Behaviour','meg_task-1DInfer')
+    meg_tmp_list = os.listdir(meg_data_dir)
+    meg_file_list = []
+    for file in meg_tmp_list:
+        if ('.csv' in file):
+            if ('loop' not in file) and ('trial' not in file):
+                meg_file_list.append(file)
     meg_file_num = len(meg_file_list)
     if meg_file_num == 1:
         meg_data_path = os.path.join(meg_data_dir,meg_file_list[0])
@@ -38,6 +40,7 @@ for sub in subjects[69:73]:  # sub_id-1 ~ sub_id
     
     sub_meg_acc = {'Participant_ID':sub,'1D_acc':total_acc,'1D_ap':ap_acc,'1D_dp':dp_acc}
     meg_1d_acc = meg_1d_acc.append(sub_meg_acc,ignore_index=True)
+
 #%%
 participant_tsv = r'/mnt/workdir/DCM/docs/被试招募及训练/participants.tsv'
 participant_data = pd.read_csv(participant_tsv,sep='\t')

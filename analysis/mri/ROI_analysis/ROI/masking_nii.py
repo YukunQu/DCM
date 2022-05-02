@@ -22,8 +22,30 @@ def masking_nii(source_dir,file,prefix):
     map_masked = new_img_like(fmap, fmap_data)
     map_masked.to_filename(os.path.join(source_dir,prefix+file))
 
-if __name__ == "__main__":
-    testset_dir = r'/mnt/workdir/DCM/tmp/2022.4.11/Park_ROI_align_result/test_set/EC/testset2/'
+#%%
+analysis_type = 'hexonM2short'
+
+for set_id in ['all']:
+    testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/hexagon/Setall'
+
+    for ifold in range(6,7):
+        ifold = f'{ifold}fold'
+        data_dir = os.path.join(testset_dir,ifold)
+        sub_list = os.listdir(data_dir)
+        for sub in sub_list:
+            data_sub_dir = os.path.join(data_dir,sub)
+            masking_nii(data_sub_dir, 'con_0001.nii', 'M')
+            masking_nii(data_sub_dir, 'con_0002.nii', 'M')
+            print(sub,'was masked.')
+
+#%%
+
+analysis_type = 'alignPhiGame1'
+
+
+for set_id in [1,2]:
+    testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
+                  r'{}/specificTo6/test_set/EC_individual/testset{}'.format(analysis_type,set_id)
 
     for ifold in range(4,9):
         ifold = f'{ifold}fold'

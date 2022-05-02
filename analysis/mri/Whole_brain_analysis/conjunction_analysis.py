@@ -41,10 +41,7 @@ def conj_stat_maps(map1, map2, out_file=None,method='rigid',thr=1.69):
     return os.path.abspath(out_file)
 
 if __name__ == "__main__":
-    map1 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/group/all/' \
-           r'Age_plus_Acc/2ndLevel/_contrast_id_ZF_0004/spmT_0002.nii'
-    map2 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/group/all/' \
-           r'Age_plus_Acc/2ndLevel/_contrast_id_ZF_0004/spmT_0003.nii'
-    outpath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/group/all/' \
-              r'Age_plus_Acc/2ndLevel/_contrast_id_ZF_0004/conjun_age_acc.nii'
-    conj_stat_maps(map1,map2,outpath,'threshold')
+    map1 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/group/covariates/2ndLevel/_contrast_id_ZF_0004/spmT_0002.nii'
+    map2 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/group/covariates/2ndLevel/_contrast_id_ZF_0004/spmT_0003.nii'
+    outpath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/group/covariates/2ndLevel/_contrast_id_ZF_0004/conjun_age_acc.nii'
+    conj_stat_maps(map1,map2,outpath,'threshold',thr=1.31)

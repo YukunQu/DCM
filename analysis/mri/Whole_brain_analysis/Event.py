@@ -198,9 +198,11 @@ class Game1EV(object):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('usable==1')
+    data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
+
+    # subjects = [str(i).zfill(3) for i in range(74,79)]
 
     runs = range(1, 7)
     ifolds = range(4, 9)

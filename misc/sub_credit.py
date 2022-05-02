@@ -17,7 +17,7 @@ import pandas as pd
 from os.path import join as pjoin
 
 # set subject 
-subjects = [str(s).zfill(3) for s in range(66,74)] # last 55-66
+subjects = [str(s).zfill(3) for s in range(72,79)] # last 55-66
 subjects_credit = pd.DataFrame(columns=['Participant_ID','Name','Credit','Credit_beh','Credit_hm'])
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -97,5 +97,5 @@ for sub in subjects:
     sub_credit = {'Participant_ID':sub_id,'Name':name,'Credit':credit,
                   'Credit_beh':beh_credit,'Credit_hm':hm_credit}
     subjects_credit = subjects_credit.append(sub_credit,ignore_index=True)
-    
+print(subjects_credit)
     

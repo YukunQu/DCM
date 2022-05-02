@@ -14,10 +14,9 @@ from analysis.behaviour.utils import game2_acc
 """calculate accuracy of game2-test task """
 # subject list
 data_dir = r'/mnt/workdir/DCM/sourcedata'
-subjects = os.listdir(data_dir)
-subjects.sort()
+subjects = ['sub_'+str(i).zfill(3) for i in range(74,79)]
 game2test_acc = pd.DataFrame(columns=['Participant_ID', 'game2_test_acc'])
-for sub in subjects[71:72]:  # sub_id-1 ~ sub_id
+for sub in subjects:  # sub_id-1 ~ sub_id
     if sub in ['sub_052','sub_054','sub_066']:
         sub_game2_acc = {'Participant_ID':sub,'game2_test_acc':float('nan')}
         game2test_acc = game2test_acc.append(sub_game2_acc,ignore_index=True)
@@ -25,11 +24,10 @@ for sub in subjects[71:72]:  # sub_id-1 ~ sub_id
         continue
 
     game2_data_dir = os.path.join(data_dir,sub,'Behaviour','fmri_task-game2-test')
-    game2_file_tmp = os.listdir(game2_data_dir)
     game2_file_list = []
-    for f in game2_file_tmp:
-        if '.csv' in f :
-            game2_file_list.append(f)
+    for i in range(1,3):
+        file_name = '{}_task-game2_run-{}.csv'.format(sub.replace('_','-'),i)
+        game2_file_list.append(file_name)
     game2_file_num = len(game2_file_list)
     if game2_file_num == 1:
         game2_data_path = os.path.join(game2_data_dir,game2_file_list[0])

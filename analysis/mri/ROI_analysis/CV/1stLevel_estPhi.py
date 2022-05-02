@@ -210,7 +210,7 @@ if __name__ == "__main__":
     # specify subjects # not change currently
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('usable==1')
+    data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
     

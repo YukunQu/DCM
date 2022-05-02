@@ -192,21 +192,40 @@ class AlignPhi(object):
 
 
 if __name__ == "__main__":
+    analysis_type = 'hexagon'
+    # define roi
+    roi_type = 'group'
+    phi_type = 'ec_phi'  # look out ec_phi or vmpfc_phi
+
+    if roi_type == 'individual':
+        if phi_type == 'ec_phi':
+            save_containter = 'alignPhiGame1/EC_individual'
+        elif phi_type == 'vmpfc_phi':
+            save_containter = 'alignPhiGame1/vmpfc_individual'
+        else:
+            raise Exception("phi type is wrong.")
+    elif roi_type == 'group':
+        if phi_type == 'ec_phi':
+            save_containter = 'alignPhiGame1/EC_group'
+        elif phi_type == 'vmpfc_phi':
+            save_containter = 'alignPhiGame1/vmpfc_group'
+        else:
+            raise Exception("phi type is wrong.")
+    else:
+        raise Exception("roi type is wrong.")
+
     # define subject list
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
+    data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
-
-    # define roi
-    phi_type = 'ec_phi'  # look out ec_phi or vmpfc_phi
 
     # default setting
     ifolds = range(4, 9)
     template = {
         'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
-        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/alignPhi/EC/testset{}/{}fold', # look out ROI
+        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/'+save_containter+'/testset{}/{}fold',
         'event_file': 'sub-{}_task-game1_run-{}_events.tsv'}
 
     # define test set
@@ -215,8 +234,9 @@ if __name__ == "__main__":
     #test_configs = {'all': [1, 2, 3, 4, 5, 6]}
 
     for test_id, test_runs in test_configs.items():
-        phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/'
-                               r'specificTo6/Phi/trainset{}_estPhi_individual_ROI.csv'.format(test_id)) # look out ROI
+        phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{}/'
+                               r'specificTo6/Phi/game1trainset{}_estPhi_{}_ROI.csv'.format(analysis_type,
+                                                                                           test_id,roi_type)) # look out ROI
         for subj in subjects:
             print('----sub-{}----'.format(subj))
 

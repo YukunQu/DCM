@@ -70,6 +70,7 @@ def sphere_roi(voxloc, radius, value, datashape = (91,109,91), data = None):
 def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None):
     image = load_img(imgpath)
     mask = load_img(mask_path)
+    mask = resample_to_img(mask, image,interpolation='nearest')
     if coords == None:
         coords = get_coordinate(image,mask)
     # mni_coords = apply_affine(image.affine, coords)
@@ -84,29 +85,48 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None
     roi_img.to_filename(savepath)
 
 
-if __name__ == "__main__":
-    stats_map_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/6fold'
+#%%
+# define individual ROI
+stats_map_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/6fold'
 
-    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-    participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('(usable==1)&(game1_acc>0.75)&(Age>18)')
-    pid = data['Participant_ID'].to_list()
-    subjects = [p.replace('_','-') for p in pid]
+participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+participants_data = pd.read_csv(participants_tsv,sep='\t')
+data = participants_data.query('game1_fmri==1')
+pid = data['Participant_ID'].to_list()
+subjects = [p.replace('_','-') for p in pid]
 
-    ec_roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
-    vmpfc_roi = r'/mnt/data/Template/VMPFC_roi.nii'
+ec_roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
+vmpfc_roi = r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/osfstorage-archive/data/Analysis_ROI_nii/mPFC_roi.nii'
 
-    savedir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI'
+ec_peak_activity = []
+vmpfc_peak_activity = []
+savedir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI'
+for sub in subjects:
+    stats_map = opj(stats_map_dir,sub,'ZF_0004.nii')
+    ec_savedir = opj(savedir,'EC')
+    if not os.path.exists(ec_savedir):
+        os.mkdir(ec_savedir)
+    vmpfc_savedir = opj(savedir,'vmpfc')
+    if not os.path.exists(vmpfc_savedir):
+        os.mkdir(vmpfc_savedir)
+    ec_savepath = opj(ec_savedir,f'{sub}_EC_func_roi.nii')
+    vmpfc_savepath = opj(vmpfc_savedir,f'{sub}_vmpfc_func_roi.nii')
+    makeSphereMask(stats_map, ec_roi, ec_savepath, radius=(5/3,5/3,5/3))
+    makeSphereMask(stats_map, vmpfc_roi, vmpfc_savepath, radius=(5/3,5/3,5/3))  # coords=(45,89,35)
 
-    for sub in subjects:
-        stats_map = opj(stats_map_dir,sub,'ZF_0004.nii')
-        ec_savedir = opj(savedir,'EC')
-        if not os.path.exists(ec_savedir):
-            os.mkdir(ec_savedir)
-        vmpfc_savedir = opj(savedir,'vmpfc')
-        if not os.path.exists(vmpfc_savedir):
-            os.mkdir(vmpfc_savedir)
-        ec_savepath = opj(ec_savedir,f'{sub}_EC_func_roi.nii')
-        vmpfc_savepath = opj(vmpfc_savedir,f'{sub}_vmpfc_func_roi.nii')
-        makeSphereMask(stats_map, ec_roi, ec_savepath, radius=(5/3,5/3,5/3))
-        makeSphereMask(stats_map, vmpfc_roi, vmpfc_savepath, radius=(5/3,5/3,5/3))  # coords=(45,87,37)
+#%%
+# define ROI from F-test group result
+analysis_type = 'hexagon_game2'
+# EC
+stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/specificTo6/training_set/trainsetall/' \
+            'group/hp/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
+roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
+savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/defROI/EC/group_EC_func_roi.nii'
+makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
+
+# vmpfc
+stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/specificTo6/training_set/trainsetall/' \
+            'group/hp/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
+roi = r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/osfstorage-archive/data/Analysis_ROI_nii/mPFC_roi.nii'
+savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/defROI/vmpfc/group_vmpfc_func_roi.nii'
+makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))

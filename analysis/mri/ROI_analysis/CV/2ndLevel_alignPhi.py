@@ -96,26 +96,19 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
 if __name__ == "__main__":
     # Configs files
     configs = {'data_root': '/mnt/workdir/DCM/BIDS/derivatives/Nipype',
-               'analysis_type': 'hexagon',
-               'ROI':'EC',
+               'analysis_type': 'alignPhiGame1',
+               'ROI':'EC_individual',
                'sub_type':'hp'}
 
     # Specify the subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('usable==1')
-    pid = data['Participant_ID'].to_list()
-    sub_all = [p.split('_')[-1] for p in pid]
+    data = participants_data.query('game1_fmri==1')  # look out
 
-    subj_config = {'adult':['010','018','023','024','027','029','033','037','043',
-                            '046','047','053','056','058','062'],
-                   'adolescent':[ '022', '031', '032', '036', '049', '050',  # del 016
-                                  '055', '059','060', '061','065'],
-                   'children':['011', '012', '015', '017', '025', '048', '063','064'],
-                   'hp':['010','024','043','046','053','062','067','068','069'],
-                   'all':sub_all}
-    sub_type = configs['sub_type']
-    subject_list = subj_config[sub_type]
+    adult_data = data.query('Age>18')
+    adolescent_data = data.query('12<Age<=18')
+    children_data = data.query('Age<=12')
+    hp_data = data.query('game1_acc>=0.8')
 
     # Specify the contrast list
     contrast_list = ['ZT_0001']
@@ -123,7 +116,24 @@ if __name__ == "__main__":
     # split 2 test set
     test_sets = {1: [4, 5, 6],
                  2: [1, 2, 3]}
+    #test_sets = {'all': [1, 2, 3, 4, 5, 6]}
 
-    for set_id, runs in test_sets.items():
-        alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs)
+    # ['adult','adolescent','children','hp']
+    for sub_type in ['hp']:
+        if sub_type == 'adult':
+            pid = adult_data['Participant_ID'].to_list()
+        elif sub_type == 'adolescent':
+            pid = adolescent_data['Participant_ID'].to_list()
+        elif sub_type == 'children':
+            pid = children_data['Participant_ID'].to_list()
+        elif sub_type == 'hp':
+            pid = hp_data['Participant_ID'].to_list()
+        else:
+            pid = None
+        subject_list = [p.split('_')[-1] for p in pid]
+        print(f"The {sub_type} group have {len(subject_list)} subjects")
 
+        configs['sub_type'] = sub_type
+
+        for set_id, runs in test_sets.items():
+            alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs)

@@ -64,7 +64,7 @@ for subj in subjects:
     meg_data_list = []
     for file in meg_tmp_list:
         file_size = os.path.getsize(join(ori_meg_datadir,file))
-        if ('.csv' in file) and (file_size>12288):
+        if ('.csv' in file) and (file_size > 12288):
             if ('loop' not in file) and ('trial' not in file):
                 meg_data_list.append(file)
     mv_file_num = 0                

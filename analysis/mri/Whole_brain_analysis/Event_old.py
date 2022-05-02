@@ -14,7 +14,6 @@ class Game1EV(object):
         self.dformat = None
 
 
-
     def game1_dformat(self):
         columns = self.behData.columns
         if 'fix_start_cue.started' in columns:
@@ -54,46 +53,8 @@ class Game1EV(object):
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
         return m1ev
-
-
-    def genM2ev(self,trial_corr,error_trial=True):
-
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['pic2_render.started'] - self.starttime
-            #duration = self.behData['cue1.started'] - self.behData['pic2_render.started']
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['pic2_render.started_raw'] - self.starttime
-            #duration = self.behData['cue1.started_raw'] - self.behData['pic2_render.started_raw']
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        else:
-            print("You need specify behavioral data format.")
-
-        if error_trial:
-            m2ev_corr = pd.DataFrame(columns=['onset','duration','angle'])
-            m2ev_error = pd.DataFrame(columns=['onset','duration','angle'])
-            for i,trial_label  in enumerate(trial_corr):
-                if trial_label == True:
-                    m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
-                elif trial_label == False:
-                    m2ev_error = m2ev_error.append(m2ev.iloc[i])
-                else:
-                    raise ValueError("The trial label should be True or False.")
-            m2ev_corr['trial_type'] = 'M2_corr'
-            m2ev_error['trial_type'] = 'M2_error'
-            return m2ev_corr, m2ev_error
-        else:
-            return m2ev
 
 
     def label_trial_corr(self):
@@ -135,22 +96,43 @@ class Game1EV(object):
         return trial_corr,accuracy
 
 
-    def M2pm(self,m2ev,ifold):
-        if isinstance(m2ev, tuple):
-            m2ev, _ = m2ev  # pmod on correct trials
+    def genM2ev(self,trial_corr):
 
-        angle = m2ev['angle']
-        pmod_sin = m2ev.copy()
-        pmod_cos = m2ev.copy()
-        pmod_sin['trial_type'] = 'sin'
-        pmod_cos['trial_type'] = 'cos'
-        pmod_sin['modulation'] = np.sin(np.deg2rad(ifold*angle))
-        pmod_cos['modulation'] = np.cos(np.deg2rad(ifold*angle))
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
 
-        return pmod_sin, pmod_cos
+        m2ev_corr = pd.DataFrame(columns=['onset','duration','angle'])
+        m2ev_error = pd.DataFrame(columns=['onset','duration','angle'])
+
+        assert len(m2ev) == len(trial_corr), "The number of trial label didn't not  same as the number of event-M2."
+
+        for i,trial_label in enumerate(trial_corr):
+            if trial_label == True:
+                m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
+            elif trial_label == False:
+                m2ev_error = m2ev_error.append(m2ev.iloc[i])
+            else:
+                raise ValueError("The trial label should be True or False.")
+        m2ev_corr['trial_type'] = 'M2_corr'
+        m2ev_error['trial_type'] = 'M2_error'
+        return m2ev_corr, m2ev_error
 
 
-    def genDeev(self):
+    def genDeev(self,trial_corr):
         # generate the event of decision
         if self.dformat == 'trial_by_trial':
             onset = self.behData['cue1.started'] - self.starttime
@@ -167,11 +149,37 @@ class Game1EV(object):
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
-        return deev
+            raise Exception("You need specify behavioral data format.")
 
+        deev_corr = pd.DataFrame(columns=['onset','duration','angle'])
+        deev_error = pd.DataFrame(columns=['onset','duration','angle'])
 
-    def game1ev_hexonM2(self,ifold):
+        assert len(deev) == len(trial_corr), "The number of trial label didn't not  same as the number of event-M2."
+
+        for i,trial_label in enumerate(trial_corr):
+            if trial_label == True:
+                deev_corr = deev_corr.append(deev.iloc[i])
+            elif trial_label == False:
+                deev_error = deev_error.append(deev.iloc[i])
+            else:
+                raise ValueError("The trial label should be True or False.")
+        deev_corr['trial_type'] = 'decision_corr'
+        deev_error['trial_type'] = 'decision_error'
+        return deev_corr, deev_error
+
+    def genpm(self,m2ev_corr,ifold):
+
+        angle = m2ev_corr['angle']
+        pmod_sin = m2ev_corr.copy()
+        pmod_cos = m2ev_corr.copy()
+        pmod_sin['trial_type'] = 'sin'
+        pmod_cos['trial_type'] = 'cos'
+        pmod_sin['modulation'] = np.sin(np.deg2rad(ifold*angle))
+        pmod_cos['modulation'] = np.cos(np.deg2rad(ifold*angle))
+
+        return pmod_sin, pmod_cos
+
+    def game1ev(self,ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         deev = self.genDeev()
@@ -188,32 +196,42 @@ class Game1EV(object):
 
 if __name__ == "__main__":
 
+    task = 'game2'
+
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('usable==1')
+    data = participants_data.query(f'{task}_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
 
-    runs = range(1,7)
+    #subjects = [str(i).zfill(3) for i in range(74,79)]
+
+    if task == 'game1':
+        runs = range(1,7) # look out
+    elif task == 'game2':
+        runs = range(1,3)
+    else:
+        raise Exception("The type of task is wrong.")
     ifolds = range(4,9)
 
-    template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
-                'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/hexonM2short/{}fold',
-                'event_file':'sub-{}_task-game1_run-{}_events.tsv'}
+    template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-{}-test/sub-{}_task-{}_run-{}.csv',
+                'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/hexonM2short/{}fold',
+                'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
 
     for subj in subjects:
         subj = str(subj).zfill(3)
         print('----sub-{}----'.format(subj))
 
         for ifold in ifolds:
-            save_dir = template['save_dir'].format(subj,ifold)
+            save_dir = template['save_dir'].format(subj,task,ifold)
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
 
             for idx in runs:
                 run_id = str(idx)
-                behDataPath = template['behav_path'].format(subj,subj,run_id)
+                behDataPath = template['behav_path'].format(subj,task,subj,task,run_id)
                 event = Game1EV(behDataPath)
                 event_data = event.game1ev_hexonM2(ifold)
-                tsv_save_path = join(save_dir,template['event_file'].format(subj,run_id))
+                tsv_save_path = join(save_dir,template['event_file'].format(subj,task,run_id))
                 event_data.to_csv(tsv_save_path, sep="\t", index=False)
+#%%

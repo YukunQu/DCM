@@ -84,14 +84,15 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     data_root = configs['data_root']
     event_dir = configs['event_dir']
-    analysis_type = configs['analysis_type']
+    task = configs['task']
+    glm_type = configs['glm_type']
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',
-                               'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
-                 'event': pjoin(event_dir,'sub-{subj_id}', analysis_type, ifold,
-                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
+                               'sub-{subj_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
+                 'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold,
+                                'sub-{subj_id}_task-game2_run-{run_id}_events.tsv'),
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',
-                                    'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
+                                    'sub-{subj_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv')
                  }
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
@@ -101,10 +102,8 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     # Datasink - creates output folder for important outputs
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir' \
-                  '/{}/training_set/trainset{}/{}'.format(analysis_type,set_id,ifold)
-    container_path = os.path.join(analysis_type,'specificTo6','training_set',
-                                  'trainset{}'.format(set_id))
+    working_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{task}/{glm_type}/Set{set_id}/{ifold}'
+    container_path = os.path.join(task,glm_type,f'Set{set_id}')
     datasink = Node(DataSink(base_directory=datasink_dir,
                              container=container_path),
                     name="datasink")
@@ -207,16 +206,19 @@ if __name__ == "__main__":
     # specify subjects # not change currently
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('usable==1')
+    data = participants_data.query('game2_fmri==1')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
+
+    #subject_list = [str(i).zfill(3) for i in range(74,79)]
 
     # input files
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'analysis_type': 'hexagon'}
+               'task':'game2',
+               'glm_type': 'hexagon'}
 
     set_id = 'all'
-    runs = [1, 2, 3, 4, 5, 6]
+    runs = [1,2]
     ifold = '6fold'
     estiFai_1stLevel(subject_list, set_id, runs, ifold, configs)
