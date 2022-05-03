@@ -35,7 +35,7 @@ def run_info(ev_file,motions_file=None):
     pmod_polys  = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2_corr','M2_error','decision']
+    trial_con = ['M1','M2_corr','M2_error','decision_corr','decision_error','pressButton']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -62,8 +62,8 @@ def run_info(ev_file,motions_file=None):
     motions = motions.fillna(0.0).values.T.tolist()
 
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,None],
-                     orth=['No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,run_pmod,None,None],
+                     orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
 
     return run_info
 
@@ -88,11 +88,11 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     glm_type = configs['glm_type']
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',
-                               'sub-{subj_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
+                               'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
                  'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold,
-                                'sub-{subj_id}_task-game2_run-{run_id}_events.tsv'),
+                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',
-                                    'sub-{subj_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv')
+                                    'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
                  }
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
@@ -114,16 +114,24 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     # Specify GLM contrasts
     # Condition names
-    condition_names = ['M2_corr','M2_error','decision','M2_corrxcos^1','M2_corrxsin^1']
+    #condition_names = ['M2_corr','M2_error','decision_corr','decision_error'
+    #
+
+    condition_names = ['M2_corrxcos^1','M2_corrxsin^1']
 
     # contrasts
-    cont01 = ['M2_corrxcos^1',   'T', condition_names,  [0, 0, 0, 1, 0]]
-    cont02 = ['M2_corrxsin^1',   'T', condition_names,  [0, 0, 0, 0, 1]]
-    cont03 = ['decision',        'T', condition_names,  [0, 0, 1, 0, 0]]
-    cont05 = ['M2',              'T', condition_names,  [0.5, 0.5, 0, 0, 0]]
+    #cont01 = ['M2',              'T', condition_names,  [0.5, 0.5, 0, 0, 0, 0, 0, 0]]
+    #cont02 = ['decision',        'T', condition_names,  [0, 0, 0.5, 0.5, 0, 0, 0, 0]]
 
-    cont04 = ['hexagon_mod',     'F', [cont01, cont02]]
-    contrast_list = [cont01, cont02, cont03, cont04, cont05]
+    cont01 = ['M2_corrxcos^1',   'T', condition_names,  [1, 0]]
+    cont02 = ['M2_corrxsin^1',   'T', condition_names,  [0, 1]]
+
+    #cont03 = ['decision_corrxcos^1',   'T', condition_names,  [0, 0, 1, 0]]
+    #cont04 = ['decision_corrxsin^1',   'T', condition_names,  [0, 0, 0, 1]]
+
+    cont05 = ['hexagon_M2',           'F', [cont01, cont02]]
+    #cont06 = ['hexagon_decision',     'F', [cont03, cont04]]
+    contrast_list = [cont05]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
@@ -206,19 +214,19 @@ if __name__ == "__main__":
     # specify subjects # not change currently
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri==1')
+    data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
-    subject_list = [p.split('_')[-1] for p in pid]
+    subject_list = [p.split('_')[-1] for p in pid][:3]
 
     #subject_list = [str(i).zfill(3) for i in range(74,79)]
 
     # input files
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'task':'game2',
-               'glm_type': 'hexonM2short'}
+               'task':'game1',
+               'glm_type': 'M2_Decision'}
 
     set_id = 'all'
-    runs = [1, 2]
+    runs = [1,2,3,4,5,6]
     ifold = '6fold'
     estiFai_1stLevel(subject_list, set_id, runs, ifold, configs)
