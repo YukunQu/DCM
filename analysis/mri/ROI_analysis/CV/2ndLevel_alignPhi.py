@@ -33,11 +33,12 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
     data_root = configs['data_root']
-    analysis_type = configs['analysis_type']
+    task = configs['task']
+    glm_type = configs['glm_type']
     ROI = configs['ROI']
     sub_type = configs['sub_type']
 
-    templates = {'cons': pjoin(data_root, analysis_type,'specificTo6/test_set',ROI,f'testset{set_id}','6fold',
+    templates = {'cons': pjoin(data_root, task, glm_type,ROI,f'Set{set_id}','6fold',
                                'sub-{subj_id}','{contrast_id}.nii')}  # look out
 
     # Create SelectFiles node
@@ -45,7 +46,7 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{analysis_type}/specificTo6/test_set/{ROI}/testset{set_id}/group/6fold/{sub_type}'# look out
+    container_path = f'{task}/{glm_type}/{ROI}/Set{set_id}/group/6fold/{sub_type}'   # look out
     datasink = Node(DataSink(base_directory=data_root,
                              container=container_path),
                     name="datasink")
@@ -70,7 +71,7 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
     # look out
     analysis2nd = Workflow(name= 'work_2nd',
                            base_dir=f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir'
-                                    f'/{analysis_type}/test_set/{ROI}/testset{set_id}/{sub_type}')
+                                    f'/{task}/{glm_type}/{ROI}/Set{set_id}/{sub_type}')
     analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                     ('subj_id','subj_id')]),
                          (selectfiles, onesamplettestdes, [('cons', 'in_files')]),
@@ -96,8 +97,9 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
 if __name__ == "__main__":
     # Configs files
     configs = {'data_root': '/mnt/workdir/DCM/BIDS/derivatives/Nipype',
-               'analysis_type': 'alignPhiGame1',
-               'ROI':'EC_individual',
+               'task':'game1',
+               'glm_type':'alignPhi',
+               'ROI':'EC_group',
                'sub_type':'hp'}
 
     # Specify the subjects
@@ -108,7 +110,7 @@ if __name__ == "__main__":
     adult_data = data.query('Age>18')
     adolescent_data = data.query('12<Age<=18')
     children_data = data.query('Age<=12')
-    hp_data = data.query('game1_acc>=0.8')
+    hp_data = data.query('game1_acc>=0.75')
 
     # Specify the contrast list
     contrast_list = ['ZT_0001']
@@ -116,7 +118,6 @@ if __name__ == "__main__":
     # split 2 test set
     test_sets = {1: [4, 5, 6],
                  2: [1, 2, 3]}
-    #test_sets = {'all': [1, 2, 3, 4, 5, 6]}
 
     # ['adult','adolescent','children','hp']
     for sub_type in ['hp']:

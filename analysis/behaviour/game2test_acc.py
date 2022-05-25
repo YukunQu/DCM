@@ -14,7 +14,7 @@ from analysis.behaviour.utils import game2_acc
 """calculate accuracy of game2-test task """
 # subject list
 data_dir = r'/mnt/workdir/DCM/sourcedata'
-subjects = ['sub_'+str(i).zfill(3) for i in range(74,79)]
+subjects = ['sub_'+str(i).zfill(3) for i in range(79,83)]
 game2test_acc = pd.DataFrame(columns=['Participant_ID', 'game2_test_acc'])
 for sub in subjects:  # sub_id-1 ~ sub_id
     if sub in ['sub_052','sub_054','sub_066']:
@@ -46,7 +46,7 @@ for sub in subjects:  # sub_id-1 ~ sub_id
     print(sub,": calculation is complete!")
 
 #%%
-participants_tsv =  r'/mnt/workdir/DCM/docs/被试招募及训练/participants.tsv'
+participants_tsv = r'/mnt/workdir/DCM/tmp/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
 for index,row in game2test_acc.iterrows():
     sub_id = row['Participant_ID']

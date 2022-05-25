@@ -36,18 +36,19 @@ def estPhi(beta_sin_map, beta_cos_map, mask, ifold='6fold',method='mean'):
 #%%
 # estimate Phi from ROI
 task = 'game1'
-glm_type = 'hexonM2short'
+glm_type = 'M2_Decision'
 roi_type = 'group'
 
 # define iterator
-#training_sets = ['Set1','Set2']
-training_sets = ['Setall']
+training_sets = ['Set1','Set2']
+#training_sets = ['Setall']
 
-folds = [str(i)+'fold' for i in range(6,7)]  # look out
+folds = [str(i)+'fold' for i in range(4,9)]  # look out
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
-data = participants_data.query('game2_fmri==1')  # look out
+data = participants_data.query('game1_fmri==1')  # look out
+data = data.query('game1_acc>=0.80')
 pid = data['Participant_ID'].to_list()
 subjects = [p.replace('_','-') for p in pid]
 
@@ -68,8 +69,8 @@ for trainset in training_sets:
         print(trainset,'-',sub)
         for ifold in folds:
             # load beta map
-            bsin_path = pjoin(datadir,ifold,sub,'Mcon_0002.nii')
-            bcos_path = pjoin(datadir,ifold,sub,'Mcon_0001.nii')
+            bsin_path = pjoin(datadir,ifold,sub,'con_0010.nii')
+            bcos_path = pjoin(datadir,ifold,sub,'con_0009.nii')
             beta_sin_map = load_img(bsin_path)
             beta_cos_map = load_img(bcos_path)
 
@@ -80,12 +81,14 @@ for trainset in training_sets:
                 vmpfc_roi = load_img(fr'/mnt/workdir/DCM/BIDS/derivatives/Nipype/'
                                      fr'hexagon/defROI/vmpfc/{sub}_vmpfc_func_roi.nii')
             elif roi_type == 'group':
-                ec_roi = load_img('/mnt/workdir/DCM/docs/Reference/Park_Grid_ROI/EC_Grid_roi.nii')
-                vmpfc_roi = load_img(fr'/mnt/workdir/DCM/docs/Reference/Park_Grid_ROI/mPFC_Grid_roi.nii')
+                ec_roi = load_img('/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/M2_Decision/defROI/'
+                                  'EC/group_EC_func_roi.nii')
+                vmpfc_roi = load_img('/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/M2_Decision/defROI/'
+                                     'vmpfc/group_vmPFC_func_roi.nii')
             else:
                 raise Exception("roi type is wrong.")
 
-            ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi,ifold,'mean')
+            ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi, ifold,'mean')
             vmpfc_phi = estPhi(beta_sin_map, beta_cos_map, vmpfc_roi,ifold,'mean')
 
             sub_phi = {'sub_id':sub,'ifold':ifold,

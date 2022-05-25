@@ -38,7 +38,7 @@ def run_info(ev_file,motions_file=None):
     pmod_polys  = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2','decision','hex_corr','hex_error']
+    trial_con = ['M1','M2_corr','M2_error','decision_corr','decision_error','pressButton']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -65,8 +65,8 @@ def run_info(ev_file,motions_file=None):
     motions = motions.fillna(0.0).values.T.tolist()
 
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,None,None,run_pmod,None],
-                     orth=['No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,run_pmod,None,None],
+                     orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
 
     return run_info
 
@@ -84,14 +84,15 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     # Specify input & output stream
     infosource = Node(IdentityInterface(fields=['subj_id']),name="infosource")
     infosource.iterables = [('subj_id', subject_list)]
-    
+
     data_root = configs['data_root']
     event_dir = configs['event_dir']
-    analysis_type = configs['analysis_type']
-    
+    task = configs['task']
+    glm_type = configs['glm_type']
+
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',
                                'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
-                 'event': pjoin(event_dir,'sub-{subj_id}', analysis_type, ifold,
+                 'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold,
                                 'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',
                                     'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
@@ -99,15 +100,13 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     
     # SelectFiles - to grab the data (alternativ to DataGrabber)
     selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
-                       name='selectfiles') 
+                       name='selectfiles')
     selectfiles.inputs.run_id = runs
-        
+
     # Datasink - creates output folder for important outputs
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir' \
-                  '/{}/training_set/trainset{}/{}'.format(analysis_type,set_id,ifold)
-    container_path = os.path.join(analysis_type,'specificTo6','training_set',
-                             'trainset{}'.format(set_id))
+    working_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{task}/{glm_type}/Set{set_id}/{ifold}'
+    container_path = os.path.join(task,glm_type,f'Set{set_id}')
     datasink = Node(DataSink(base_directory=datasink_dir,
                              container=container_path),
                     name="datasink")
@@ -118,17 +117,28 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     
     # Specify GLM contrasts
     # Condition names
-    condition_names = ['M2','decision','hex_corrxcos^1','hex_corrxsin^1']
+    condition_names = ['M2_corrxcos^1','M2_corrxsin^1','decision_corrxcos^1','decision_corrxsin^1',
+                       'M2_corr','M2_error','decision_corr','decision_error']
 
-    # contrasts
-    cont01 = ['hex_corrxcos^1',   'T', condition_names, [0, 0, 1, 0]]
-    cont02 = ['hex_corrxsin^1',   'T', condition_names, [0, 0, 0, 1]]
-    cont03 = ['decision',         'T', condition_names, [0, 1, 0, 0]]
-    cont05 = ['M2',               'T', condition_names, [1, 0, 0, 0]]
+    # contrastst
+    cont01 = ['m2_cos',        'T', condition_names,  [1,0,0,0,0,0,0,0]]
+    cont02 = ['m2_sin',        'T', condition_names,  [0,1,0,0,0,0,0,0]]
 
-    cont04 = ['hexagon_mod',      'F', [cont01, cont02]]
-    contrast_list = [cont01, cont02, cont03, cont04, cont05]
-    
+    cont03 = ['decision_cos',  'T', condition_names,  [0,0,1,0,0,0,0,0]]
+    cont04 = ['decision_sin',  'T', condition_names,  [0,0,0,1,0,0,0,0]]
+
+    cont05 = ['m2_hexagon',       'F', [cont01, cont02]]
+    cont06 = ['decision_hexagon', 'F', [cont03, cont04]]
+
+    cont07 = ['m2',             'T', condition_names,  [0,0,0,0,1,1,0,0]]
+    cont08 = ['decision_corr',  'T', condition_names,  [0,0,0,0,0,0,1,0]]
+
+    cont09 =  ['cos', 'T',condition_names,  [1,0,1,0,0,0,0,0]]
+    cont010 = ['sin', 'T',condition_names,  [0,1,0,1,0,0,0,0]]
+    cont011 = ['hexagon', 'F', [cont09, cont010]]
+
+    contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08,cont09,cont010,cont011]
+
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
     
@@ -211,13 +221,15 @@ if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')
+    data = data.query('game1_acc>=0.8')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
     
     # input files
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'analysis_type': 'hexagon'}
+               'task':'game1',
+               'glm_type': 'M2_Decision'}
     
     # split k training set
     training_sets = {1: [1, 2, 3],

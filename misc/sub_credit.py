@@ -17,7 +17,7 @@ import pandas as pd
 from os.path import join as pjoin
 
 # set subject 
-subjects = [str(s).zfill(3) for s in range(72,79)] # last 55-66
+subjects = [str(s).zfill(3) for s in range(79,82)] # last 55-66
 subjects_credit = pd.DataFrame(columns=['Participant_ID','Name','Credit','Credit_beh','Credit_hm'])
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -78,7 +78,7 @@ for sub in subjects:
     if age < 16:
         hm_thr = 0.5
     else:
-        hm_thr = 0.3
+        hm_thr = 0.2
     num_goodrun = 0
     for hm in head_motion:
         if hm < hm_thr:

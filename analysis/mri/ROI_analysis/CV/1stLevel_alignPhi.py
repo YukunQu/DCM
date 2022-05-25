@@ -25,20 +25,19 @@ from nipype.algorithms.misc import Gunzip
 from nipype.interfaces.io import DataSink
 from nipype.interfaces import spm
 
-
-def run_info(ev_file, motions_file=None):
+def run_info(ev_file,motions_file=None):
     import pandas as pd
     from nipype.interfaces.base import Bunch
     onsets = []
     conditions = []
-    durations = []
+    durations  = []
 
-    pmod_names = []
+    pmod_names  = []
     pmod_params = []
-    pmod_polys = []
+    pmod_polys  = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2','decision','hex_corr','hex_error']
+    trial_con = ['M1','M2_corr','M2_error','decision_corr','decision_error','pressButton']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -50,23 +49,24 @@ def run_info(ev_file, motions_file=None):
             pmod_params.append(group[1].modulation.tolist())
             pmod_polys.append(1)
 
-    motions_df = pd.read_csv(motions_file, sep='\t')
+    motions_df = pd.read_csv(motions_file,sep='\t')
 
-    motion_columns = ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
-                      'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
-                      'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
-                      'rot_x', 'rot_x_derivative1', 'rot_x_derivative1_power2', 'rot_x_power2',
-                      'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
-                      'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
+    motion_columns   = ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
+                        'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
+                        'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
+                        'rot_x', 'rot_x_derivative1', 'rot_x_derivative1_power2', 'rot_x_power2',
+                        'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
+                        'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
 
     """motion_columns= ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z']"""
 
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
 
-    run_pmod = Bunch(name=pmod_names, param=pmod_params, poly=pmod_polys)
-    run_info = Bunch(conditions=conditions, onsets=onsets, durations=durations, pmod=[None,None,None,run_pmod,None],
-                     orth=['No', 'No', 'No', 'No','No'], regressor_names=motion_columns, regressors=motions)
+    run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,run_pmod,None,None],
+                     orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+
     return run_info
 
 
@@ -84,12 +84,14 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
 
     data_root = configs['data_root']
     event_dir = configs['event_dir']
-    analysis_type = configs['analysis_type']
+
+    task =  configs['task']
+    glm_type = configs['glm_type']
     ROI = configs['ROI']
 
     templates = {'func': pjoin(data_root, 'sub-{subj_id}/func',
                                'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
-                 'event': pjoin(event_dir, 'sub-{subj_id}', analysis_type, ROI, f'testset{set_id}', ifold,
+                 'event': pjoin(event_dir, 'sub-{subj_id}', task, glm_type, ROI, f'testset{set_id}', ifold,
                                 'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'), # look out
                  'regressors': pjoin(data_root, 'sub-{subj_id}/func',
                                      'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
@@ -102,10 +104,9 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
 
     # Datasink - creates output folder for important outputs
     datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/' \
-                  'test_set/{}/testset{}/{}'.format(analysis_type, ROI,set_id, ifold)
-    container_path = os.path.join(analysis_type, 'specificTo6', 'test_set',ROI,
-                                  'testset{}'.format(set_id))
+    working_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/{}/{}/' \
+                  'Set{}/{}'.format(task,glm_type,ROI,set_id, ifold)
+    container_path = os.path.join(task,glm_type,ROI,f'Set{set_id}')
     datasink = Node(DataSink(base_directory=datasink_dir,
                              container=container_path),
                     name="datasink")
@@ -116,12 +117,12 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
 
     # Specify GLM contrasts
     # Condition names
-    condition_names = ['hex_corrxalignPhi^1', 'decision', 'M2']
+    condition_names = ['M2_corrxalignPhi^1','decision_corrxalignPhi^1']
 
     # contrasts
-    cont01 = ['hex_corrxalignPhi^1', 'T', condition_names, [1, 0, 0]]
-    cont02 = ['decision',            'T', condition_names, [0, 1, 0]]
-    cont03 = ['M2',                  'T', condition_names, [0, 0, 1]]
+    cont01 = ['M2_corrxalignPhi^1',          'T', condition_names, [1, 0]]
+    cont02 = ['decision_corrxalignPhi^1',    'T', condition_names, [0, 1]]
+    cont03 = ['alignPhi',                    'T', condition_names, [0.5, 0.5]]
     contrast_list = [cont01, cont02, cont03]
 
     # Specify Nodes
@@ -203,14 +204,15 @@ if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')
-    data = data.query('(Age<=18)and(game1_acc<=0.8)')
+    data = data.query('game1_acc>=0.80')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
 
     # input files
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'analysis_type': 'alignPhiGame1',
+               'task':'game1',
+               'glm_type': 'alignPhi',
                'ROI':'EC_group'}
 
     # split 2 test set

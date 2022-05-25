@@ -5,7 +5,8 @@
 #     3. Estimate 1st-level contrasts
 #     4. Normalize 1st-level contrasts
 import os
-import time 
+import time
+import numpy as np
 import pandas as pd 
 from os.path import join as pjoin
 
@@ -47,8 +48,9 @@ def run_info(ev_file,motions_file=None):
             pmod_params.append(group[1].modulation.tolist())
             pmod_polys.append(1)
 
-    motions_df = pd.read_csv(motions_file,sep='\t')
+    #motions_df = pd.read_csv(motions_file,sep='\t')
 
+    """
     motion_columns   = ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
                         'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
                         'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
@@ -56,14 +58,14 @@ def run_info(ev_file,motions_file=None):
                         'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
                         'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
 
-    """motion_columns= ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z']"""
+    motion_columns= ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z']"""
 
-    motions = motions_df[motion_columns]
-    motions = motions.fillna(0.0).values.T.tolist()
+    #motions = motions_df[motion_columns]
+    #motions = motions.fillna(0.0).values.T.tolist()
 
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
     run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,run_pmod,None,None],
-                     orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+                     orth=['No','No','No','No','No','No'])
 
     return run_info
 
@@ -114,24 +116,28 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     # Specify GLM contrasts
     # Condition names
-    #condition_names = ['M2_corr','M2_error','decision_corr','decision_error'
-    #
 
-    condition_names = ['M2_corrxcos^1','M2_corrxsin^1']
+    condition_names = ['M2_corrxcos^1','M2_corrxsin^1','decision_corrxcos^1','decision_corrxsin^1',
+                       'M2_corr','M2_error','decision_corr','decision_error']
 
-    # contrasts
-    #cont01 = ['M2',              'T', condition_names,  [0.5, 0.5, 0, 0, 0, 0, 0, 0]]
-    #cont02 = ['decision',        'T', condition_names,  [0, 0, 0.5, 0.5, 0, 0, 0, 0]]
+    # contrastst
+    cont01 = ['m2_cos',        'T', condition_names,  [1,0,0,0,0,0,0,0]]
+    cont02 = ['m2_sin',        'T', condition_names,  [0,1,0,0,0,0,0,0]]
 
-    cont01 = ['M2_corrxcos^1',   'T', condition_names,  [1, 0]]
-    cont02 = ['M2_corrxsin^1',   'T', condition_names,  [0, 1]]
+    cont03 = ['decision_cos',  'T', condition_names,  [0,0,1,0,0,0,0,0]]
+    cont04 = ['decision_sin',  'T', condition_names,  [0,0,0,1,0,0,0,0]]
 
-    #cont03 = ['decision_corrxcos^1',   'T', condition_names,  [0, 0, 1, 0]]
-    #cont04 = ['decision_corrxsin^1',   'T', condition_names,  [0, 0, 0, 1]]
+    cont05 = ['m2_hexagon',       'F', [cont01, cont02]]
+    cont06 = ['decision_hexagon', 'F', [cont03, cont04]]
 
-    cont05 = ['hexagon_M2',           'F', [cont01, cont02]]
-    #cont06 = ['hexagon_decision',     'F', [cont03, cont04]]
-    contrast_list = [cont05]
+    cont07 = ['m2',             'T', condition_names,  [0,0,0,0,1,1,0,0]]
+    cont08 = ['decision_corr',  'T', condition_names,  [0,0,0,0,0,0,1,0]]
+
+    cont09 =  ['cos', 'T',condition_names,  [0.5,0,0.5,0,0,0,0,0]]
+    cont010 = ['sin', 'T',condition_names,  [0,0.5,0,0.5,0,0,0,0]]
+    cont011 = ['hexagon', 'F', [cont09, cont010]]
+
+    contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08,cont09,cont010,cont011]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
@@ -203,7 +209,7 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     # Create 1st-level analysis output graph
     #  analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
-    analysis1st.run('MultiProc', plugin_args={'n_procs': 30})
+    analysis1st.run('MultiProc', plugin_args={'n_procs': 10})
 
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
@@ -216,12 +222,14 @@ if __name__ == "__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
-    subject_list = [p.split('_')[-1] for p in pid][:3]
+    subject_list = [p.split('_')[-1] for p in pid]
 
-    #subject_list = [str(i).zfill(3) for i in range(74,79)]
+    sub_list = np.load(r'/mnt/workdir/DCM/tmp/sub_list.npy')
+    sub_list = [p.split('-')[-1] for p in sub_list]
+    subject_list = [s for s in subject_list if s in sub_list]
 
     # input files
-    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
+    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'task':'game1',
                'glm_type': 'M2_Decision'}

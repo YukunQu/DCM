@@ -116,17 +116,35 @@ for sub in subjects:
 
 #%%
 # define ROI from F-test group result
-analysis_type = 'hexagon_game2'
+task = 'game1'
+glm_type = 'M2_Decision'
 # EC
-stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/specificTo6/training_set/trainsetall/' \
-            'group/hp/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
-roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
-savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/defROI/EC/group_EC_func_roi.nii'
+stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/Setall/' \
+            f'group/hp/2ndLevel/_contrast_id_ZF_0011/spmT_0001.nii'
+roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
+savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/EC/group_EC_func_roi.nii'
 makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
 
 # vmpfc
-stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/specificTo6/training_set/trainsetall/' \
-            'group/hp/2ndLevel/_contrast_id_ZF_0004/spmT_0001.nii'
-roi = r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/osfstorage-archive/data/Analysis_ROI_nii/mPFC_roi.nii'
-savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{analysis_type}/defROI/vmpfc/group_vmpfc_func_roi.nii'
+stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/{glm_type}/Setall/' \
+            f'group/hp/2ndLevel/_contrast_id_ZF_0011/spmT_0001.nii'
+roi = r'/mnt/data/Template/VMPFC_roi.nii'
+savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/vmpfc/group_vmPFC_func_roi.nii'
 makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
+
+#%%
+task = 'game1'
+glm_type = 'M2_Decision'
+# EC
+stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/Setall/' \
+            f'group/hp/2ndLevel/_contrast_id_ZF_0011/spmT_0001.nii'
+roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
+savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/EC/check_EC_func_roi.nii'
+makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3),coords=(33,62,21))
+#%%
+from nilearn.plotting import view_img
+
+stat_map = load_img( f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/EC/check_EC_func_roi.nii')
+
+bg_img = load_img(r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz')
+vimg = view_img(stat_map_img=stat_map,bg_img=bg_img,threshold=0,vmax=5,symmetric_cbar=1)

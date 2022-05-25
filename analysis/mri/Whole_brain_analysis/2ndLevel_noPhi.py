@@ -24,7 +24,7 @@ from nipype.interfaces.utility import IdentityInterface
 from nipype.interfaces import spm
 
 
-def level2nd_noPhi(analysis_type,sub_type,subject_list,contrast_list):
+def level2nd_noPhi(task,glm_type,sub_type,subject_list,contrast_list):
     spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
 
     # data input and ouput
@@ -35,15 +35,15 @@ def level2nd_noPhi(analysis_type,sub_type,subject_list,contrast_list):
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    templates = {'cons': pjoin(data_root, '{}/specificTo6/training_set/trainsetall/6fold'.format(analysis_type),
-                               'sub-{subj_id}','{contrast_id}.nii')}  # look out
+    templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/Setall/6fold',
+                               'sub-{subj_id}', '{contrast_id}.nii')}  # look out
 
     # Create SelectFiles node
     selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                        name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = '{}/specificTo6/training_set/trainsetall/group/{}'.format(analysis_type,sub_type)  # look out
+    container_path = f'{task}/{glm_type}/Setall/group/{sub_type}'
     datasink = Node(DataSink(base_directory=data_root,
                              container=container_path),
                     name="datasink")
@@ -67,8 +67,8 @@ def level2nd_noPhi(analysis_type,sub_type,subject_list,contrast_list):
     # 2nd workflow
     # look out
     analysis2nd = Workflow(name='work_2nd',
-                           base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{}/{}'.format(analysis_type,
-                                                                                                        sub_type)) # look out
+                           base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/'
+                                    '{}/{}/Setall/group/{}'.format(task,glm_type,sub_type))
     analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                     ('subj_id','subj_id')]),
                         (selectfiles, onesamplettestdes, [('cons', 'in_files')]),
@@ -88,19 +88,23 @@ def level2nd_noPhi(analysis_type,sub_type,subject_list,contrast_list):
                                                         '2ndLevel.@con')])
                         ])
     # run 2nd analysis
-    analysis2nd.run('MultiProc', plugin_args={'n_procs': 2})
+    analysis2nd.run('MultiProc', plugin_args={'n_procs': 10})
 
 
 if __name__ == "__main__":
+    task = 'game1'
+    glm_type = 'M2_Decision'
+
+    contrast_list = ['ZF_0005','ZF_0006','ZT_0007','ZT_0008','ZF_0011']
 
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('game1_fmri==1')  # look out
+    data = participants_data.query('game2_fmri==1')  # look out
 
     adult_data = data.query('Age>18')
     adolescent_data = data.query('12<Age<=18')
     children_data = data.query('Age<=12')
-    hp_data = data.query('game1_acc>=0.75').iloc[4:]
+    hp_data = data.query('game1_acc>=0.8')
 
     print("Participants:", len(data))
     print("Adult:",len(adult_data))
@@ -108,21 +112,18 @@ if __name__ == "__main__":
     print("Children:", len(children_data))
     print("High performance:",len(hp_data),"({} adult)".format(len(hp_data.query('Age>18'))))
 
-    contrast_list = ['ZF_0004']
-    analysis_type = 'hexagon'
-
-    #  ['adult','adolescent','children','hp']
-    for sub_type in ['hp_75']:
+    for sub_type in ['adult','adolescent','children','hp']:
         if sub_type == 'adult':
             pid = adult_data['Participant_ID'].to_list()
         elif sub_type == 'adolescent':
             pid = adolescent_data['Participant_ID'].to_list()
         elif sub_type == 'children':
             pid = children_data['Participant_ID'].to_list()
-        elif sub_type == 'hp_75':
+        elif sub_type == 'hp':
             pid = hp_data['Participant_ID'].to_list()
         else:
             pid = None
         subject_list = [p.split('_')[-1] for p in pid]
         print(f"The {sub_type} group have {len(subject_list)} subjects")
-        level2nd_noPhi(analysis_type, sub_type, subject_list, contrast_list)
+
+        level2nd_noPhi(task,glm_type, sub_type, subject_list, contrast_list)

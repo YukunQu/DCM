@@ -13,13 +13,13 @@ import pandas as pd
 
 
 class AlignPhi(object):
-    """"""
-    def __init__(self, behDataPath):
+    def __init__(self,behDataPath):
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
         self.behData = self.behData.dropna(axis=0, subset=['pairs_id'])
         self.behData = self.behData.fillna('None')
         self.dformat = None
+
 
     def game1_dformat(self):
         columns = self.behData.columns
@@ -28,7 +28,8 @@ class AlignPhi(object):
         elif 'fixation.started_raw' in columns:
             self.dformat = 'summary'
         else:
-            print("The data is not game1 behavioral data.")
+            raise Exception("You need specify behavioral data format.")
+
 
     def cal_start_time(self):
         self.game1_dformat()
@@ -37,7 +38,7 @@ class AlignPhi(object):
         elif self.dformat == 'summary':
             starttime = self.behData['fixation.started_raw'].min() - 1
         else:
-            print("Error:You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
         return starttime
 
     def genM1ev(self):
@@ -46,7 +47,7 @@ class AlignPhi(object):
             duration = self.behData['pic2_render.started'] - self.behData['pic1_render.started']
             angle = self.behData['angles']
 
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
         elif self.dformat == 'summary':
@@ -54,51 +55,12 @@ class AlignPhi(object):
             duration = self.behData['pic2_render.started_raw'] - self.behData['pic1_render.started_raw']
             angle = self.behData['angles']
 
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
         return m1ev
-
-    def genM2ev(self):
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['pic2_render.started'] - self.starttime
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['pic2_render.started_raw'] - self.starttime
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        else:
-            print("You need specify behavioral data format.")
-        return m2ev
-
-    def genDeev(self):
-        # generate the event of decision
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1.started'] - self.starttime
-            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        else:
-            print("You need specify behavioral data format.")
-        return deev
 
     def label_trial_corr(self):
         if self.dformat == 'trial_by_trial':
@@ -112,10 +74,10 @@ class AlignPhi(object):
                 else:
                     keyResp_list.append(k[1])
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
 
         trial_corr = []
-        for keyResp, row in zip(keyResp_list, self.behData.itertuples()):
+        for keyResp,row in zip(keyResp_list, self.behData.itertuples()):
             rule = row.fightRule
             if rule == '1A2D':
                 fight_result = row.pic1_ap - row.pic2_dp
@@ -129,49 +91,109 @@ class AlignPhi(object):
                     correctAns = 2
                 else:
                     correctAns = 1
+            else:
+                raise Exception("None of rule have been found in the file.")
             if (keyResp == 'None') or (keyResp == None):
                 trial_corr.append(False)
             elif int(keyResp) == correctAns:
                 trial_corr.append(True)
             else:
                 trial_corr.append(False)
-        accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
-        return trial_corr, accuracy
+        accuracy = np.round(np.sum(trial_corr) / len(self.behData),3)
+        return trial_corr,accuracy
 
-    def hexmodev(self, trial_corr):
+
+    def genM2ev(self,trial_corr):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
-            duration = self.behData['cue1_2.started'] - self.behData['pic2_render.started']
+            duration = [2.5] * len(self.behData)
             angle = self.behData['angles']
-            hexmodev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            hexmodev['trial_type'] = 'hexmod'
-            hexmodev['modulation'] = 1
+            m2ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['pic2_render.started_raw'] - self.starttime
-            duration = self.behData['cue1_2.started_raw'] - self.behData['pic2_render.started_raw']
+            duration = [2.5] * len(self.behData)
             angle = self.behData['angles']
-            hexmodev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            hexmodev['trial_type'] = 'hexmod'
-            hexmodev['modulation'] = 1
+            m2ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
 
-        hexev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        hexev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        for i, trial_label in enumerate(trial_corr):
+        m2ev_corr = pd.DataFrame(columns=['onset','duration','angle'])
+        m2ev_error = pd.DataFrame(columns=['onset','duration','angle'])
+
+        assert len(m2ev) == len(trial_corr), "The number of trial label didn't not same as the number of event-M2."
+
+        for i,trial_label in enumerate(trial_corr):
             if trial_label == True:
-                hexev_corr = hexev_corr.append(hexmodev.iloc[i])
+                m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
             elif trial_label == False:
-                hexev_error = hexev_error.append(hexmodev.iloc[i])
+                m2ev_error = m2ev_error.append(m2ev.iloc[i])
             else:
                 raise ValueError("The trial label should be True or False.")
-        hexev_corr['trial_type'] = 'hex_corr'
-        hexev_error['trial_type'] = 'hex_error'
-        return hexev_corr, hexev_error
+        m2ev_corr['trial_type'] = 'M2_corr'
+        m2ev_error['trial_type'] = 'M2_error'
+        return m2ev_corr, m2ev_error
 
-    def hexpm(self, hexev_corr, ifold, phi):
-        angle = hexev_corr['angle']
-        pmod_alignPhi = hexev_corr.copy()
+    def genDeev(self,trial_corr):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        deev_corr = pd.DataFrame(columns=['onset','duration','angle'])
+        deev_error = pd.DataFrame(columns=['onset','duration','angle'])
+
+        assert len(deev) == len(trial_corr), "The number of trial label didn't not  same as the number of event-decision."
+
+        for i,trial_label in enumerate(trial_corr):
+            if trial_label == True:
+                deev_corr = deev_corr.append(deev.iloc[i])
+            elif trial_label == False:
+                deev_error = deev_error.append(deev.iloc[i])
+            else:
+                raise ValueError("The trial label should be True or False.")
+        deev_corr['trial_type'] = 'decision_corr'
+        deev_error['trial_type'] = 'decision_error'
+        return deev_corr, deev_error
+
+    def pressButton(self):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['resp.started'] - self.starttime
+            duration = 0
+            angle = self.behData['angles']
+            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            pbev['trial_type'] = 'pressButton'
+            pbev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['resp.started_raw'] - self.starttime
+            duration = 0
+            angle = self.behData['angles']
+            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            pbev['trial_type'] = 'pressButton'
+            pbev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        return pbev
+
+    def genpm(self,m2ev_corr,ifold,phi):
+        angle = m2ev_corr['angle']
+        pmod_alignPhi = m2ev_corr.copy()
         pmod_alignPhi['trial_type'] = 'alignPhi'
         pmod_alignPhi['modulation'] = np.cos(np.deg2rad(ifold * (angle - phi)))
         return pmod_alignPhi
@@ -179,36 +201,35 @@ class AlignPhi(object):
     def game1_alignPhi(self, ifold, phi):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
-        m2ev = self.genM2ev()
-        deev = self.genDeev()
-        trial_corr, accuracy = self.label_trial_corr()
-        hexev_corr, hexev_error = self.hexmodev(trial_corr)
-        pmod_alignPhi = self.hexpm(hexev_corr, ifold, phi)
-
-        event_data = pd.concat([m1ev, m2ev, deev,
-                                hexev_corr, hexev_error,
-                                pmod_alignPhi], axis=0)
+        trial_corr,accuracy = self.label_trial_corr()
+        m2ev_corr,m2ev_error = self.genM2ev(trial_corr)
+        deev_corr, deev_error = self.genDeev(trial_corr)
+        pbev = self.pressButton()
+        pmod_alignPhi = self.genpm(m2ev_corr,ifold,phi)
+        event_data = pd.concat([m1ev,m2ev_corr,m2ev_error,deev_corr,deev_error,pbev,
+                                pmod_alignPhi],axis=0)
         return event_data
 
 
 if __name__ == "__main__":
-    analysis_type = 'hexagon'
+    task = 'game1'
+    glm_type = 'M2_Decision'
     # define roi
     roi_type = 'group'
     phi_type = 'ec_phi'  # look out ec_phi or vmpfc_phi
 
     if roi_type == 'individual':
         if phi_type == 'ec_phi':
-            save_containter = 'alignPhiGame1/EC_individual'
+            save_containter = 'game1/alignPhi/EC_individual'
         elif phi_type == 'vmpfc_phi':
-            save_containter = 'alignPhiGame1/vmpfc_individual'
+            save_containter = 'game1/alignPhi/vmpfc_individual'
         else:
             raise Exception("phi type is wrong.")
     elif roi_type == 'group':
         if phi_type == 'ec_phi':
-            save_containter = 'alignPhiGame1/EC_group'
+            save_containter = 'game1/alignPhi/EC_group'
         elif phi_type == 'vmpfc_phi':
-            save_containter = 'alignPhiGame1/vmpfc_group'
+            save_containter = 'game1/alignPhi/vmpfc_group'
         else:
             raise Exception("phi type is wrong.")
     else:
@@ -218,6 +239,7 @@ if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')
+    data = data.query('game1_acc>=0.8')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
 
@@ -231,12 +253,10 @@ if __name__ == "__main__":
     # define test set
     test_configs = {'1': [4, 5, 6],
                     '2': [1, 2, 3]}
-    #test_configs = {'all': [1, 2, 3, 4, 5, 6]}
 
     for test_id, test_runs in test_configs.items():
-        phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{}/'
-                               r'specificTo6/Phi/game1trainset{}_estPhi_{}_ROI.csv'.format(analysis_type,
-                                                                                           test_id,roi_type)) # look out ROI
+        phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{}/{}/Phi'
+                               r'/Set{}_estPhi_{}-{}_ROI.csv'.format(task,glm_type,test_id,task,roi_type)) # look out ROI
         for subj in subjects:
             print('----sub-{}----'.format(subj))
 

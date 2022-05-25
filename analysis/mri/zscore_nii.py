@@ -28,7 +28,7 @@ def zscore_nii(source_dir,file,prefix):
 
 #%%
 # zscore the 1st F-test result
-testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/hexagon/Setall'
+testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/M2_Decision/Setall'
 
 for ifold in range(6,7):
     ifold = f'{ifold}fold'
@@ -36,26 +36,16 @@ for ifold in range(6,7):
     sub_list = os.listdir(data_dir)
     for sub in sub_list:
         data_sub_dir = os.path.join(data_dir,sub)
-        zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmF_0005.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmF_0006.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmF_0011.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmT_0007.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmT_0008.nii', 'Z')
         print(sub,'was zscored.')
 
 #%%
-# zscore the 2nd group result
-analysis_type = 'hexonM2short'
-sub_types = ['children','adolescent','adult','hp']
-cmap = 'spmT_0001.nii'
-
-for sub_type in sub_types:
-    cmap_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-               r'{}/specificTo6/training_set/trainsetall/group/' \
-               r'{}/2ndLevel/_contrast_id_ZF_0004'.format(analysis_type,sub_type)
-    zscore_nii(cmap_dir, cmap, 'Z')
-    print(sub_type,'was zscored.')
-
-
-#%%
-# zscore align phi 1st tmap
-testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/alignPhiGame1/specificTo6/test_set/EC_individual/testset{}'
+# zscore cross validation result
+testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/alignPhi/EC_group/Set{}'
 
 for set_id in [1,2]:
     for ifold in range(6,7):
@@ -65,4 +55,6 @@ for set_id in [1,2]:
         for sub in sub_list:
             data_sub_dir = os.path.join(data_dir,sub)
             zscore_nii(data_sub_dir, 'spmT_0001.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmT_0002.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmT_0003.nii', 'Z')
             print(sub,'was zscored.')
