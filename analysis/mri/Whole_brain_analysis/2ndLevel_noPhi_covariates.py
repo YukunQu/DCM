@@ -24,28 +24,25 @@ from nipype.interfaces.utility import IdentityInterface
 from nipype.interfaces import spm
 
 
-def level2nd_noPhi_covariate(task,glm_type,subject_list, contrast_list, covariates):
+def level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st,contrast_2nd,covariates,covar_type):
     spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
 
     # data input and ouput
-    infosource = Node(IdentityInterface(fields=['contrast_id', 'subj_id']),
-                      name="infosource")
-    infosource.iterables = [('contrast_id', contrast_list)]
+    infosource = Node(IdentityInterface(fields=['contrast_id', 'subj_id']), name="infosource")
+    infosource.iterables = [('contrast_id', contrast_1st)]
     infosource.inputs.subj_id = subject_list
 
-    # SelectFiles - to grab the data (alternativ to DataGrabber)
+    # SelectFiles
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/Setall/6fold',
-                         'sub-{subj_id}', '{contrast_id}.nii')}  # look out
+    templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/Setall/6fold','sub-{subj_id}', '{contrast_id}.nii')}
 
     # Create SelectFiles node
     selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{task}/{glm_type}/Setall/group/covariates/Acc'
-    datasink = Node(DataSink(base_directory=data_root,
-                             container=container_path),
+    container_path = f'{task}/{glm_type}/Setall/group/covariates/{covar_type}'
+    datasink = Node(DataSink(base_directory=data_root, container=container_path),
                     name="datasink")
 
     # Use the following substitutions for the DataSink output
@@ -55,10 +52,10 @@ def level2nd_noPhi_covariate(task,glm_type,subject_list, contrast_list, covariat
     # Node initialize
     onesamplettestdes = Node(OneSampleTTestDesign(), name="onesampttestdes")
 
-    #age = covariates['age']
-    acc = covariates['acc']
-    onesamplettestdes.inputs.covariates = [dict(vector=acc, name='Acc', centering=1)]
-                                           #dict(vector=acc, name='Acc', centering=1)]
+    spmf_covariates = []
+    for key,value in covariates.items():
+        spmf_covariates.append(dict(vector=value, name=key, centering=1))
+    onesamplettestdes.inputs.covariates = spmf_covariates
 
     level2estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
                           name="level2estimate")
@@ -66,17 +63,11 @@ def level2nd_noPhi_covariate(task,glm_type,subject_list, contrast_list, covariat
     level2conestimate = Node(EstimateContrast(group_contrast=True),
                              name="level2conestimate")
     # specify contrast
-    condition_names = ['mean', 'Acc']
-    cont01 = ['Group', 'T', condition_names, [1, 0]]
-    cont02 = ['Acc',   'T', condition_names, [0, 1]]
-    #cont03 = ['Acc',   'T', condition_names, [0, 0, 1]]
-    level2conestimate.inputs.contrasts = [cont01, cont02]
+    level2conestimate.inputs.contrasts = contrast_2nd
 
     # 2nd workflow
-    # look out
-    analysis2nd = Workflow(name='work_2nd',
-                           base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/'
-                                    '{}/{}/group/covariates/Acc'.format(task,glm_type))
+    analysis2nd = Workflow(name='work_2nd',base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/'
+                                           '{}/{}/group/covariates/{}'.format(task,glm_type,covar_type))
     analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                     ('subj_id', 'subj_id')]),
                          (selectfiles, onesamplettestdes, [('cons', 'in_files')]),
@@ -100,20 +91,30 @@ def level2nd_noPhi_covariate(task,glm_type,subject_list, contrast_list, covariat
 
 
 if __name__ == "__main__":
-    task = 'game2'  # look out
-    glm_type = 'M2_Decision'
 
-    contrast_list = ['ZF_0005','ZF_0006','ZF_0011']
-
+    # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri==1')  # look out
+    data = participants_data.query('game1_fmri==1')  # look out
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
+    
+    task = 'game1'  # look out
+    glm_type = 'whole_hexagon'
+
+    # contrast
+    contrast_1st = ['ZF_0004']
+
+    condition_names = ['mean', 'acc']
+    cont01 = ['Group', 'T', condition_names, [1, 0]]
+    cont02 = ['acc',   'T', condition_names, [0, 1]]
+    #cont03 = ['acc',   'T', condition_names, [0, 0, 1]]
+    contrast_2nd = [cont01, cont02]
 
     # covariates
     covariates = {}
     #covariates['age'] = data['Age'].to_list()
-    covariates['acc'] = data['game2_test_acc'].to_list()  # look out game2_test_acc
+    covariates['acc'] = data['game1_acc'].to_list()
 
-    level2nd_noPhi_covariate(task,glm_type,subject_list, contrast_list, covariates)
+    covar_dir = 'acc'
+    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)

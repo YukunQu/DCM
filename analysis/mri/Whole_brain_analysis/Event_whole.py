@@ -170,6 +170,25 @@ class Game1EV(object):
         hexev_error['trial_type'] = 'hex_error'
         return hexev_corr, hexev_error
 
+    def pressButton(self):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['resp.started'] - self.starttime
+            duration = 0
+            angle = self.behData['angles']
+            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            pbev['trial_type'] = 'pressButton'
+            pbev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['resp.started_raw'] - self.starttime
+            duration = 0
+            angle = self.behData['angles']
+            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            pbev['trial_type'] = 'pressButton'
+            pbev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        return pbev
+
     def hexpm(self, hexev_corr, ifold):
         angle = hexev_corr['angle']
         pmod_sin = hexev_corr.copy()
@@ -185,46 +204,65 @@ class Game1EV(object):
         m1ev = self.genM1ev()
         m2ev = self.genM2ev()
         deev = self.genDeev()
+        pbev = self.pressButton()
         trial_corr, accuracy = self.label_trial_corr()
         hexev_corr, hexev_error = self.hexmodev(trial_corr)
         pmod_sin, pmod_cos = self.hexpm(hexev_corr, ifold)
 
         event_data = pd.concat([m1ev, m2ev, deev,
-                                hexev_corr, hexev_error,
+                                hexev_corr, hexev_error,pbev,
                                 pmod_sin, pmod_cos], axis=0)
         return event_data
 
 
-if __name__ == "__main__":
-    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-    participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('game1_fmri==1')
-    pid = data['Participant_ID'].to_list()
-    subjects = [p.split('_')[-1] for p in pid]
+def gen_sub_event(task, subjects):
+    if task == 'game1':
+        runs = range(1,7)
+        template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/whole_hexagon/{}fold',
+                    'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
+    elif task == 'game2':
+        runs = range(1,3)
+        template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/whole_hexagon/{}fold',
+                    'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
+    else:
+        raise Exception("The type of task is wrong.")
 
-    # subjects = [str(i).zfill(3) for i in range(74,79)]
-
-    runs = range(1, 7)
-    ifolds = range(4, 9)
-
-    template = {
-        'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv',
-        'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/hexagon/{}fold',
-        'event_file': 'sub-{}_task-game1_run-{}_events.tsv'}
+    ifolds = range(4,9)
 
     for subj in subjects:
         subj = str(subj).zfill(3)
         print('----sub-{}----'.format(subj))
 
         for ifold in ifolds:
-            save_dir = template['save_dir'].format(subj, ifold)
+            save_dir = template['save_dir'].format(subj,task,ifold)
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
 
             for idx in runs:
                 run_id = str(idx)
-                behDataPath = template['behav_path'].format(subj, subj, run_id)
-                event = Game1EV(behDataPath)
-                event_data = event.game1ev(ifold)
-                tsv_save_path = join(save_dir, template['event_file'].format(subj, run_id))
+                behDataPath = template['behav_path'].format(subj,subj,task,run_id)
+                if task == 'game1':
+                    event =  Game1EV(behDataPath)
+                    event_data = event.game1ev(ifold)
+                # elif task == 'game2':
+                    # event = Game2EV(behDataPath)
+                    # event_data = event.game2ev(ifold)
+                else:
+                    raise Exception("The type of task is wrong.")
+                tsv_save_path = join(save_dir,template['event_file'].format(subj,task,run_id))
                 event_data.to_csv(tsv_save_path, sep="\t", index=False)
+
+
+if __name__ == "__main__":
+
+    task = 'game1'
+
+    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+    participants_data = pd.read_csv(participants_tsv,sep='\t')
+    data = participants_data.query(f'{task}_fmri==1')
+    pid = data['Participant_ID'].to_list()
+    subjects = [p.split('_')[-1] for p in pid]
+
+    gen_sub_event(task,subjects)

@@ -17,7 +17,7 @@ for html in html_files:
 
 # copy figure file
 #%%
-subs_list = ['sub-010','sub-015', 'sub-027','sub-037', 'sub-046',  'sub-076', 'sub-080']
+subs_list = ['sub-015', 'sub-027','sub-037', 'sub-046',  'sub-076', 'sub-080']
 for sub in subs_list:
     ori_file = os.path.join(fmriprep_dir,sub,'figures')
     target_file = os.path.join(target_dir,sub,'figures')
