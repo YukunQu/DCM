@@ -13,7 +13,8 @@ from  nilearn.masking import apply_mask
 
 def zscore_nii(source_dir,file,prefix):
     filepath = os.path.join(source_dir,file)
-    mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz')
+    mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii')
+    #mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz')
     fmap = load_img(filepath)
     
     fmap_mean = apply_mask(fmap, mask).mean()

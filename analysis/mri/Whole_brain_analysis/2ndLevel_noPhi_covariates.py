@@ -90,6 +90,31 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st,contrast_2n
     analysis2nd.run('MultiProc', plugin_args={'n_procs': 10})
 
 
+def level2nd_covar_acc(subject_list,task,glm_type,contrast_1st):
+    condition_names = ['mean', 'acc']
+    cont01 = ['Group', 'T', condition_names, [1, 0]]
+    cont02 = ['acc',   'T', condition_names, [0, 1]]
+    contrast_2nd = [cont01, cont02]
+
+    # covariates
+    covariates = {}
+    covariates['acc'] = data['game1_acc'].to_list()
+    covar_dir = 'acc'
+    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
+
+
+def level2nd_covar_age(subject_list,task,glm_type,contrast_1st):
+    condition_names = ['mean', 'age']
+    cont01 = ['Group', 'T', condition_names, [1, 0]]
+    cont02 = ['age',   'T', condition_names, [0, 1]]
+    contrast_2nd = [cont01, cont02]
+
+    # covariates
+    covariates = {}
+    covariates['age'] = data['Age'].to_list()
+    covar_dir = 'age'
+    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
+
 if __name__ == "__main__":
 
     # subject
@@ -102,19 +127,7 @@ if __name__ == "__main__":
     task = 'game1'  # look out
     glm_type = 'whole_hexagon'
 
-    # contrast
     contrast_1st = ['ZF_0004']
 
-    condition_names = ['mean', 'acc']
-    cont01 = ['Group', 'T', condition_names, [1, 0]]
-    cont02 = ['acc',   'T', condition_names, [0, 1]]
-    #cont03 = ['acc',   'T', condition_names, [0, 0, 1]]
-    contrast_2nd = [cont01, cont02]
-
-    # covariates
-    covariates = {}
-    #covariates['age'] = data['Age'].to_list()
-    covariates['acc'] = data['game1_acc'].to_list()
-
-    covar_dir = 'acc'
-    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
+    level2nd_covar_age(subject_list,task,glm_type,contrast_1st)
+    level2nd_covar_acc(subject_list,task,glm_type,contrast_1st)

@@ -23,16 +23,16 @@ from nipype.interfaces.io import DataSink
 from nipype.interfaces import spm
 
 
-def run_info(ev_file):
+def run_info(ev_file,motions_file=None):
     import pandas as pd
     from nipype.interfaces.base import Bunch
     onsets = []
     conditions = []
     durations  = []
 
-    pmod_names  = []
+    pmod_names = []
     pmod_params = []
-    pmod_polys  = []
+    pmod_polys = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
     trial_con = ['M1','M2','decision','hex_corr','hex_error','pressButton']
@@ -46,10 +46,23 @@ def run_info(ev_file):
             pmod_names.append(condition)
             pmod_params.append(group[1].modulation.tolist())
             pmod_polys.append(1)
+    print(conditions)
+    motions_df = pd.read_csv(motions_file,sep='\t')
+
+    motion_columns   = ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
+                        'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
+                        'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
+                        'rot_x', 'rot_x_derivative1', 'rot_x_derivative1_power2', 'rot_x_power2',
+                        'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
+                        'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
+
+
+    motions = motions_df[motion_columns]
+    motions = motions.fillna(0.0).values.T.tolist()
 
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
     run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,None,None,run_pmod,None,None],
-                     orth=['No','No','No','No','No','No'])
+                     orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
 
     return run_info
 
@@ -74,11 +87,12 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     glm_type = configs['glm_type']
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',
-                               'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin6Asym_desc-smoothAROMAnonaggr_bold.nii.gz'),
+                               'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
                  'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold,
-                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv')
+                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
+                 'regressors':pjoin(data_root,'sub-{subj_id}/func',
+                                    'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
                  }
-
     # SelectFiles - to grab the data (alternativ to DataGrabber)
     selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                        name='selectfiles')
@@ -106,18 +120,20 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     cont03 = ['decision',         'T', condition_names, [0, 1, 0, 0]]
     cont05 = ['M2',               'T', condition_names, [1, 0, 0, 0]]
 
-    cont04 = ['hexagon_mod',      'F', [cont01, cont02]]
+    cont04 = ['hexagon',      'F', [cont01, cont02]]
     contrast_list = [cont01, cont02, cont03, cont04, cont05]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
 
+    smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+
     # prepare event file
-    runs_prep = MapNode(Function(input_names=['ev_file'],
+    runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
                                  output_names=['run_info'],
                                  function=run_info),
                         name='runsinfo',
-                        iterfield = ['ev_file'])
+                        iterfield = ['ev_file','motions_file'])
 
     # SpecifyModel - Generates SPM-specific Model
     modelspec = Node(SpecifySPMModel(concatenate_runs=False,
@@ -152,13 +168,16 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     # Connect up the 1st-level analysis components
     analysis1st.connect([(infosource, selectfiles,  [('subj_id','subj_id')]),
-                         (selectfiles, runs_prep,   [('event','ev_file')]),
+                         (selectfiles, runs_prep,   [('event','ev_file'),
+                                                     ('regressors','motions_file')]),
                          (runs_prep, modelspec,     [('run_info','subject_info')]),
+
                          (selectfiles, gunzip_func, [('func','in_file')]),
-                         (gunzip_func, modelspec,   [('out_file','functional_runs')]),
+                         (gunzip_func, smooth,      [('out_file','in_files')]),
+                         (smooth, modelspec,        [('smoothed_files','functional_runs')]),
+
                          (modelspec,level1design,[('session_info','session_info')]),
                          (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
-
                          (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
                                                          ('beta_images','beta_images'),
                                                          ('residual_image','residual_image')
