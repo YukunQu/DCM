@@ -98,7 +98,12 @@ def level2nd_covar_acc(subject_list,task,glm_type,contrast_1st):
 
     # covariates
     covariates = {}
-    covariates['acc'] = data['game1_acc'].to_list()
+    if task == 'game1':
+        covariates['acc'] = data['game1_acc'].to_list()
+    elif task == 'game2':
+        covariates['acc'] = data['game2_test_acc'].to_list()
+    else:
+        raise Exception("Task type is wrong.")
     covar_dir = 'acc'
     level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
 
@@ -115,6 +120,21 @@ def level2nd_covar_age(subject_list,task,glm_type,contrast_1st):
     covar_dir = 'age'
     level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
 
+
+def level2nd_covar_age_acc(subject_list,task,glm_type,contrast_1st):
+    condition_names = ['mean', 'age','acc']
+    cont01 = ['Group', 'T', condition_names, [1, 0, 0]]
+    cont02 = ['age',   'T', condition_names, [0, 1, 0]]
+    cont03 = ['acc',   'T', condition_names, [0, 0, 1]]
+    contrast_2nd = [cont01, cont02,cont03]
+
+    # covariates
+    covariates = {}
+    covariates['age'] = data['Age'].to_list()
+    covariates['acc'] = data['game1_acc'].to_list()
+    covar_dir = 'age_acc'
+    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
+
 if __name__ == "__main__":
 
     # subject
@@ -125,9 +145,9 @@ if __name__ == "__main__":
     subject_list = [p.split('_')[-1] for p in pid]
     
     task = 'game1'  # look out
-    glm_type = 'whole_hexagon'
+    glm_type = 'separate_hexagon'
 
-    contrast_1st = ['ZF_0004']
+    contrast_1st = ['ZF_0005','ZF_0006','ZF_0011']
 
     level2nd_covar_age(subject_list,task,glm_type,contrast_1st)
     level2nd_covar_acc(subject_list,task,glm_type,contrast_1st)

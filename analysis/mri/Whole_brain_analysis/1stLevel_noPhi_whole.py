@@ -35,7 +35,7 @@ def run_info(ev_file,motions_file=None):
     pmod_polys = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2','decision','hex_corr','hex_error','pressButton']
+    trial_con = ['M1','infer_corr','infer_error']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -46,9 +46,8 @@ def run_info(ev_file,motions_file=None):
             pmod_names.append(condition)
             pmod_params.append(group[1].modulation.tolist())
             pmod_polys.append(1)
-    print(conditions)
-    motions_df = pd.read_csv(motions_file,sep='\t')
 
+    motions_df = pd.read_csv(motions_file,sep='\t')
     motion_columns   = ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
                         'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
                         'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
@@ -61,8 +60,8 @@ def run_info(ev_file,motions_file=None):
     motions = motions.fillna(0.0).values.T.tolist()
 
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,None,None,run_pmod,None,None],
-                     orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None],
+                     orth=['No','No','No'],regressor_names=motion_columns,regressors=motions)
 
     return run_info
 
@@ -112,16 +111,15 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     # Specify GLM contrasts
     # Condition names
-    condition_names = ['M2','decision','hex_corrxcos^1','hex_corrxsin^1']
+    condition_names = ['M1','infer_corrxcos^1','infer_corrxsin^1']
 
     # contrasts
-    cont01 = ['hex_corrxcos^1',   'T', condition_names, [0, 0, 1, 0]]
-    cont02 = ['hex_corrxsin^1',   'T', condition_names, [0, 0, 0, 1]]
-    cont03 = ['decision',         'T', condition_names, [0, 1, 0, 0]]
-    cont05 = ['M2',               'T', condition_names, [1, 0, 0, 0]]
+    cont01 = ['infer_corrxcos^1',   'T', condition_names, [0, 1, 0]]
+    cont02 = ['infer_corrxsin^1',   'T', condition_names, [0, 0, 1]]
+    cont03 = ['M1',                 'T', condition_names, [1, 0, 0]]
 
-    cont04 = ['hexagon',      'F', [cont01, cont02]]
-    contrast_list = [cont01, cont02, cont03, cont04, cont05]
+    cont04 = ['hexagon',          'F', [cont01, cont02]]
+    contrast_list = [cont01, cont02, cont03, cont04]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])

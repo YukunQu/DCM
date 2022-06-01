@@ -68,7 +68,7 @@ def run_info(ev_file,motions_file=None):
     return run_info
 
 
-def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
+def estiPhi_1stLevel(subject_list,set_id,runs,ifold,configs):
 
     # start cue
     start_time = time.time()
@@ -88,11 +88,11 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     glm_type = configs['glm_type']
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',
-                               'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
+                               'sub-{subj_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'),
                  'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold,
-                                'sub-{subj_id}_task-game1_run-{run_id}_events.tsv'),
+                                'sub-{subj_id}_task-game2_run-{run_id}_events.tsv'),
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',
-                                    'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
+                                    'sub-{subj_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv')
                  }
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
@@ -131,7 +131,7 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     cont07 = ['m2',             'T', condition_names,  [0,0,0,0,1,0,0,0]]
     cont08 = ['decision_corr',  'T', condition_names,  [0,0,0,0,0,0,1,0]]
 
-    cont09 =  ['cos', 'T',condition_names,  [0.5,0,0.5,0,0,0,0,0]]
+    cont09  = ['cos', 'T',condition_names,  [0.5,0,0.5,0,0,0,0,0]]
     cont010 = ['sin', 'T',condition_names,  [0,0.5,0,0.5,0,0,0,0]]
     cont011 = ['hexagon', 'F', [cont09, cont010]]
 
@@ -216,17 +216,17 @@ if __name__ == "__main__":
     # specify subjects # not change currently
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri==1')
+    data = participants_data.query('game2_fmri==1')
     pid = data['Participant_ID'].to_list()
     subject_list = [p.split('_')[-1] for p in pid]
 
     # input files
     configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'task':'game1',
+               'task':'game2',
                'glm_type': 'separate_hexagon'}
 
     set_id = 'all'
-    runs = [1,2,3,4,5,6]
+    runs = [1,2]
     ifold = '6fold'
-    estiFai_1stLevel(subject_list, set_id, runs, ifold, configs)
+    estiPhi_1stLevel(subject_list, set_id, runs, ifold, configs)

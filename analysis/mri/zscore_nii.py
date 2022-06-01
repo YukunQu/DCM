@@ -29,7 +29,7 @@ def zscore_nii(source_dir,file,prefix):
 
 #%%
 # zscore the 1st F-test result
-testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/whole_hexagon/Setall'
+testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall'
 
 for ifold in range(6,7):
     ifold = f'{ifold}fold'
@@ -37,12 +37,12 @@ for ifold in range(6,7):
     sub_list = os.listdir(data_dir)
     for sub in sub_list:
         data_sub_dir = os.path.join(data_dir,sub)
-        zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
-        #zscore_nii(data_sub_dir, 'spmF_0005.nii', 'Z')
-        #zscore_nii(data_sub_dir, 'spmF_0006.nii', 'Z')
-        #zscore_nii(data_sub_dir, 'spmT_0007.nii', 'Z')
-        #zscore_nii(data_sub_dir, 'spmT_0008.nii', 'Z')
-        #zscore_nii(data_sub_dir, 'spmF_0011.nii', 'Z')
+        #zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmF_0005.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmF_0006.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmT_0007.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmT_0008.nii', 'Z')
+        zscore_nii(data_sub_dir, 'spmF_0011.nii', 'Z')
         print(sub,'was zscored.')
 
 #%%

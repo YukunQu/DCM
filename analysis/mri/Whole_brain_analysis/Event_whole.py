@@ -139,36 +139,36 @@ class Game1EV(object):
         accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
         return trial_corr, accuracy
 
-    def hexmodev(self, trial_corr):
+    def inferev(self, trial_corr):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
             duration = self.behData['cue1_2.started'] - self.behData['pic2_render.started']
             angle = self.behData['angles']
-            hexmodev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            hexmodev['trial_type'] = 'hexmod'
-            hexmodev['modulation'] = 1
+            inferev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            inferev['trial_type'] = 'inference'
+            inferev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['pic2_render.started_raw'] - self.starttime
             duration = self.behData['cue1_2.started_raw'] - self.behData['pic2_render.started_raw']
             angle = self.behData['angles']
-            hexmodev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            hexmodev['trial_type'] = 'hexmod'
-            hexmodev['modulation'] = 1
+            inferev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            inferev['trial_type'] = 'inference'
+            inferev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
 
-        hexev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        hexev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        infer_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        infer_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
         for i, trial_label in enumerate(trial_corr):
             if trial_label == True:
-                hexev_corr = hexev_corr.append(hexmodev.iloc[i])
+                infer_corr = infer_corr.append(inferev.iloc[i])
             elif trial_label == False:
-                hexev_error = hexev_error.append(hexmodev.iloc[i])
+                infer_error = infer_error.append(inferev.iloc[i])
             else:
                 raise ValueError("The trial label should be True or False.")
-        hexev_corr['trial_type'] = 'hex_corr'
-        hexev_error['trial_type'] = 'hex_error'
-        return hexev_corr, hexev_error
+        infer_corr['trial_type'] = 'infer_corr'
+        infer_error['trial_type'] = 'infer_error'
+        return infer_corr, infer_error
 
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
@@ -189,10 +189,10 @@ class Game1EV(object):
             raise Exception("You need specify behavioral data format.")
         return pbev
 
-    def hexpm(self, hexev_corr, ifold):
-        angle = hexev_corr['angle']
-        pmod_sin = hexev_corr.copy()
-        pmod_cos = hexev_corr.copy()
+    def hexagon_pm(self, infer_corr, ifold):
+        angle = infer_corr['angle']
+        pmod_sin = infer_corr.copy()
+        pmod_cos = infer_corr.copy()
         pmod_sin['trial_type'] = 'sin'
         pmod_cos['trial_type'] = 'cos'
         pmod_sin['modulation'] = np.sin(np.deg2rad(ifold * angle))
@@ -202,15 +202,14 @@ class Game1EV(object):
     def game1ev(self, ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
-        m2ev = self.genM2ev()
-        deev = self.genDeev()
-        pbev = self.pressButton()
+        #m2ev = self.genM2ev()
+        #deev = self.genDeev()
+        #pbev = self.pressButton()
         trial_corr, accuracy = self.label_trial_corr()
-        hexev_corr, hexev_error = self.hexmodev(trial_corr)
-        pmod_sin, pmod_cos = self.hexpm(hexev_corr, ifold)
+        infer_corr, infer_error = self.inferev(trial_corr)
+        pmod_sin, pmod_cos = self.hexagon_pm(infer_corr, ifold)
 
-        event_data = pd.concat([m1ev, m2ev, deev,
-                                hexev_corr, hexev_error,pbev,
+        event_data = pd.concat([m1ev,infer_corr, infer_error,
                                 pmod_sin, pmod_cos], axis=0)
         return event_data
 
@@ -223,7 +222,7 @@ def gen_sub_event(task, subjects):
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
-        template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
+        template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1-test/sub-{}_task-{}_run-{}.csv',
                     'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/whole_hexagon/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
@@ -264,5 +263,4 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
-
     gen_sub_event(task,subjects)

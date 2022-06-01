@@ -33,9 +33,9 @@ def run_info(ev_file,motions_file=None):
     conditions = []
     durations  = []
 
-    pmod_names  = []
+    pmod_names = []
     pmod_params = []
-    pmod_polys  = []
+    pmod_polys = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
     trial_con = ['M1','M2_corr','M2_error','decision_corr','decision_error','pressButton']
@@ -67,20 +67,19 @@ def run_info(ev_file,motions_file=None):
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
     run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None,run_pmod,None,None],
                      orth=['No','No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
-
     return run_info
 
 
-def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
-    
+def estiPhi_1stLevel(subject_list,set_id,runs,ifold,configs):
+
     # start cue
     start_time = time.time()
     print("Training set",set_id," ",ifold," start!")
-    
+
     # set parameters and specify which SPM to use
     tr = 3.
     spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
-    
+
     # Specify input & output stream
     infosource = Node(IdentityInterface(fields=['subj_id']),name="infosource")
     infosource.iterables = [('subj_id', subject_list)]
@@ -97,7 +96,7 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',
                                     'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
                  }
-    
+
     # SelectFiles - to grab the data (alternativ to DataGrabber)
     selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                        name='selectfiles')
@@ -110,13 +109,14 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     datasink = Node(DataSink(base_directory=datasink_dir,
                              container=container_path),
                     name="datasink")
-    
+
     # Use the following DataSink output substitutions
     substitutions = [('_subj_id_', 'sub-')]
     datasink.inputs.substitutions = substitutions
-    
+
     # Specify GLM contrasts
     # Condition names
+
     condition_names = ['M2_corrxcos^1','M2_corrxsin^1','decision_corrxcos^1','decision_corrxsin^1',
                        'M2_corr','M2_error','decision_corr','decision_error']
 
@@ -130,36 +130,36 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
     cont05 = ['m2_hexagon',       'F', [cont01, cont02]]
     cont06 = ['decision_hexagon', 'F', [cont03, cont04]]
 
-    cont07 = ['m2',             'T', condition_names,  [0,0,0,0,1,1,0,0]]
+    cont07 = ['m2',             'T', condition_names,  [0,0,0,0,1,0,0,0]]
     cont08 = ['decision_corr',  'T', condition_names,  [0,0,0,0,0,0,1,0]]
 
-    cont09 =  ['cos', 'T',condition_names,  [1,0,1,0,0,0,0,0]]
-    cont010 = ['sin', 'T',condition_names,  [0,1,0,1,0,0,0,0]]
+    cont09  = ['cos', 'T',condition_names,  [0.5,0,0.5,0,0,0,0,0]]
+    cont010 = ['sin', 'T',condition_names,  [0,0.5,0,0.5,0,0,0,0]]
     cont011 = ['hexagon', 'F', [cont09, cont010]]
 
     contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08,cont09,cont010,cont011]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
-    
+
     smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
-    
+
     # prepare event file
     runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
                                  output_names=['run_info'],
                                  function=run_info),
                         name='runsinfo',
                         iterfield = ['ev_file','motions_file'])
-    
+
     # SpecifyModel - Generates SPM-specific Model
     modelspec = Node(SpecifySPMModel(concatenate_runs=False,
-                                    input_units='secs',
-                                    output_units='secs',
-                                    time_repetition=tr,
-                                    high_pass_filter_cutoff=128.,
-                                    ),
-                    name='modelspec')
-    
+                                     input_units='secs',
+                                     output_units='secs',
+                                     time_repetition=tr,
+                                     high_pass_filter_cutoff=128.,
+                                     ),
+                     name='modelspec')
+
     # Level1Design - Generates an SPM design matrix
     level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
                                      timing_units='secs',
@@ -167,50 +167,48 @@ def estiFai_1stLevel(subject_list,set_id,runs,ifold,configs):
                                      model_serial_correlations='AR(1)',
                                      microtime_resolution=49,
                                      microtime_onset=25,
-                                     flags = {'mthresh':float('-inf')}),
+                                     flags={'mthresh':float('-inf')}),
                         name="level1design")
-    
+
     # EstimateModel - estimate the parameters of the model
     level1estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
                           name="level1estimate")
-    
+
     # EstimateContrast - estimates contrasts
     level1conest = Node(EstimateContrast(contrasts=contrast_list),
                         name="level1conest")
-    
+
     # Specify Workflow
     # Initiation of the 1st-level analysis workflow
     analysis1st = Workflow(name='work_1st', base_dir=working_dir)
-    
+
     # Connect up the 1st-level analysis components
     analysis1st.connect([(infosource, selectfiles,  [('subj_id','subj_id')]),
                          (selectfiles, runs_prep,   [('event','ev_file'),
-                                                     ('regressors','motions_file')
-                                                    ]),
+                                                     ('regressors','motions_file')]),
                          (runs_prep, modelspec,     [('run_info','subject_info')]),
+
                          (selectfiles, gunzip_func, [('func','in_file')]),
                          (gunzip_func, smooth,      [('out_file','in_files')]),
                          (smooth, modelspec,        [('smoothed_files','functional_runs')]),
-                         
+
                          (modelspec,level1design,[('session_info','session_info')]),
                          (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
-                         
+
                          (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
                                                          ('beta_images','beta_images'),
                                                          ('residual_image','residual_image')
-                                                        ]),
+                                                         ]),
                          (level1conest, datasink, [('spm_mat_file','{}.@spm_mat'.format(ifold)),
                                                    ('spmT_images', '{}.@T'.format(ifold)),
                                                    ('con_images',  '{}.@con'.format(ifold)),
                                                    ('spmF_images', '{}.@F'.format(ifold)),
-                                                  ])
-                        ])
+                                                   ])
+                         ])
 
-    # Create 1st-level analysis output graph
-    #  analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
     analysis1st.run('MultiProc', plugin_args={'n_procs': 30})
-    
+
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
     print(f"Run time cost {run_time}")
@@ -226,10 +224,10 @@ if __name__ == "__main__":
     subject_list = [p.split('_')[-1] for p in pid]
     
     # input files
-    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
+    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'task':'game1',
-               'glm_type': 'M2_Decision'}
+               'glm_type': 'separate_hexagon'}
     
     # split k training set
     training_sets = {1: [1, 2, 3],
@@ -237,4 +235,4 @@ if __name__ == "__main__":
     for set_id,runs in training_sets.items():
         for i in range(4, 9):
             ifold = str(i) + 'fold'
-            estiFai_1stLevel(subject_list, set_id, runs, ifold, configs)
+            estiPhi_1stLevel(subject_list, set_id, runs, ifold, configs)
