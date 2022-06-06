@@ -213,23 +213,23 @@ class AlignPhi(object):
 
 if __name__ == "__main__":
     task = 'game1'
-    glm_type = 'M2_Decision'
+    glm_type = 'separate_hexagon'
     # define roi
-    roi_type = 'group'
+    roi_type = 'park'
     phi_type = 'ec_phi'  # look out ec_phi or vmpfc_phi
 
-    if roi_type == 'individual':
+    if roi_type == 'func':
         if phi_type == 'ec_phi':
-            save_containter = 'game1/alignPhi/EC_individual'
+            save_containter = 'game1/alignPhi/EC_func'
         elif phi_type == 'vmpfc_phi':
-            save_containter = 'game1/alignPhi/vmpfc_individual'
+            save_containter = 'game1/alignPhi/vmpfc_func'
         else:
             raise Exception("phi type is wrong.")
-    elif roi_type == 'group':
+    elif roi_type == 'park':
         if phi_type == 'ec_phi':
-            save_containter = 'game1/alignPhi/EC_group'
+            save_containter = 'game1/alignPhi/EC_park'
         elif phi_type == 'vmpfc_phi':
-            save_containter = 'game1/alignPhi/vmpfc_group'
+            save_containter = 'game1/alignPhi/EC_vmpfc'
         else:
             raise Exception("phi type is wrong.")
     else:
@@ -256,7 +256,7 @@ if __name__ == "__main__":
 
     for test_id, test_runs in test_configs.items():
         phi_data = pd.read_csv(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{}/{}/Phi'
-                               r'/Set{}_estPhi_{}-{}_ROI.csv'.format(task,glm_type,test_id,task,roi_type)) # look out ROI
+                               r'/estPhi_{}_Set{}_{}_ROI.csv'.format(task,glm_type,task,test_id,roi_type)) # look out ROI
         for subj in subjects:
             print('----sub-{}----'.format(subj))
 

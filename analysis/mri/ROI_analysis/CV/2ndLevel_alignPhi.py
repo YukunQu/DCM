@@ -21,7 +21,7 @@ from nipype.interfaces.io import SelectFiles, DataSink
 from nipype.interfaces.utility import IdentityInterface
 
 
-def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
+def alignPhi_2ndLevel(subject_list, contrast_list, set_id, configs):
     # Specify which SPM to use
     from nipype.interfaces import spm
     spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
@@ -91,7 +91,7 @@ def alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs):
                                                          '2ndLevel.@con')])
                          ])
     # run 2nd analysis
-    analysis2nd.run('MultiProc', plugin_args={'n_procs': 2})
+    analysis2nd.run('MultiProc', plugin_args={'n_procs': 10})
 
 #%%
 if __name__ == "__main__":
@@ -99,7 +99,7 @@ if __name__ == "__main__":
     configs = {'data_root': '/mnt/workdir/DCM/BIDS/derivatives/Nipype',
                'task':'game1',
                'glm_type':'alignPhi',
-               'ROI':'EC_group',
+               'ROI':'EC_func',
                'sub_type':'hp'}
 
     # Specify the subjects
@@ -110,14 +110,13 @@ if __name__ == "__main__":
     adult_data = data.query('Age>18')
     adolescent_data = data.query('12<Age<=18')
     children_data = data.query('Age<=12')
-    hp_data = data.query('game1_acc>=0.75')
+    hp_data = data.query('game1_acc>=0.80')
 
     # Specify the contrast list
-    contrast_list = ['ZT_0001']
+    contrast_list = ['ZT_0001','ZT_0002','ZT_0003']
 
     # split 2 test set
-    test_sets = {1: [4, 5, 6],
-                 2: [1, 2, 3]}
+    test_sets = [1,2]
 
     # ['adult','adolescent','children','hp']
     for sub_type in ['hp']:
@@ -136,5 +135,5 @@ if __name__ == "__main__":
 
         configs['sub_type'] = sub_type
 
-        for set_id, runs in test_sets.items():
+        for set_id in test_sets:
             alignPhi_2ndLevel(subject_list,contrast_list,set_id,configs)

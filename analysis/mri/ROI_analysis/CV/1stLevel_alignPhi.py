@@ -195,7 +195,7 @@ def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
     # Create 1st-level analysis output graph
     #    analysis1st.write_graph(graph2use='colored', format='png', simple_form=True)
     # run the 1st analysis
-    analysis1st.run('MultiProc', plugin_args={'n_procs': 35})
+    analysis1st.run('MultiProc', plugin_args={'n_procs': 30})
 
 
 if __name__ == "__main__":
@@ -209,18 +209,18 @@ if __name__ == "__main__":
     subject_list = [p.split('_')[-1] for p in pid]
 
     # input files
-    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume',
+    configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'task':'game1',
                'glm_type': 'alignPhi',
-               'ROI':'EC_group'}
+               'ROI':'EC_park'}# 'EC_park'
 
     # split 2 test set
-    test_sets = {1: [4, 5, 6],
+    test_sets = {#1: [4, 5, 6],
                  2: [1, 2, 3]}
     #test_sets = {'all': [1, 2, 3, 4, 5, 6]}
 
-    folds = range(4,9)  # look out
+    folds = range(8,9)  # look out
 
     for set_id, runs in test_sets.items():
         for i in folds:

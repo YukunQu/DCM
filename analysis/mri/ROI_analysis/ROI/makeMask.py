@@ -86,65 +86,20 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None
 
 
 #%%
-# define individual ROI
-stats_map_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/specificTo6/training_set/trainsetall/6fold'
+if __name__ == "__main__":
+    # define ROI from F-test group result
+    import os
+    task = 'game1'
+    glm_type = 'separate_hexagon'
+    # EC
+    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/mean_zmap.nii.gz'
+    roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
+    savepath = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/EC/EC_func_roi.nii'
+    makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
 
-participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-participants_data = pd.read_csv(participants_tsv,sep='\t')
-data = participants_data.query('game1_fmri==1')
-pid = data['Participant_ID'].to_list()
-subjects = [p.replace('_','-') for p in pid]
+    # vmpfc
+    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/mean_zmap.nii.gz'
+    roi = r'/mnt/data/Template/VMPFC_roi.nii'
+    savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/vmpfc/vmPFC_func_roi.nii'
+    makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
 
-ec_roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
-vmpfc_roi = r'/mnt/workdir/DCM/docs/Reference/Park_Grid_Coding/osfstorage-archive/data/Analysis_ROI_nii/mPFC_roi.nii'
-
-ec_peak_activity = []
-vmpfc_peak_activity = []
-savedir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/hexagon/defROI'
-for sub in subjects:
-    stats_map = opj(stats_map_dir,sub,'ZF_0004.nii')
-    ec_savedir = opj(savedir,'EC')
-    if not os.path.exists(ec_savedir):
-        os.mkdir(ec_savedir)
-    vmpfc_savedir = opj(savedir,'vmpfc')
-    if not os.path.exists(vmpfc_savedir):
-        os.mkdir(vmpfc_savedir)
-    ec_savepath = opj(ec_savedir,f'{sub}_EC_func_roi.nii')
-    vmpfc_savepath = opj(vmpfc_savedir,f'{sub}_vmpfc_func_roi.nii')
-    makeSphereMask(stats_map, ec_roi, ec_savepath, radius=(5/3,5/3,5/3))
-    makeSphereMask(stats_map, vmpfc_roi, vmpfc_savepath, radius=(5/3,5/3,5/3))  # coords=(45,89,35)
-
-#%%
-# define ROI from F-test group result
-task = 'game1'
-glm_type = 'M2_Decision'
-# EC
-stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/Setall/' \
-            f'group/hp/2ndLevel/_contrast_id_ZF_0011/spmT_0001.nii'
-roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
-savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/EC/group_EC_func_roi.nii'
-makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
-
-# vmpfc
-stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/{glm_type}/Setall/' \
-            f'group/hp/2ndLevel/_contrast_id_ZF_0011/spmT_0001.nii'
-roi = r'/mnt/data/Template/VMPFC_roi.nii'
-savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/vmpfc/group_vmPFC_func_roi.nii'
-makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
-
-#%%
-task = 'game1'
-glm_type = 'M2_Decision'
-# EC
-stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/Setall/' \
-            f'group/hp/2ndLevel/_contrast_id_ZF_0011/spmT_0001.nii'
-roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
-savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/EC/check_EC_func_roi.nii'
-makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3),coords=(33,62,21))
-#%%
-from nilearn.plotting import view_img
-
-stat_map = load_img( f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/defROI/EC/check_EC_func_roi.nii')
-
-bg_img = load_img(r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-01_desc-brain_T1w.nii.gz')
-vimg = view_img(stat_map_img=stat_map,bg_img=bg_img,threshold=0,vmax=5,symmetric_cbar=1)

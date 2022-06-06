@@ -28,35 +28,39 @@ def zscore_nii(source_dir,file,prefix):
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
 
 #%%
-# zscore the 1st F-test result
-testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall'
 
-for ifold in range(6,7):
-    ifold = f'{ifold}fold'
-    data_dir = os.path.join(testset_dir,ifold)
-    sub_list = os.listdir(data_dir)
-    for sub in sub_list:
-        data_sub_dir = os.path.join(data_dir,sub)
-        #zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
-        zscore_nii(data_sub_dir, 'spmF_0005.nii', 'Z')
-        zscore_nii(data_sub_dir, 'spmF_0006.nii', 'Z')
-        zscore_nii(data_sub_dir, 'spmT_0007.nii', 'Z')
-        zscore_nii(data_sub_dir, 'spmT_0008.nii', 'Z')
-        zscore_nii(data_sub_dir, 'spmF_0011.nii', 'Z')
-        print(sub,'was zscored.')
+if __name__=="__main__":
+    # zscore the 1st F-test result
+    testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Set1'
 
-#%%
-# zscore cross validation result
-testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/alignPhi/EC_group/Set{}'
-
-for set_id in [1,2]:
     for ifold in range(6,7):
         ifold = f'{ifold}fold'
-        data_dir = os.path.join(testset_dir.format(set_id),ifold)
+        data_dir = os.path.join(testset_dir,ifold)
         sub_list = os.listdir(data_dir)
         for sub in sub_list:
             data_sub_dir = os.path.join(data_dir,sub)
-            zscore_nii(data_sub_dir, 'spmT_0001.nii', 'Z')
-            zscore_nii(data_sub_dir, 'spmT_0002.nii', 'Z')
-            zscore_nii(data_sub_dir, 'spmT_0003.nii', 'Z')
+            #zscore_nii(data_sub_dir, 'spmF_0004.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmF_0005.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmF_0006.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmT_0007.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmT_0008.nii', 'Z')
+            zscore_nii(data_sub_dir, 'spmF_0011.nii', 'Z')
             print(sub,'was zscored.')
+
+#%%
+    # zscore cross validation result
+
+    testset_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/alignPhi/EC_park/Set{}'
+
+    for set_id in [1,2]:
+        for ifold in range(4,9):
+            ifold = f'{ifold}fold'
+            data_dir = os.path.join(testset_dir.format(set_id),ifold)
+            sub_list = os.listdir(data_dir)
+            for sub in sub_list:
+                data_sub_dir = os.path.join(data_dir,sub)
+                zscore_nii(data_sub_dir, 'spmT_0001.nii', 'Z')
+                zscore_nii(data_sub_dir, 'spmT_0002.nii', 'Z')
+                zscore_nii(data_sub_dir, 'spmT_0003.nii', 'Z')
+                print(sub,'was zscored.')
+
