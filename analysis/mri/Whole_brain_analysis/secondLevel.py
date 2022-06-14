@@ -62,7 +62,7 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
     cont01 = ['Group', 'T', ['mean'], [1]]
     level2conestimate.inputs.contrasts = [cont01]
 
-    level2thresh = Node(Threshold(contrast_index=1),
+    level2thresh = Node(Threshold(contrast_index=1,extent_fdr_p_threshold=0.05),
                         name="level2thresh")
 
     # 2nd workflow
@@ -90,7 +90,7 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
                                                          '2ndLevel.@T'),
                                                         ('con_images',
                                                          '2ndLevel.@con')]),
-                          (level2thresh, datasink,  [('thresholded_map',
+                          (level2thresh, datasink,   [('thresholded_map',
                                                      '2ndLevel.@threshold')])
                          ])
     # run 2nd analysis

@@ -1,0 +1,1542 @@
+nohup: ignoring input
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (96 seconds remaining)
+Computing run 3 out of 6 runs (69 seconds remaining)
+Computing run 4 out of 6 runs (49 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 94 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (96 seconds remaining)
+Computing run 3 out of 6 runs (74 seconds remaining)
+Computing run 4 out of 6 runs (52 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 98 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (86 seconds remaining)
+Computing run 3 out of 6 runs (72 seconds remaining)
+Computing run 4 out of 6 runs (54 seconds remaining)
+Computing run 5 out of 6 runs (35 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 108 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (94 seconds remaining)
+Computing run 3 out of 6 runs (70 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (34 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 104 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (85 seconds remaining)
+Computing run 3 out of 6 runs (67 seconds remaining)
+Computing run 4 out of 6 runs (49 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 101 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (86 seconds remaining)
+Computing run 3 out of 6 runs (70 seconds remaining)
+Computing run 4 out of 6 runs (52 seconds remaining)
+Computing run 5 out of 6 runs (35 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 103 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (93 seconds remaining)
+Computing run 3 out of 6 runs (70 seconds remaining)
+Computing run 4 out of 6 runs (52 seconds remaining)
+Computing run 5 out of 6 runs (34 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 103 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (79 seconds remaining)
+Computing run 3 out of 6 runs (62 seconds remaining)
+Computing run 4 out of 6 runs (47 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 94 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (86 seconds remaining)
+Computing run 3 out of 6 runs (68 seconds remaining)
+Computing run 4 out of 6 runs (50 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 96 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (77 seconds remaining)
+Computing run 3 out of 6 runs (60 seconds remaining)
+Computing run 4 out of 6 runs (45 seconds remaining)
+Computing run 5 out of 6 runs (30 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (82 seconds remaining)
+Computing run 3 out of 6 runs (63 seconds remaining)
+Computing run 4 out of 6 runs (46 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (82 seconds remaining)
+Computing run 3 out of 6 runs (64 seconds remaining)
+Computing run 4 out of 6 runs (47 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (82 seconds remaining)
+Computing run 3 out of 6 runs (68 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (34 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 102 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (83 seconds remaining)
+Computing run 3 out of 6 runs (65 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 95 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (84 seconds remaining)
+Computing run 3 out of 6 runs (70 seconds remaining)
+Computing run 4 out of 6 runs (53 seconds remaining)
+Computing run 5 out of 6 runs (36 seconds remaining)
+Computing run 6 out of 6 runs (18 seconds remaining)
+
+Computation of 6 runs done in 110 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (88 seconds remaining)
+Computing run 3 out of 6 runs (69 seconds remaining)
+Computing run 4 out of 6 runs (52 seconds remaining)
+Computing run 5 out of 6 runs (35 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 106 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (84 seconds remaining)
+Computing run 3 out of 6 runs (67 seconds remaining)
+Computing run 4 out of 6 runs (49 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 95 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (88 seconds remaining)
+Computing run 3 out of 6 runs (66 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 93 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (93 seconds remaining)
+Computing run 3 out of 6 runs (67 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 93 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (78 seconds remaining)
+Computing run 3 out of 6 runs (61 seconds remaining)
+Computing run 4 out of 6 runs (45 seconds remaining)
+Computing run 5 out of 6 runs (30 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (81 seconds remaining)
+Computing run 3 out of 6 runs (64 seconds remaining)
+Computing run 4 out of 6 runs (47 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 91 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (76 seconds remaining)
+Computing run 3 out of 6 runs (60 seconds remaining)
+Computing run 4 out of 6 runs (45 seconds remaining)
+Computing run 5 out of 6 runs (30 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 90 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (90 seconds remaining)
+Computing run 3 out of 6 runs (69 seconds remaining)
+Computing run 4 out of 6 runs (50 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 96 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (77 seconds remaining)
+Computing run 3 out of 6 runs (63 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 96 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (84 seconds remaining)
+Computing run 3 out of 6 runs (69 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 101 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (85 seconds remaining)
+Computing run 3 out of 6 runs (67 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (34 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 99 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (84 seconds remaining)
+Computing run 3 out of 6 runs (65 seconds remaining)
+Computing run 4 out of 6 runs (49 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 97 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (78 seconds remaining)
+Computing run 3 out of 6 runs (62 seconds remaining)
+Computing run 4 out of 6 runs (46 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (86 seconds remaining)
+Computing run 3 out of 6 runs (65 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (90 seconds remaining)
+Computing run 3 out of 6 runs (66 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 94 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (87 seconds remaining)
+Computing run 3 out of 6 runs (66 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 94 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (89 seconds remaining)
+Computing run 3 out of 6 runs (67 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 95 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (82 seconds remaining)
+Computing run 3 out of 6 runs (64 seconds remaining)
+Computing run 4 out of 6 runs (47 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 96 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (101 seconds remaining)
+Computing run 3 out of 6 runs (75 seconds remaining)
+Computing run 4 out of 6 runs (54 seconds remaining)
+Computing run 5 out of 6 runs (36 seconds remaining)
+Computing run 6 out of 6 runs (18 seconds remaining)
+
+Computation of 6 runs done in 109 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (86 seconds remaining)
+Computing run 3 out of 6 runs (69 seconds remaining)
+Computing run 4 out of 6 runs (50 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 98 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (84 seconds remaining)
+Computing run 3 out of 6 runs (72 seconds remaining)
+Computing run 4 out of 6 runs (55 seconds remaining)
+Computing run 5 out of 6 runs (36 seconds remaining)
+Computing run 6 out of 6 runs (18 seconds remaining)
+
+Computation of 6 runs done in 108 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (87 seconds remaining)
+Computing run 3 out of 6 runs (66 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 97 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (88 seconds remaining)
+Computing run 3 out of 6 runs (67 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (34 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 103 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (78 seconds remaining)
+Computing run 3 out of 6 runs (64 seconds remaining)
+Computing run 4 out of 6 runs (47 seconds remaining)
+Computing run 5 out of 6 runs (31 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (86 seconds remaining)
+Computing run 3 out of 6 runs (68 seconds remaining)
+Computing run 4 out of 6 runs (50 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 100 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (92 seconds remaining)
+Computing run 3 out of 6 runs (69 seconds remaining)
+Computing run 4 out of 6 runs (50 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 96 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (96 seconds remaining)
+Computing run 3 out of 6 runs (71 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 99 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (84 seconds remaining)
+Computing run 3 out of 6 runs (63 seconds remaining)
+Computing run 4 out of 6 runs (48 seconds remaining)
+Computing run 5 out of 6 runs (32 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 97 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (93 seconds remaining)
+Computing run 3 out of 6 runs (70 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (34 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 100 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (89 seconds remaining)
+Computing run 3 out of 6 runs (68 seconds remaining)
+Computing run 4 out of 6 runs (51 seconds remaining)
+Computing run 5 out of 6 runs (33 seconds remaining)
+Computing run 6 out of 6 runs (16 seconds remaining)
+
+Computation of 6 runs done in 98 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (78 seconds remaining)
+Computing run 3 out of 6 runs (62 seconds remaining)
+Computing run 4 out of 6 runs (46 seconds remaining)
+Computing run 5 out of 6 runs (30 seconds remaining)
+Computing run 6 out of 6 runs (15 seconds remaining)
+
+Computation of 6 runs done in 92 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+  Contrast  2 out of 11: m2_sin
+  Contrast  3 out of 11: decision_cos
+  Contrast  4 out of 11: decision_sin
+  Contrast  5 out of 11: m2
+  Contrast  6 out of 11: decision
+  Contrast  7 out of 11: cos
+  Contrast  8 out of 11: sin
+  Contrast  9 out of 11: m2_hexagon
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py:352: UserWarning: Running approximate fixed effects on F statistics.
+  warn('Running approximate fixed effects on F statistics.')
+  Contrast  10 out of 11: decision_hexagon
+  Contrast  11 out of 11: hexagon
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+A 'modulation' column was found in the given events data and is used.
+Computing run 1 out of 6 runs (go take a coffee, a big one)
+Computing run 2 out of 6 runs (102 seconds remaining)
+Computing run 3 out of 6 runs (75 seconds remaining)
+Computing run 4 out of 6 runs (54 seconds remaining)
+Computing run 5 out of 6 runs (35 seconds remaining)
+Computing run 6 out of 6 runs (17 seconds remaining)
+
+Computation of 6 runs done in 102 seconds
+
+Computing contrasts...
+  Contrast  1 out of 11: m2_cos
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py:657: UserWarning: One contrast given, assuming it for all 6 runs
+  warn('One contrast given, assuming it for all %d runs' % n_runs)
+Traceback (most recent call last):
+  File "game1_separate_nilearn.py", line 176, in <module>
+    first_level_glm(datasink,functional_imgs,design_matrices)
+  File "game1_separate_nilearn.py", line 140, in first_level_glm
+    stats_map = fmri_glm.compute_contrast(contrast_val, output_type='all')
+  File "/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/first_level/first_level.py", line 678, in compute_contrast
+    contrast = _compute_fixed_effect_contrast(self.labels_, self.results_,
+  File "/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py", line 132, in _compute_fixed_effect_contrast
+    contrast_ = compute_contrast(lab, res, con_val, contrast_type)
+  File "/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/contrasts.py", line 96, in compute_contrast
+    resl = regression_result[label_].Tcontrast(con_val)
+  File "/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/model.py", line 205, in Tcontrast
+    raise ValueError("t contrasts should be length P=%d, "
+ValueError: t contrasts should be length P=33, but this is length 35
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
+/home/dell/.local/lib/python3.8/site-packages/nilearn/glm/__init__.py:55: FutureWarning: The nilearn.glm module is experimental. It may change in any future release of Nilearn.
+  warn('The nilearn.glm module is experimental. '
