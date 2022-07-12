@@ -1,0 +1,10 @@
+[workspace]
+restore_data_on_startup = True
+save_data_on_exit = True
+save_history = True
+save_non_project_files = False
+
+[main]
+version = 0.2.0
+recent_files = ['analysis/mri/specificTo6/1stLevel_defROI.py', 'analysis/mri/specificTo6/2ndLevel_defROI.py', 'analysis/mri/specificTo6/makeMask.py', 'analysis/mri/zscore_nii.py', 'analysis/mri/specificTo6/estPhi.py', 'preparation/simulation/grid_like_coding.py', 'analysis/mri/specificTo6/1stLevel_estPhi.py', 'preparation/simulation/utils.py', '../../../../home/dell/Software/anaconda3/lib/python3.8/site-packages/scipy/stats/morestats.py', 'analysis/mri/specificTo6/extract_activity.py']
+

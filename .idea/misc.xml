@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.8 (base)" project-jdk-type="Python SDK" />
+  <component name="UnattendedHostPersistenceState">
+    <option name="openedFilesInfos">
+      <list>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="226" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/analysis/mri/Whole_brain_analysis/game1_1stLevel.py" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="32443" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/analysis/mri/Whole_brain_analysis/firstLevel.py" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="882" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/analysis/mri/zscore_nii.py" />
+        </OpenedFileInfo>
+        <OpenedFileInfo>
+          <option name="caretOffset" value="703" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/analysis/mri/Whole_brain_analysis/game1_rsa_1stLevel.py" />
+        </OpenedFileInfo>
+      </list>
+    </option>
+  </component>
+</project>
