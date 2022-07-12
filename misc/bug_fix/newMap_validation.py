@@ -23,3 +23,4 @@ blockdir = r'D:\File\PhD\Development cognitive map\experiment\task\dcm_day1\map_
 dim = 'ap'
 trainCondition = reconstruct_map(blockdir,dim)
 new_pairs_df = pd.read_excel(r'D:\File\PhD\Development cognitive map\experiment\task\dcm_day1\map_set\5x5\map2_recon/ap_train.xlsx')
+

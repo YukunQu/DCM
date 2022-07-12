@@ -52,10 +52,9 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
                 ddir_path = os.path.join(sub_data_dir, ddir)
                 data_num = len(os.listdir(ddir_path))
                 print('File number of ',ddir,":",data_num)
-        print("    ")
-            
 
 data_dir = '/mnt/data/Sourcedata/DCM'
-sub_list = ['sub_'+str(i).zfill(3) for i in range(75,79)]
-check_subj_data(data_dir, sub_list,['MEG','MRI','meg_task-1DInfer','fmri_task-game1',
-                                   'fmri_task-game2-train','fmri_task-game2-test'])
+sub_list = ['sub_'+str(i).zfill(3) for i in range(82,105)]
+check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
+                                    'pilot','fmri_task-game1','fmri_task-game2-train',
+                                    'fmri_task-game2-test'])

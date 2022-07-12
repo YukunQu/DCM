@@ -66,7 +66,7 @@ if __name__ =="__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
-    subject_list = [p.split('_')[-1] for p in pid]
-    subject_list = [str(i).zfill(3) for i in range(79,83)]
-    rename_game2_behav_data(subject_list)
+    #subject_list = [p.split('_')[-1] for p in pid]
+    subject_list = [str(i).zfill(3) for i in range(89,90)]
+    rename_game1_behav_data(subject_list)
     

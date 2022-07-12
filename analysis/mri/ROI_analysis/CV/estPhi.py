@@ -21,15 +21,13 @@ def estPhi(beta_sin_map, beta_cos_map, mask, ifold='6fold',method='mean'):
     
     beta_sin_roi = apply_mask(beta_sin_map, mask)
     beta_cos_roi = apply_mask(beta_cos_map, mask)
-    
+
     if method == 'mean':
-        beta_sin = np.nanmean(beta_sin_roi)
-        beta_cos = np.nanmean(beta_cos_roi)
-        mean_orientation = np.rad2deg(np.arctan2(beta_sin,beta_cos))/ifold
+        mean_orientation = np.rad2deg(np.mean(np.arctan2(beta_sin_roi,beta_cos_roi))/ifold)
     elif method == 'circmean':
-        mean_orientation = np.rad2deg(circmean(np.arctan(beta_sin_roi/beta_cos_roi))/ifold) # refer park's code
+        mean_orientation = np.rad2deg(circmean(np.arctan2(beta_sin_roi,beta_cos_roi))/ifold)
     else:
-        raise Exception("Please specify the method.")
+        raise Exception(f"The method:{method} is wrong.")
     return mean_orientation
 
 
@@ -46,7 +44,7 @@ folds = [str(i)+'fold' for i in range(6,7)]  # look out
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
-data = participants_data.query('game2_fmri==1')  # look out
+data = participants_data.query(f'{task}_fmri==1')  # look out
 # data = data.query('game1_acc>=0.8')
 pid = data['Participant_ID'].to_list()
 subjects = [p.replace('_','-') for p in pid]
@@ -60,7 +58,7 @@ if not os.path.exists(datasink):
 
 for trainset in training_sets:
     datadir = pjoin(dataroot, trainset)
-    save_path = pjoin(datasink,'estPhi_{}_{}_individual_ROI.csv'.format(task,trainset))  # look out
+    save_path = pjoin(datasink,'estPhi_mean_{}_{}_individual_ROI.csv'.format(task,trainset))  # look out
     subs_phi = pd.DataFrame(columns=['sub_id','ifold','ec_phi','vmpfc_phi'])
 
     print("————————{} start!—————————".format(trainset))
@@ -74,16 +72,16 @@ for trainset in training_sets:
             beta_cos_map = load_img(bcos_path)
 
             # load roi
-            ec_roi = load_img('/mnt/workdir/DCM/BIDS/derivatives/Nipype/{}/defROI/EC/individual'
-                              '/{}_EC_func_roi.nii'.format(task,sub.split('-')[-1]))
-            vmpfc_roi = load_img('/mnt/workdir/DCM/BIDS/derivatives/Nipype/{}/defROI/vmpfc/individual'
-                                 '/{}_vmpfc_func_roi.nii'.format(task,sub.split('-')[-1]))
+            ec_roi = load_img('/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/EC/individual'
+                              '/{}_EC_func_roi.nii'.format(sub.split('-')[-1]))
+            vmpfc_roi = load_img('/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/vmpfc/individual'
+                                 '/{}_vmpfc_func_roi.nii'.format(sub.split('-')[-1]))
 
             #ec_roi = load_img('/mnt/workdir/DCM/docs/Reference/Park_Grid_ROI/EC_Grid_roi.nii')
             #vmpfc_roi = load_img('/mnt/workdir/DCM/docs/Reference/Park_Grid_ROI/mPFC_Grid_roi.nii')
 
-            ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi, ifold,'mean')
-            vmpfc_phi = estPhi(beta_sin_map, beta_cos_map, vmpfc_roi,ifold,'mean')
+            ec_phi = estPhi(beta_sin_map, beta_cos_map, ec_roi, ifold)
+            vmpfc_phi = estPhi(beta_sin_map, beta_cos_map, vmpfc_roi,ifold)
 
             sub_phi = {'sub_id':sub,'ifold':ifold,
                        'ec_phi':ec_phi,'vmpfc_phi':vmpfc_phi}
