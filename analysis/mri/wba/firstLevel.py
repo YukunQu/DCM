@@ -29,6 +29,8 @@ def firstLevel_noPhi(subject_list,set_id,runs,ifold,configs):
         firstLevel_RSA(subject_list,set_id,runs,ifold,configs)
     elif glm_type == 'fir':
         firstLevel_noPhi_fir(subject_list,set_id,runs,ifold,configs)
+    elif glm_type == 'game2_align_game1':
+        pass
     else:
         raise Exception("The glm type is not supported.")
 

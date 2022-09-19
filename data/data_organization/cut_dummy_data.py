@@ -1,6 +1,7 @@
 import pandas as pd
 from nilearn import image
 
+
 def cut_dummy_data(beh_file,fmri_file,show=False):
     #%  load behavioral data
     beh_data = pd.read_csv(beh_file)

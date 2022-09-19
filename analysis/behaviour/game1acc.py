@@ -83,8 +83,9 @@ def game1_acc(subject, trial_check=True):
 
 
 if __name__ == "__main__":
-    subjects = range(83,105)
+    subjects = range(147,191)
     subjects = [(str(s).zfill(3)) for s in subjects]
+    subjects.remove('172')
     subject_acc = {}
     for subject in subjects:
         trial_corr,accuracy = game1_acc(subject, trial_check=True)

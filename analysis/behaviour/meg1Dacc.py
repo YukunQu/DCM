@@ -12,7 +12,8 @@ from analysis.behaviour.utils import meg_1D_acc
 """calculate accuracy of MEG 1D task """
 # subject list
 beh_data_dir = r'/mnt/workdir/DCM/sourcedata'
-subjects = ['sub_'+str(i).zfill(3) for i in range(79,83)]
+subjects = ['sub_'+str(i).zfill(3) for i in range(147,191)]
+subjects.remove("sub_172")
 meg_1d_acc = pd.DataFrame(columns=['Participant_ID', '1D_acc', '1D_ap', '1D_dp'])
 for sub in subjects:  # sub_id-1 ~ sub_id
     meg_data_dir = os.path.join(beh_data_dir,sub,'Behaviour','meg_task-1DInfer')

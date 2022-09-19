@@ -20,7 +20,9 @@ def sourcedata_structure(sourcedata_dir,sub_id):
     os.mkdir(os.path.join(sub_dir,'NeuroData','MEG'))
     print(sub_id,'is finished.')
 
-for i in range(150,151):
-    sourcedata_dir = '/mnt/data/Sourcedata/DCM'
-    sub_id = 'sub_' + str(i).zfill(3)
-    sourcedata_structure(sourcedata_dir,sub_id)
+
+if __name__ == '__main__':
+    for i in range(168,201):
+        sourcedata_dir = '/mnt/data/Sourcedata/DCM'
+        sub_id = 'sub_' + str(i).zfill(3)
+        sourcedata_structure(sourcedata_dir,sub_id)

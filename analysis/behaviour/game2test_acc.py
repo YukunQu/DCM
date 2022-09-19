@@ -14,10 +14,10 @@ from analysis.behaviour.utils import game2_acc
 """calculate accuracy of game2-test task """
 # subject list
 data_dir = r'/mnt/workdir/DCM/sourcedata'
-subjects = ['sub_'+str(i).zfill(3) for i in range(79,83)]
+subjects = ['sub_'+str(i).zfill(3) for i in range(147,191)]
 game2test_acc = pd.DataFrame(columns=['Participant_ID', 'game2_test_acc'])
 for sub in subjects:  # sub_id-1 ~ sub_id
-    if sub in ['sub_052','sub_054','sub_066']:
+    if sub in ['sub_052','sub_054','sub_066','sub_120','sub_155','sub_172']:
         sub_game2_acc = {'Participant_ID':sub,'game2_test_acc':float('nan')}
         game2test_acc = game2test_acc.append(sub_game2_acc,ignore_index=True)
         print(sub,"have",0,"runs file.")
@@ -43,8 +43,6 @@ for sub in subjects:  # sub_id-1 ~ sub_id
     accuracy = game2_acc(game2_data)
     sub_game2_acc = {'Participant_ID':sub,'game2_test_acc':accuracy}
     game2test_acc = game2test_acc.append(sub_game2_acc,ignore_index=True)
-    print(sub,": calculation is complete!")
-
 #%%
 participants_tsv = r'/mnt/workdir/DCM/tmp/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')

@@ -205,7 +205,6 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('_')[-1] for p in pid]
-    subjects = subjects[-4:]
 
     for subj in subjects:
         print("-------{} start!--------".format(subj))

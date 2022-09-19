@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from analysis.mri.ROI_analysis.ROI.makeMask import makeSphereMask
 
-task = 'game2'
+task = 'game1'
 glm_type = 'separate_hexagon'
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -17,7 +17,7 @@ if not os.path.exists(savedir):
 
 for sub in subject_list:
     stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{task}/{glm_type}/Setall/6fold/sub-{sub}/ZF_0011.nii'
-    roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr25-2mm.nii.gz'
+    roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
     savepath = os.path.join(savedir,'{}_EC_func_roi.nii'.format(sub))
     makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
 

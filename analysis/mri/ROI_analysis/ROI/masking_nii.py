@@ -21,9 +21,8 @@ def masking_nii(source_dir,file,prefix):
     fmap_data[mask_data == 0] = np.float64('NaN')
     map_masked = new_img_like(fmap, fmap_data)
     map_masked.to_filename(os.path.join(source_dir,prefix+file))
-
 #%%
-task = 'game2'
+task = 'game1'
 glm_type = 'separate_hexagon'
 
 for set_id in ['all']:

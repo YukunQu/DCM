@@ -58,7 +58,7 @@ def genSubAcc(trainDataDir,participant_id,sub_exp_id=None):
     pids= len(name_list) * participant_id
     #sub_score = pd.DataFrame({'姓名':name_list,'Participant_ID':pids,'Exp_ID':id_list,'date':time_list,'dim':dim_list,'test_accuracy':acc_list})
     sub_score = pd.DataFrame({'姓名':name_list,'Participant_ID':pids,'Exp_ID':id_list,'date':time_list,'test_accuracy':acc_list})
-    print(sub_score)     
+    print(sub_score)
     return sub_score
     
 

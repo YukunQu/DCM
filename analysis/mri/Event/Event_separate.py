@@ -263,6 +263,7 @@ class Game2EV(object):
             m1ev['modulation'] = 1
         else:
             raise Exception("You need specify behavioral data format.")
+        m1ev = m1ev.sort_values('onset',ignore_index=True)
         return m1ev
 
     def label_trial_corr(self):
