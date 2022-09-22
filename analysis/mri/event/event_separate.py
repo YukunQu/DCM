@@ -423,12 +423,12 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/separate_hexagon/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/separate_hexagon/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")
@@ -440,7 +440,7 @@ def gen_sub_event(task, subjects):
         print('----sub-{}----'.format(subj))
 
         for ifold in ifolds:
-            save_dir = template['save_dir'].format(subj,task,ifold)
+            save_dir = template['save_dir'].format(task,subj,ifold)
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
 
@@ -462,11 +462,10 @@ def gen_sub_event(task, subjects):
 if __name__ == "__main__":
 
     task = 'game1'
-
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
     data = participants_data.query(f'{task}_fmri==1')
     pid = data['Participant_ID'].to_list()
-    subjects = [p.split('_')[-1] for p in pid]
-
-    gen_sub_event(task,subjects)
+    subjects = [p.split('-')[-1] for p in pid]
+    subjects = ['193','194','195']
+    gen_sub_event(task, subjects)

@@ -68,8 +68,7 @@ if __name__ =="__main__":
     #data = participants_data.query('game2_fmri==1')
     #pid = data['Participant_ID'].to_list()
     #subject_list = [p.split('_')[-1] for p in pid]
-    subject_list = [str(i).zfill(3) for i in range(191,193)]
-    subject_list = ['191','192']
-    #rename_game1_behav_data(subject_list)
-    rename_game2_behav_data(subject_list)
+    subject_list = [str(i).zfill(3) for i in range(193,196)]
+    rename_game1_behav_data(subject_list)
+    #rename_game2_behav_data(subject_list)
     

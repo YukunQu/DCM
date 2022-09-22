@@ -16,7 +16,7 @@ def zscore_nii(source_dir,file,prefix):
     mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii')
     #mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz')
     fmap = load_img(filepath)
-    
+
     fmap_mean = apply_mask(fmap, mask).mean()
     fmap_std = apply_mask(fmap, mask).std()
     fmap_zscore = math_img("(img- {})/{}".format(fmap_mean,fmap_std),img=fmap)
@@ -26,6 +26,7 @@ def zscore_nii(source_dir,file,prefix):
     fmap_data[mask_data == 0] = np.float64('NaN')
     map_zscore = new_img_like(fmap_zscore, fmap_data)
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
+
 
 #%%
 

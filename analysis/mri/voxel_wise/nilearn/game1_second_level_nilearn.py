@@ -53,9 +53,8 @@ def second_covariate():
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')  # look out
-    data = data.query("Participant_ID!='sub_079'")
     pid = data['Participant_ID'].to_list()
-    subject_list = [p.split('_')[-1] for p in pid]
+    subject_list = [p.split('-')[-1] for p in pid]
     accuracy = data['game1_acc'].to_list()  # look out
     #age = data['Age'].to_list()
     #covariate = {'Age':age}
@@ -63,7 +62,7 @@ def second_covariate():
     datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/group'
 
     # load contrast data
-    contrast_1st = ['decision_hexagon_tmap']
+    contrast_1st = ['m2_hexagon_tmap','decision_hexagon_tmap','hexagon_tmap']
     for contrast_id in contrast_1st:
         second_level_covariate(subject_list,task,glm_type,contrast_id,covariate,datasink,centring=True)
 

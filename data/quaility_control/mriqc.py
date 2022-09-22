@@ -42,11 +42,12 @@ bids_dir = r'/mnt/workdir/DCM/BIDS'
 out_dir = r'/mnt/workdir/DCM/BIDS/derivatives/mriqc'
 
 starttime = time.time()
+"""
 for subj in sub_list:
     command = mriqc_participant.format(bids_dir,out_dir,subj)
     print("Command:",command)
     subprocess.call(command, shell=True)
-
+"""
 command = mriqc_group.format(bids_dir,out_dir)
 print("Command:",command)
 subprocess.call(command, shell=True)

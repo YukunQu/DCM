@@ -1,20 +1,24 @@
 import os
 import pandas as pd
 from analysis.mri.zscore_nii import zscore_nii
-from analysis.mri.Whole_brain_analysis.firstLevel import firstLevel_noPhi_fir
+from analysis.mri.voxel_wise.firstLevel import firstLevel_noPhi
 
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri==1')
 pid = data['Participant_ID'].to_list()
-subject_list = [p.split('_')[-1] for p in pid]
+
+target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/whole_hexagon/Setall/6fold'
+already_sub = os.listdir(target_dir)
+subject_list = [p.split('-')[-1] for p in pid if p not in already_sub]
+
 
 # input files
 configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task':'game1',
-           'glm_type': 'fir_hexagon',
+           'glm_type': 'whole_hexagon',  # look out
            'func_name':'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
            'regressor_name':'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
@@ -22,9 +26,9 @@ configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica'
 set_id = 'all'
 runs = [1, 2, 3, 4, 5, 6]
 ifold = '6fold'
-firstLevel_noPhi_fir(subject_list, set_id, runs, ifold, configs)
+firstLevel_noPhi(subject_list, set_id, runs, ifold, configs)
 
-# zscore 1st level file
+# zscore 1st level
 cmap_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{configs["task"]}/{configs["glm_type"]}/Set{set_id}'
 data_dir = os.path.join(cmap_dir,ifold)
 sub_list = os.listdir(data_dir)

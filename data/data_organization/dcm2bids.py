@@ -17,7 +17,7 @@ def dcm2bids_helper(subjects):
         print("Command:",command)
         subprocess.call(command,shell=True)
 
-subjects = [167]
+subjects = [194]
 dcm2bids_helper(subjects)
 #%%
 import subprocess

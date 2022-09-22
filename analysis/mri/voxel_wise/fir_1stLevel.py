@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from analysis.mri.zscore_nii import zscore_nii
-from analysis.mri.wba.firstLevel import firstLevel_noPhi
+from analysis.mri.voxel_wise.firstLevel import firstLevel_noPhi_fir
 
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -14,7 +14,7 @@ subject_list = [p.split('_')[-1] for p in pid]
 configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task':'game1',
-           'glm_type': 'separate_hexagon_difficult',  # look out
+           'glm_type': 'fir_hexagon',
            'func_name':'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
            'regressor_name':'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
@@ -22,7 +22,7 @@ configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica'
 set_id = 'all'
 runs = [1, 2, 3, 4, 5, 6]
 ifold = '6fold'
-firstLevel_noPhi(subject_list, set_id, runs, ifold, configs)
+firstLevel_noPhi_fir(subject_list, set_id, runs, ifold, configs)
 
 # zscore 1st level file
 cmap_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{configs["task"]}/{configs["glm_type"]}/Set{set_id}'

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar  9 12:07:25 2022
 
 @author: dell
 """
@@ -22,7 +21,7 @@ from nipype.interfaces.utility import IdentityInterface
 
 # Specify which SPM to use
 from nipype.interfaces import spm
-from analysis.mri.wba.secondLevel import level2nd_noPhi
+from analysis.mri.voxel_wise.secondLevel import level2nd_noPhi
 
 
 if __name__ == "__main__":

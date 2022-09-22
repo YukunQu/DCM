@@ -83,13 +83,12 @@ def game1_acc(subject, trial_check=True):
 
 
 if __name__ == "__main__":
-    subjects = range(147,191)
+    subjects = range(180,181)
     subjects = [(str(s).zfill(3)) for s in subjects]
-    subjects.remove('172')
     subject_acc = {}
     for subject in subjects:
         trial_corr,accuracy = game1_acc(subject, trial_check=True)
-        subject_acc['sub_{}'.format(subject)] = accuracy
+        subject_acc['sub-{}'.format(subject)] = accuracy
 #%%
     participants_tsv = r'/mnt/workdir/DCM/tmp/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')

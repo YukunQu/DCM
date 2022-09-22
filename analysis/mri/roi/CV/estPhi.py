@@ -29,7 +29,7 @@ def estPhi(beta_sin_map, beta_cos_map, mask, ifold='6fold', level='roi'):
         mean_orientation = np.rad2deg(circmean(np.arctan2(beta_sin_roi, beta_cos_roi)) / ifold)
         std_orientation = np.rad2deg(circstd(np.arctan2(beta_sin_roi, beta_cos_roi)/ifold,np.pi/6,-np.pi/6))
         return mean_orientation,std_orientation
-    elif level == 'voxel':
+    elif level == 'voxel_wise':
         mean_orientation = np.rad2deg(np.arctan2(beta_sin_roi, beta_cos_roi) / ifold)
         return mean_orientation
     else:
@@ -77,7 +77,7 @@ def estSubPhi(task,glm_type, sets, subjects, folds, savename, roi='group',level=
                 if isinstance(ec_phi,np.ndarray):
                     for i,(ep,vp) in enumerate(zip(ec_phi, vmpfc_phi)):
                         sub_phi = {'sub_id': sub, 'ifold': ifold,
-                                   'ec_phi': ep, 'vmpfc_phi': vp,'voxel':i+1}
+                                   'ec_phi': ep, 'vmpfc_phi': vp,'voxel_wise':i+1}
                         subs_phi = subs_phi.append(sub_phi, ignore_index=True)
                 else:
                     ec_mean = ec_phi[0]

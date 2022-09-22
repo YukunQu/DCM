@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from analysis.mri.zscore_nii import zscore_nii
-from analysis.mri.wba.firstLevel import firstLevel_noPhi
+from analysis.mri.voxel_wise.firstLevel import firstLevel_noPhi
 
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'

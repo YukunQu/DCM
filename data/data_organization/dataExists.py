@@ -18,6 +18,8 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
             if stand_form:
                 mod_list = os.listdir(sub_data_dir)
                 for mod in mod_list:
+                    if  mod not in ['Behaviour','NeuroData']:
+                        continue
                     data_list = os.listdir(os.path.join(sub_data_dir,mod))
                     for ddir in data_list:
                         if isinstance(filters,list):
@@ -46,7 +48,7 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
 
 #data_dir = '/mnt/data/Sourcedata/DCM'
 data_dir = '/mnt/workdir/DCM/sourcedata'
-sub_list = ['sub_'+str(i).zfill(3) for i in range(95,150)]
+sub_list = ['sub_'+str(i).zfill(3) for i in range(191,196)]
 check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
                                     'pilot','fmri_task-game1','fmri_task-game2-train',
                                     'fmri_task-game2-test','placement'])

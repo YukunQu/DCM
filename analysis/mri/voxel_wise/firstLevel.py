@@ -18,7 +18,6 @@ from nipype.interfaces import spm
 
 def firstLevel_noPhi(subject_list,set_id,runs,ifold,configs):
     glm_type = configs['glm_type']
-
     if glm_type == 'separate_hexagon':
         firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs)
     elif glm_type == 'separate_hexagon_difficult':
@@ -66,10 +65,8 @@ def run_info_separate(ev_file,motions_file=None):
                       'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
                       'rot_x', 'rot_x_derivative1', 'rot_x_derivative1_power2', 'rot_x_power2',
                       'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
-                      'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
-
-    """motion_columns= ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z']"""
-
+                      'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2',
+                      '','']
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
 
@@ -103,7 +100,7 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
     regressor_name = configs['regressor_name']
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',func_name),
-                 'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold, event_name),
+                 'event': pjoin(event_dir,task, glm_type,'sub-{subj_id}',ifold, event_name),
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',regressor_name)
                  }
 
@@ -219,7 +216,7 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                          ])
 
     # run the 1st analysis
-    analysis1st.run('MultiProc', plugin_args={'n_procs': 30})
+    analysis1st.run('MultiProc', plugin_args={'n_procs': 33})
 
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
@@ -439,7 +436,7 @@ def run_info_whole(ev_file,motions_file=None):
     pmod_polys = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['infer_corr','infer_error']
+    trial_con = ['M1','infer_corr','infer_error']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -464,8 +461,8 @@ def run_info_whole(ev_file,motions_file=None):
     motions = motions.fillna(0.0).values.T.tolist()
 
     run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[run_pmod,None],
-                     orth=['No','No'],regressor_names=motion_columns,regressors=motions)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,run_pmod,None],
+                     orth=['No','No','No'],regressor_names=motion_columns,regressors=motions)
 
     return run_info
 
@@ -491,7 +488,7 @@ def firstLevel_noPhi_whole(subject_list,set_id,runs,ifold,configs):
     regressor_name = configs['regressor_name']
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}/func',func_name),
-                 'event': pjoin(event_dir,'sub-{subj_id}',task,glm_type, ifold, event_name),
+                 'event': pjoin(event_dir,task, glm_type,'sub-{subj_id}',ifold, event_name),
                  'regressors':pjoin(data_root,'sub-{subj_id}/func',regressor_name)
                  }
 
@@ -520,8 +517,8 @@ def firstLevel_noPhi_whole(subject_list,set_id,runs,ifold,configs):
     cont01 = ['infer_corrxcos^1',   'T', condition_names, [1, 0]]
     cont02 = ['infer_corrxsin^1',   'T', condition_names, [0, 1]]
 
-    cont04 = ['hexagon', 'F', [cont01, cont02]]
-    contrast_list = [cont01, cont02, cont04]
+    cont03 = ['hexagon', 'F', [cont01, cont02]]
+    contrast_list = [cont01, cont02, cont03]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])

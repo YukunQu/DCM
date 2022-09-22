@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from analysis.mri.ROI_analysis.ROI.makeMask import makeSphereMask
+from analysis.mri.roi.ROI.makeMask import makeSphereMask
 
 task = 'game1'
 glm_type = 'separate_hexagon'

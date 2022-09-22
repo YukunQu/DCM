@@ -41,9 +41,9 @@ for i,sub in enumerate(unexist_subjects):
         continue
 #%%
 command_surfer = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --use-aroma --output-spaces MNI152NLin2009cAsym:res-2 T1w fsnative --no-tty -w {} --nthreads 20'
-command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --use-aroma --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w --no-tty -w {} --fs-no-reconall --nthreads 66'
-
-sub_list = ['025 136 167']
+command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --use-aroma --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w --no-tty -w {} --fs-no-reconall --nthreads 66 '
+# --ignore fieldmaps
+sub_list = ['089 099 100 101 103 111']
 
 starttime = time.time()
 for subj in sub_list:

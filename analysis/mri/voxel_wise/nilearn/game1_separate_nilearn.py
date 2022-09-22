@@ -69,7 +69,7 @@ def prepare_data(subj,run_list,ifold,configs):
         functional_imgs.append(func_img)
 
         # load event
-        event_path = join(event_dir,f'sub-{subj}',task,glm_type,ifold,events_name.format(subj,run_id))
+        event_path = join(event_dir,task,glm_type,f'sub-{subj}',ifold,events_name.format(subj,run_id))
         event = load_ev_separate(event_path)
 
         # load motion
@@ -204,9 +204,14 @@ if __name__ == "__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
-    subjects = [p.split('_')[-1] for p in pid]
+    subjects = [p.split('-')[-1] for p in pid]
+
+    aleary_subs = os.listdir('/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/6fold')
+    aleary_subs = [a.split('-')[-1] for a in aleary_subs]
 
     for subj in subjects:
+        if subj in aleary_subs:
+            continue
         print("-------{} start!--------".format(subj))
         datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold/sub-{}'.format(configs['task'],
                                                                                                   configs['glm_type'],

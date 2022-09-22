@@ -17,7 +17,7 @@ from nibabel.affines import apply_affine
 
 
 def get_coordinate(image, mask):
-    # return voxel coordinates of peak point
+    # return voxel_wise coordinates of peak point
     mask = resample_to_img(mask,image,interpolation='nearest')
     img_masked = apply_mask(image, mask)
     peak_value = np.max(img_masked)
@@ -91,15 +91,15 @@ if __name__ == "__main__":
     import os
     task = 'game1'
     glm_type = 'separate_hexagon'
+
     # EC
-    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/mean_zmap.nii.gz'
+    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0006/spmT_0002.nii'
     roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
     savepath = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/EC/EC_func_roi.nii'
     makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
 
     # vmpfc
-    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/mean_zmap.nii.gz'
+    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0011/spmT_0002.nii'
     roi = r'/mnt/data/Template/VMPFC_roi.nii'
-    savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/vmpfc/vmPFC_func_roi.nii'
-    makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
-
+    savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/vmPFC/vmPFC_func_roi.nii'
+    makeSphereMask(stats_map, roi, savepath, radius=(2,2,2))
