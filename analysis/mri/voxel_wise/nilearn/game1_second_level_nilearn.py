@@ -21,12 +21,12 @@ def second_level_covariate(subjects,task,glm_type,contrast_id,covariates,datasin
     extra_info_subjects['subject_label'] = subjects
 
     design_matrix = make_second_level_design_matrix(subjects,extra_info_subjects)
-    for key in covariate_name:
-        design_matrix[key] = design_matrix[key] - design_matrix[key].mean()
+    # for key in covariate_name:
+    #    design_matrix[key] = design_matrix[key] - design_matrix[key].mean()
 
     # estimate second level model
     mni_mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
-    model = SecondLevelModel(smoothing_fwhm=5.0,mask_img=mni_mask)
+    model = SecondLevelModel()
     model.fit(cmap_files, design_matrix=design_matrix)
 
     if not os.path.exists(datasink):
@@ -62,7 +62,7 @@ def second_covariate():
     datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/group'
 
     # load contrast data
-    contrast_1st = ['m2_hexagon_tmap','decision_hexagon_tmap','hexagon_tmap']
+    contrast_1st = ['m2_hexagon_cmap','decision_hexagon_cmap','hexagon_cmap']
     for contrast_id in contrast_1st:
         second_level_covariate(subject_list,task,glm_type,contrast_id,covariate,datasink,centring=True)
 

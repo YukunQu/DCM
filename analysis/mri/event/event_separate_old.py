@@ -171,19 +171,16 @@ class Game1EV(object):
 
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
-            pressB_data = self.behData.copy()
-            pressB_data = pressB_data.dropna(axis=0,subset=['resp.rt'])
-            onset = self.behData['cue1_2.started'] - self.starttime
+            onset = self.behData['cue1.started'] - self.starttime
             duration = 0
-            angle = pressB_data['angles']
+            angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
         elif self.dformat == 'summary':
-            pressB_data = self.behData.copy().dropna(axis=0, subset=['resp.rt_raw'])
-            onset = self.behData['cue1_2.started_raw'] - self.starttime
+            onset = self.behData['cue1.started_raw'] - self.starttime
             duration = 0
-            angle = pressB_data['angles']
+            angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
@@ -376,14 +373,14 @@ class Game2EV(object):
 
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1_2.started'] - self.starttime
+            onset = self.behData['cue1.started'] - self.starttime
             duration = 0
             angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
         elif self.dformat == 'summary':
-            onset = self.behData['cue1_2.started_raw'] - self.starttime
+            onset = self.behData['cue1.started_raw'] - self.starttime
             duration = 0
             angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
@@ -394,7 +391,6 @@ class Game2EV(object):
         return pbev
 
     def genpm(self, m2ev_corr, ifold):
-
         angle = m2ev_corr['angle']
         pmod_sin = m2ev_corr.copy()
         pmod_cos = m2ev_corr.copy()
@@ -423,12 +419,12 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_old/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_old/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")
@@ -460,7 +456,6 @@ def gen_sub_event(task, subjects):
 
 
 if __name__ == "__main__":
-
     task = 'game1'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')

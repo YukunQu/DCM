@@ -21,7 +21,7 @@ configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica'
            'regressor_name':'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
 
 # split k training set
-training_sets = {1: [1, 2, 3] #######
+training_sets = {1: [1, 2, 3]  #######
                  }
 for set_id,runs in training_sets.items():
     for i in range(4, 9):

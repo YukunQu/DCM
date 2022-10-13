@@ -177,15 +177,19 @@ def first_level_glm(datasink,run_imgs,design_matrices):
 
         stats_map = fmri_glm.compute_contrast(contrast_val, output_type='all')
         c_map = stats_map['effect_size']
+        t_map = stats_map['stat']
         z_map = stats_map['z_score']
 
         # write the resulting stat images to file
         if not os.path.exists(datasink):
             os.makedirs(datasink)
-        c_image_path = join(datasink, '%s_cmap.nii.gz' % contrast_id)
+        c_image_path = join(datasink, 'sub-%s_cmap.nii.gz' % contrast_id)
         c_map.to_filename(c_image_path)
 
-        z_image_path = join(datasink, '%s_zmap.nii.gz' % contrast_id)
+        t_image_path = join(datasink, 'sub-%s_tmap.nii.gz' % contrast_id)
+        t_map.to_filename(t_image_path)
+
+        z_image_path = join(datasink, 'sub-%s_zmap.nii.gz' % contrast_id)
         z_map.to_filename(z_image_path)
 
 
@@ -193,7 +197,7 @@ if __name__ == "__main__":
     run_list = [1,2,3,4,5,6]
     ifold = 6
     configs = {'TR':3.0, 'task':'game1', 'glm_type':'separate_hexagon',
-               'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
+               'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'func_name': r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                'events_name':r'sub-{}_task-game1_run-{}_events.tsv',
@@ -205,7 +209,7 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-
+    subjects = ['180']
     aleary_subs = os.listdir('/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/6fold')
     aleary_subs = [a.split('-')[-1] for a in aleary_subs]
 

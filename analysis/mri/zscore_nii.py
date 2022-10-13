@@ -8,13 +8,13 @@ Created on Sat Jan 15 00:03:50 2022
 import os
 import numpy as np
 from nilearn.image import load_img,math_img,new_img_like
-from  nilearn.masking import apply_mask
+from nilearn.masking import apply_mask
 
 
 def zscore_nii(source_dir,file,prefix):
     filepath = os.path.join(source_dir,file)
     mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii')
-    #mask = load_img(r'/mnt/data/Template/tpl-MNI152NLin6Asym/tpl-MNI152NLin6Asym_res-02_desc-brain_mask.nii.gz')
+    #mask = load_img(r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask.nii')
     fmap = load_img(filepath)
 
     fmap_mean = apply_mask(fmap, mask).mean()
@@ -26,8 +26,6 @@ def zscore_nii(source_dir,file,prefix):
     fmap_data[mask_data == 0] = np.float64('NaN')
     map_zscore = new_img_like(fmap_zscore, fmap_data)
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
-
-
 #%%
 
 if __name__=="__main__":

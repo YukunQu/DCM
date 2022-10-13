@@ -94,7 +94,7 @@ class Game1EV(object):
         m1ev = m1ev.sort_values('onset',ignore_index=True)
         return m1ev
 
-    def genM2ev(self,trial_corr):
+    def genM2ev(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -112,26 +112,10 @@ class Game1EV(object):
         else:
             raise Exception("You need specify behavioral data format.")
 
-        m2ev_corr = pd.DataFrame(columns=['onset','duration','angle'])
-        m2ev_error = pd.DataFrame(columns=['onset','duration','angle'])
+        m2ev = m2ev.sort_values('onset',ignore_index=True)
+        return m2ev
 
-        assert len(m2ev) == len(trial_corr), "The number of trial label didn't not same as the number of event-M2."
-
-        for i,trial_label in enumerate(trial_corr):
-            if trial_label == True:
-                m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
-            elif trial_label == False:
-                m2ev_error = m2ev_error.append(m2ev.iloc[i])
-            else:
-                raise ValueError("The trial label should be True or False.")
-        m2ev_corr['trial_type'] = 'M2_corr'
-        m2ev_error['trial_type'] = 'M2_error'
-
-        m2ev_corr = m2ev_corr.sort_values('onset',ignore_index=True)
-        m2ev_error = m2ev_error.sort_values('onset',ignore_index=True)
-        return m2ev_corr, m2ev_error
-
-    def genDeev(self,trial_corr):
+    def genDeev(self):
         # generate the event of decision
         if self.dformat == 'trial_by_trial':
             onset = self.behData['cue1.started'] - self.starttime
@@ -150,40 +134,21 @@ class Game1EV(object):
         else:
             raise Exception("You need specify behavioral data format.")
 
-        deev_corr = pd.DataFrame(columns=['onset','duration','angle'])
-        deev_error = pd.DataFrame(columns=['onset','duration','angle'])
-
-        assert len(deev) == len(trial_corr), "The number of trial label didn't not  same as the number of event-decision."
-
-        for i,trial_label in enumerate(trial_corr):
-            if trial_label == True:
-                deev_corr = deev_corr.append(deev.iloc[i])
-            elif trial_label == False:
-                deev_error = deev_error.append(deev.iloc[i])
-            else:
-                raise ValueError("The trial label should be True or False.")
-        deev_corr['trial_type'] = 'decision_corr'
-        deev_error['trial_type'] = 'decision_error'
-
-        deev_corr = deev_corr.sort_values('onset',ignore_index=True)
-        deev_error = deev_error.sort_values('onset',ignore_index=True)
-        return deev_corr, deev_error
+        deev = deev.sort_values('onset',ignore_index=True)
+        return deev
 
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
-            pressB_data = self.behData.copy()
-            pressB_data = pressB_data.dropna(axis=0,subset=['resp.rt'])
-            onset = self.behData['cue1_2.started'] - self.starttime
+            onset = self.behData['cue1.started'] - self.starttime
             duration = 0
-            angle = pressB_data['angles']
+            angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
         elif self.dformat == 'summary':
-            pressB_data = self.behData.copy().dropna(axis=0, subset=['resp.rt_raw'])
-            onset = self.behData['cue1_2.started_raw'] - self.starttime
+            onset = self.behData['cue1.started_raw'] - self.starttime
             duration = 0
-            angle = pressB_data['angles']
+            angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
@@ -192,10 +157,10 @@ class Game1EV(object):
         pbev = pbev.sort_values('onset',ignore_index=True)
         return pbev
 
-    def genpm(self,m2ev_corr,ifold):
-        angle = m2ev_corr['angle']
-        pmod_sin = m2ev_corr.copy()
-        pmod_cos = m2ev_corr.copy()
+    def genpm(self,m2ev,ifold):
+        angle = m2ev['angle']
+        pmod_sin = m2ev.copy()
+        pmod_cos = m2ev.copy()
         pmod_sin['trial_type'] = 'sin'
         pmod_cos['trial_type'] = 'cos'
         pmod_sin['modulation'] = np.sin(np.deg2rad(ifold*angle))
@@ -206,12 +171,11 @@ class Game1EV(object):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         pbev = self.pressButton()
-        trial_corr,accuracy = self.label_trial_corr()
-        m2ev_corr,m2ev_error = self.genM2ev(trial_corr)
-        deev_corr, deev_error = self.genDeev(trial_corr)
-        pmod_sin, pmod_cos = self.genpm(m2ev_corr,ifold)
+        m2ev = self.genM2ev()
+        deev = self.genDeev()
+        pmod_sin, pmod_cos = self.genpm(m2ev,ifold)
 
-        event_data = pd.concat([m1ev,m2ev_corr,m2ev_error,deev_corr,deev_error,pbev,
+        event_data = pd.concat([m1ev,m2ev,deev,pbev,
                                 pmod_sin,pmod_cos],axis=0)
         return event_data
 
@@ -376,14 +340,14 @@ class Game2EV(object):
 
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1_2.started'] - self.starttime
+            onset = self.behData['cue1.started'] - self.starttime
             duration = 0
             angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
         elif self.dformat == 'summary':
-            onset = self.behData['cue1_2.started_raw'] - self.starttime
+            onset = self.behData['cue1.started_raw'] - self.starttime
             duration = 0
             angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
@@ -394,7 +358,6 @@ class Game2EV(object):
         return pbev
 
     def genpm(self, m2ev_corr, ifold):
-
         angle = m2ev_corr['angle']
         pmod_sin = m2ev_corr.copy()
         pmod_cos = m2ev_corr.copy()
@@ -423,12 +386,12 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_new/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_new/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")
@@ -460,7 +423,6 @@ def gen_sub_event(task, subjects):
 
 
 if __name__ == "__main__":
-
     task = 'game1'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')

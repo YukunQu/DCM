@@ -92,14 +92,17 @@ if __name__ == "__main__":
     task = 'game1'
     glm_type = 'separate_hexagon'
 
+    subjects = os.listdir(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/6fold')
+
     # EC
     stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0006/spmT_0002.nii'
     roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
-    savepath = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/EC/EC_func_roi.nii'
+    savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/defROI/EC/group_EC_func_roi.nii'
     makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
-
+    """
     # vmpfc
     stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0011/spmT_0002.nii'
     roi = r'/mnt/data/Template/VMPFC_roi.nii'
     savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/vmPFC/vmPFC_func_roi.nii'
     makeSphereMask(stats_map, roi, savepath, radius=(2,2,2))
+    """

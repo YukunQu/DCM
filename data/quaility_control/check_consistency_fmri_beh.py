@@ -17,7 +17,6 @@ def check_consistency(task,run_list):
 
     if task == 'game1':
         behavioral_template = r'/mnt/workdir/DCM/sourcedata/{}/Behaviour/fmri_task-game1/{}'
-
         beh_template = '{}_task-game1_run-{}.csv'
         fmri_template = '{}_task-game1_run-{}_bold.json'
     elif task == 'game2':
@@ -29,13 +28,13 @@ def check_consistency(task,run_list):
 
     timeline_df = pd.DataFrame(columns=['sub_id','task','run','behavior_time','fmri_time'])
     for sub in subject_list:
-        print(f'---------------{task}-{sub}-------------------')
-        if sub == 'sub_167':  # sub 167 只有5个game1， 看一下他是否还有扫的符合条件的run
+        if sub == 'sub-024':
             continue
+        print(f'---------------{task}-{sub}-------------------')
         for run in run_list:
             # read start time from the behavioral data
-            beh_name = beh_template.format(sub.replace("_",'-'),run)
-            beh_path = behavioral_template.format(sub,beh_name)
+            beh_name = beh_template.format(sub,run)
+            beh_path = behavioral_template.format(sub.replace("-",'_'),beh_name)
             tmp_df = pd.read_csv(beh_path)
             if 'date' not in tmp_df.columns:
                 print(f"The {sub} do not have 'date' in behavioral data.")
@@ -46,6 +45,8 @@ def check_consistency(task,run_list):
                     starttime = tmp_df['wait_key1.rt'].min()
                 elif 'wait_key6.rt' in tmp_df.columns:
                     starttime = tmp_df['wait_key6.rt'].min()
+                elif 'cue1.started_raw' in tmp_df.columns:
+                    starttime = tmp_df['cue1.started_raw'].min()
                 else:
                     print(sub,'-',run,"didn't have starttime.")
                     starttime = 0
@@ -72,3 +73,5 @@ def check_consistency(task,run_list):
 if __name__ == "__main__":
     game1_timeline_df,game1_error_run = check_consistency('game1',range(1,7))
     game2_timeline_df,game2_error_run = check_consistency('game2',range(1,3))
+
+    """sub-010 and sub-011 game2 is a exception. Because their two runs  of game2 files are identical."""

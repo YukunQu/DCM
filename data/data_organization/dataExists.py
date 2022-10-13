@@ -6,8 +6,9 @@
 # The scripts check data for each subject
 
 import os
-# 检测哪个被试的某个文件夹下为空
 
+#%%
+# 检测原始文件夹下被试数据是否完整
 def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
     with open(os.path.join(data_dir, 'data_exist_state.txt'),'w') as f:
         for sub in sub_list:
@@ -46,9 +47,68 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
             f.write('\n')
 
 
-#data_dir = '/mnt/data/Sourcedata/DCM'
 data_dir = '/mnt/workdir/DCM/sourcedata'
 sub_list = ['sub_'+str(i).zfill(3) for i in range(191,196)]
 check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
                                     'pilot','fmri_task-game1','fmri_task-game2-train',
                                     'fmri_task-game2-test','placement'])
+
+#%%
+# 检测BIDS 目录下被试数据是否完整
+
+def check_bids_dir():
+    import os
+    import pandas as pd
+    # read the participants.tsv file and got the subject list
+    df = pd.read_csv(r'/mnt/workdir/DCM/BIDS/participants.tsv',sep='\t')
+    subject_list = df.query("game1_fmri ==1")['Participant_ID']
+    subject_list = [sub.replace("_", '-') for sub in subject_list]
+
+    # check the BIDS for subjects
+    BIDS_dir = r'/mnt/workdir/DCM/BIDS'
+    sub_bids = os.listdir(BIDS_dir)
+
+    for sub in subject_list:
+        if sub not in sub_bids:
+            print(sub,"shoud have BIDS files but not.")
+
+    sub_bids.sort()
+    for sub in sub_bids:
+        if 'sub' in sub:
+            if sub not in subject_list:
+                print(sub,"doesn't need the BIDS files.")
+    print("The BIDS checking finished.")
+
+check_bids_dir()
+#%%
+
+def check_fmriprep_dir():
+    import os
+    import pandas as pd
+    # read the participants.tsv file and got the subject list
+    df = pd.read_csv(r'/mnt/workdir/DCM/BIDS/participants.tsv',sep='\t')
+    subject_list = df.query("game1_fmri==1")['Participant_ID']
+
+    # check the BIDS for subjects
+    fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_surfer/fmriprep'
+    freesurfer_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_surfer/freesurfer'
+
+    for dir in [fmriprep_dir, freesurfer_dir]:
+        print("------------------{}------------------".format(dir.split('/')[-1]))
+        sub_preprocess_list = os.listdir(dir)
+        subject_list = [sub.replace("_",'-') for sub in subject_list]
+        subject_list.sort()
+        i = 0
+        for sub in subject_list:
+            if sub not in sub_preprocess_list:
+                i +=1
+                print(sub,"should have preprocessing files but not.")
+        print(i,"subjects have no-preprocessing files")
+
+        sub_preprocess_list.sort()
+        for sub in sub_preprocess_list:
+            if ('sub' in sub) and ('html' not in sub):
+                if sub not in subject_list:
+                    print(sub,"doesn't need the preprocessing files.")
+        print("The check finished.")
+check_fmriprep_dir()

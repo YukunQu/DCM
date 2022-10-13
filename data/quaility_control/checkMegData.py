@@ -46,12 +46,8 @@ def check_subs_meg(sub_list,data_dir):
 
 if __name__ == "__main__":
     # load subject file and check it
-    data_dir = r'/mnt/data/Sourcedata/DCM'
-    sub_list = ['sub_'+str(i).zfill(3) for i in range(82,120)]
-    sub_list = ['sub_145', 'sub_146', 'sub_156','sub_157','sub_168',
-                'sub_169', 'sub_170', 'sub_183', 'sub_184',
-                'sub_185','sub_186','sub_187',
-                'sub_189','sub_190']
+    data_dir = r'/mnt/data/DCM/sourcedata'
+    sub_list = ['sub_'+str(i).zfill(3) for i in range(193,198)]
     log = check_subs_meg(sub_list,data_dir)
     for info in log:
         print(info)

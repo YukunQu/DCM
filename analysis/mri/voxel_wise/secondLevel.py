@@ -91,8 +91,8 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
                                                          '2ndLevel.@T'),
                                                         ('con_images',
                                                          '2ndLevel.@con')]),
-                          (level2thresh, datasink,   [('thresholded_map',
-                                                     '2ndLevel.@threshold')])
+                         (level2thresh, datasink,   [('thresholded_map',
+                                                      '2ndLevel.@threshold')])
                          ])
     # run 2nd analysis
     analysis2nd.run('MultiProc', plugin_args={'n_procs': 30})
@@ -139,18 +139,9 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st,contrast_2n
     # specify contrast
     level2conestimate.inputs.contrasts = contrast_2nd
 
-    level2thresh = Node(Threshold(contrast_index=1,
-                                  use_topo_fdr=True,
-                                  use_fwe_correction=False,
-                                  extent_threshold=0,
-                                  height_threshold=0.01,
-                                  height_threshold_type='p-value',
-                                  extent_fdr_p_threshold=0.05),
-                        name="level2thresh")
-
     # 2nd workflow
     analysis2nd = Workflow(name='work_2nd',base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/'
-                                                    '{}/{}/Setall/group/covariates/{}'.format(task,glm_type,covar_type))
+                                                    '{}/{}/group/covariates/{}'.format(task,glm_type,covar_type))
     analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
                                                     ('subj_id', 'subj_id')]),
                          (selectfiles, onesamplettestdes, [('cons', 'in_files')]),
@@ -162,22 +153,15 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st,contrast_2n
                                                                'beta_images'),
                                                               ('residual_image',
                                                                'residual_image')]),
-                         (level2conestimate, level2thresh, [('spm_mat_file',
-                                                             'spm_mat_file'),
-                                                            ('spmT_images',
-                                                             'stat_image'),
-                                                            ]),
                          (level2conestimate, datasink, [('spm_mat_file',
                                                          '2ndLevel.@spm_mat'),
                                                         ('spmT_images',
                                                          '2ndLevel.@T'),
                                                         ('con_images',
-                                                         '2ndLevel.@con')]),
-                         (level2thresh, datasink, [('thresholded_map',
-                                                    '2ndLevel.@threshold')])
+                                                         '2ndLevel.@con')])
                          ])
     # run 2nd analysis
-    analysis2nd.run('MultiProc', plugin_args={'n_procs': 10})
+    analysis2nd.run('MultiProc', plugin_args={'n_procs': 50})
 
 
 def level2nd_covar_acc(paricipants_info,task,glm_type,contrast_1st):
@@ -198,28 +182,6 @@ def level2nd_covar_acc(paricipants_info,task,glm_type,contrast_1st):
     else:
         raise Exception("Task type is wrong.")
     covar_dir = 'acc'
-    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
-
-def level2nd_covar_age_acc(paricipants_info,task,glm_type,contrast_1st):
-    pid = paricipants_info['Participant_ID'].to_list()
-    subject_list = [p.split('-')[-1] for p in pid]
-
-    condition_names = ['mean', 'acc','age']
-    cont01 = ['Group',  'T', condition_names, [1, 0, 0]]
-    cont02 = ['acc',    'T', condition_names, [0, 1, 0]]
-    cont03 = ['age',    'T', condition_names, [0, 0, 1]]
-    contrast_2nd = [cont01, cont02, cont03]
-
-    # covariates
-    covariates = {}
-    if task == 'game1':
-        covariates['acc'] = paricipants_info['game1_acc'].to_list()
-    elif task == 'game2':
-        covariates['acc'] = paricipants_info['game2_test_acc'].to_list()
-    else:
-        raise Exception("Task type is wrong.")
-    covariates['age'] = paricipants_info['Age'].to_list()
-    covar_dir = 'age_acc'
     level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
 
 
