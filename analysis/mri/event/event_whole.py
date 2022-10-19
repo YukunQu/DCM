@@ -13,7 +13,10 @@ import pandas as pd
 
 
 class Game1EV(object):
-    """"""
+    """
+    model the hexagonal effect from the onset of M2 to press button,
+    but also model the onset time of visual change with stick function.
+    """
 
     def __init__(self, behDataPath):
         self.behDataPath = behDataPath
@@ -34,17 +37,17 @@ class Game1EV(object):
     def cal_start_time(self):
         self.game1_dformat()
         if self.dformat == 'trial_by_trial':
-            starttime = self.behData['fix_start_cue.started'][1]
+            starttime = self.behData['fix_start_cue.started'].min()
         elif self.dformat == 'summary':
             starttime = self.behData['fixation.started_raw'].min() - 1
         else:
-            print("Error:You need specify behavioral data format.")
+            raise Exception("The input file is wrong! You need specify behavioral data format.")
         return starttime
 
     def genM1ev(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic1_render.started'] - self.starttime
-            duration = self.behData['pic2_render.started'] - self.behData['pic1_render.started']
+            duration = 0
             angle = self.behData['angles']
 
             m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
@@ -52,27 +55,28 @@ class Game1EV(object):
             m1ev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['pic1_render.started_raw'] - self.starttime
-            duration = self.behData['pic2_render.started_raw'] - self.behData['pic1_render.started_raw']
+            duration = 0
             angle = self.behData['angles']
 
             m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("You need specify behavioral data format.")
+        m1ev = m1ev.sort_values('onset',ignore_index=True)
         return m1ev
 
     def genM2ev(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
-            duration = [2.5] * len(self.behData)
+            duration = 0
             angle = self.behData['angles']
             m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m2ev['trial_type'] = 'M2'
             m2ev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['pic2_render.started_raw'] - self.starttime
-            duration = [2.5] * len(self.behData)
+            duration = 0
             angle = self.behData['angles']
             m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m2ev['trial_type'] = 'M2'

@@ -130,7 +130,6 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
 
     # Specify GLM contrasts
     # Condition names
-
     condition_names = ['M2_corrxcos^1','M2_corrxsin^1','decision_corrxcos^1','decision_corrxsin^1',
                        'M2_corr','M2_error','decision_corr','decision_error']
 
@@ -172,11 +171,11 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                                      input_units='secs',
                                      output_units='secs',
                                      time_repetition=tr,
-                                     high_pass_filter_cutoff=128.,
+                                     high_pass_filter_cutoff=100.,
                                      ),
                      name='modelspec')
 
-    mask_img = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask.nii'
+    mask_img = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_6mm.nii'
     # Level1Design - Generates an SPM design matrix
     level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
                                      timing_units='secs',
@@ -184,7 +183,7 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                                      model_serial_correlations='AR(1)',
                                      microtime_resolution=49,
                                      microtime_onset=24,
-                                     #mask_image=mask_img,
+                                     mask_image=mask_img,
                                      flags={'mthresh':'-Inf',
                                             'volt':1}),
                         name="level1design")

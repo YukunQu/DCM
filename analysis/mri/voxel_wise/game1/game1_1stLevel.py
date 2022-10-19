@@ -9,6 +9,15 @@ participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri==1')
 pid = data['Participant_ID'].to_list()
 
+# check the existence of preprocessing file
+fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep'
+preprocess_subs = os.listdir(fmriprep_dir)
+preprocess_subs = [p for p in preprocess_subs if ('sub-'in p) and ('html' not in p)]
+for p in pid:
+    if p not in preprocess_subs:
+        print(f"The {p} didn't have preprocess files." )
+
+# filter the subjects who exist.
 target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/6fold'
 if os.path.exists(target_dir):
     already_sub = os.listdir(target_dir)
@@ -16,13 +25,13 @@ if os.path.exists(target_dir):
 else:
     subject_list = [p.split('-')[-1] for p in pid]
 
-subject_list=['099','179','185']
+print("{} subjects are ready.".format(len(subject_list)))
 
 # input files
 configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep',
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task':'game1',
-           'glm_type': 'separate_hexagon',  # look out
+           'glm_type': 'separate_hexagon_old',  # look out
            'func_name':'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
            'regressor_name':'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}

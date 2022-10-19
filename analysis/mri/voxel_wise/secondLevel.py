@@ -199,3 +199,26 @@ def level2nd_covar_age(paricipants_info,task,glm_type,contrast_1st):
     covariates['age'] = paricipants_info['Age'].to_list()
     covar_dir = 'age'
     level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
+
+
+def level2nd_covar_acc_age(paricipants_info,task,glm_type,contrast_1st):
+    pid = paricipants_info['Participant_ID'].to_list()
+    subject_list = [p.split('-')[-1] for p in pid]
+
+    condition_names = ['mean', 'acc', 'age']
+    cont01 = ['Group',  'T', condition_names, [1, 0, 0]]
+    cont02 = ['acc',    'T', condition_names, [0, 1, 0]]
+    cont03 = ['age',    'T', condition_names, [0, 0, 1]]
+    contrast_2nd = [cont01, cont02, cont03]
+
+    # covariates
+    covariates = {}
+    if task == 'game1':
+        covariates['acc'] = paricipants_info['game1_acc'].to_list()
+    elif task == 'game2':
+        covariates['acc'] = paricipants_info['game2_test_acc'].to_list()
+    else:
+        raise Exception("Task type is wrong.")
+    covariates['age'] = paricipants_info['Age'].to_list()
+    covar_dir = 'acc_age'
+    level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
