@@ -131,6 +131,46 @@ class Game1EV(object):
         m2ev_error = m2ev_error.sort_values('onset',ignore_index=True)
         return m2ev_corr, m2ev_error
 
+    def genPlanning(self,trial_corr):
+        # model the fixaiton phase between M2 and decison as a regressor —— planning
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['fixation_3.started'] - self.starttime
+            duration = self.behData['cue1.started'] - self.behData['fixation_3.started']
+
+            angle = self.behData['angles']
+            planning = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            planning['trial_type'] = 'planning'
+            planning['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['fixation_3.started_raw'] - self.starttime
+            duration = self.behData['cue1.started_raw'] - self.behData['fixation_3.started_raw']
+
+            angle = self.behData['angles']
+            planning = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            planning['trial_type'] = 'planning'
+            planning['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        planning_corr = pd.DataFrame(columns=['onset','duration','angle'])
+        planning_error = pd.DataFrame(columns=['onset','duration','angle'])
+
+        assert len(planning) == len(trial_corr), "The number of trial label didn't not  same as the number of event-decision."
+
+        for i,trial_label in enumerate(trial_corr):
+            if trial_label == True:
+                planning_corr = planning_corr.append(planning.iloc[i])
+            elif trial_label == False:
+                planning_error = planning_error.append(planning.iloc[i])
+            else:
+                raise ValueError("The trial label should be True or False.")
+        planning_corr['trial_type'] = 'planning_corr'
+        planning_error['trial_type'] = 'planning_error'
+
+        planning_corr = planning_corr.sort_values('onset',ignore_index=True)
+        planning_error = planning_error.sort_values('onset',ignore_index=True)
+        return planning_corr,planning_error
+
     def genDeev(self,trial_corr):
         # generate the event of decision
         if self.dformat == 'trial_by_trial':
@@ -172,14 +212,14 @@ class Game1EV(object):
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['cue1.started'] - self.starttime
-            duration = 0
+            duration = [0] * len(self.behData)
             angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = 0
+            duration = [0] * len(self.behData)
             angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
@@ -203,12 +243,13 @@ class Game1EV(object):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         pbev = self.pressButton()
-        trial_corr,accuracy = self.label_trial_corr()
-        m2ev_corr,m2ev_error = self.genM2ev(trial_corr)
+        trial_corr, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
+        planning_corr,planning_error = self.genPlanning(trial_corr)
         deev_corr, deev_error = self.genDeev(trial_corr)
         pmod_sin, pmod_cos = self.genpm(m2ev_corr,ifold)
 
-        event_data = pd.concat([m1ev,m2ev_corr,m2ev_error,deev_corr,deev_error,pbev,
+        event_data = pd.concat([m1ev,m2ev_corr,m2ev_error,planning_corr,planning_error,deev_corr,deev_error,pbev,
                                 pmod_sin,pmod_cos],axis=0)
         return event_data
 
@@ -419,12 +460,12 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_old/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_3phases_correct_trials/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_old/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_3phases_correct_trials/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")

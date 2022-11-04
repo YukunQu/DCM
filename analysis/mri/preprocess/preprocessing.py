@@ -13,7 +13,7 @@ participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri==1')
 pid = data['Participant_ID'].to_list()
 
-fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_v22'
+fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume'
 exist_subjects = []
 for file in os.listdir(fmriprep_dir):
     if 'sub-' in file:
@@ -34,7 +34,7 @@ sub_set = ''
 for i,sub in enumerate(subject_list):
     sub_set = sub_set+ sub + ' '
     sub_set_num = sub_set_num+1
-    if sub_set_num == 12:
+    if sub_set_num == 10:
         sub_list.append(sub_set[:-1])
         sub_set_num = 0
         sub_set = ''
@@ -44,16 +44,17 @@ for i,sub in enumerate(subject_list):
         continue
 #%%
 #command_surfer = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 100'
-command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 100 --fs-no-reconall'
+#command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 80 --fs-no-reconall'
+command_volume_ignore_fmap = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --nthreads 32 --fs-no-reconall --ignore fieldmaps --use-syn-sdc'
 
 starttime = time.time()
 for subj in sub_list:
     bids_dir = r'/mnt/workdir/DCM/BIDS'
-    out_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_v22'
+    out_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume'
     
     work_dir = r'/mnt/workdir/DCM/working'
     freesurfer_license = r'/mnt/data/license.txt'
-    command = command_volume.format(bids_dir,out_dir,subj,freesurfer_license,work_dir)
+    command = command_volume_ignore_fmap.format(bids_dir,out_dir,subj,freesurfer_license,work_dir)
     print("Command:",command)
     subprocess.call(command, shell=True)
 

@@ -23,9 +23,9 @@ sub_list = []
 sub_set_num = 0
 sub_set = ''
 for i,sub in enumerate(unexist_subjects):
-    sub_set = sub_set+ sub + ' '
+    sub_set = sub_set + sub + ' '
     sub_set_num = sub_set_num+1
-    if sub_set_num == 10:
+    if sub_set_num == 8:
         sub_list.append(sub_set[:-1])
         sub_set_num = 0
         sub_set = ''

@@ -15,14 +15,12 @@ import pandas as pd
 class Game1EV(object):
     """
     model the hexagonal effect from the onset of M2 to press button,
-    but also model the onset time of visual change with stick function.
+    but also model the onset time of visual stimuli with stick function.
     """
-
     def __init__(self, behDataPath):
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
         self.behData = self.behData.dropna(axis=0, subset=['pairs_id'])
-        self.behData = self.behData.fillna('None')
         self.dformat = None
 
     def game1_dformat(self):
@@ -47,18 +45,18 @@ class Game1EV(object):
     def genM1ev(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic1_render.started'] - self.starttime
-            duration = 0
+            duration = self.behData['pic2_render.started'] - self.behData['pic1_render.started']
             angle = self.behData['angles']
 
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['pic1_render.started_raw'] - self.starttime
-            duration = 0
+            duration = self.behData['pic2_render.started_raw'] - self.behData['pic1_render.started_raw']
             angle = self.behData['angles']
 
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
         else:
@@ -82,30 +80,56 @@ class Game1EV(object):
             m2ev['trial_type'] = 'M2'
             m2ev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("The input file is wrong! You need specify behavioral data format.")
+        m2ev = m2ev.sort_values('onset',ignore_index=True)
         return m2ev
 
     def genDeev(self):
         # generate the event of decision
         if self.dformat == 'trial_by_trial':
             onset = self.behData['cue1.started'] - self.starttime
-            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            duration = 0
             angle = self.behData['angles']
             deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
         elif self.dformat == 'summary':
             onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            duration = 0
             angle = self.behData['angles']
             deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
         else:
-            print("You need specify behavioral data format.")
+            raise Exception("The input file is wrong! You need specify behavioral data format.")
+        deev = deev.sort_values('onset',ignore_index=True)
         return deev
 
+    def pressButton(self):
+        if self.dformat == 'trial_by_trial':
+            pb_data = self.behData.copy()
+            pb_data = pb_data.dropna(axis=0, subset=['resp.rt'])
+            onset = pb_data['cue1.started'] - self.starttime + pb_data['resp.rt']
+            duration = 0
+            angle = pb_data['angles']
+            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            pbev['trial_type'] = 'pressButton'
+            pbev['modulation'] = 1
+        elif self.dformat == 'summary':
+            pb_data = self.behData.copy()
+            pb_data = pb_data.dropna(axis=0, subset=['resp.rt_raw'])
+            onset = pb_data['cue1.started_raw'] - self.starttime + pb_data['resp.rt_raw']
+            duration = 0
+            angle = pb_data['angles']
+            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
+            pbev['trial_type'] = 'pressButton'
+            pbev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        return pbev
+
     def label_trial_corr(self):
+        self.behData = self.behData.fillna('None')
         if self.dformat == 'trial_by_trial':
             keyResp_list = self.behData['resp.keys']
         elif self.dformat == 'summary':
@@ -148,6 +172,7 @@ class Game1EV(object):
             onset = self.behData['pic2_render.started'] - self.starttime
             duration = self.behData['cue1_2.started'] - self.behData['pic2_render.started']
             angle = self.behData['angles']
+
             inferev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             inferev['trial_type'] = 'inference'
             inferev['modulation'] = 1
@@ -155,11 +180,14 @@ class Game1EV(object):
             onset = self.behData['pic2_render.started_raw'] - self.starttime
             duration = self.behData['cue1_2.started_raw'] - self.behData['pic2_render.started_raw']
             angle = self.behData['angles']
+
             inferev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             inferev['trial_type'] = 'inference'
             inferev['modulation'] = 1
         else:
             raise Exception("You need specify behavioral data format.")
+
+        assert len(inferev) == len(trial_corr), "The number of trial label didn't not same as the number of event-decision."
 
         infer_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
         infer_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
@@ -174,25 +202,6 @@ class Game1EV(object):
         infer_error['trial_type'] = 'infer_error'
         return infer_corr, infer_error
 
-    def pressButton(self):
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['resp.started'] - self.starttime
-            duration = 0
-            angle = self.behData['angles']
-            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
-            pbev['trial_type'] = 'pressButton'
-            pbev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['resp.started_raw'] - self.starttime
-            duration = 0
-            angle = self.behData['angles']
-            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
-            pbev['trial_type'] = 'pressButton'
-            pbev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        return pbev
-
     def hexagon_pm(self, infer_corr, ifold):
         angle = infer_corr['angle']
         pmod_sin = infer_corr.copy()
@@ -206,14 +215,14 @@ class Game1EV(object):
     def game1ev(self, ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
-        #m2ev = self.genM2ev()
-        #deev = self.genDeev()
-        #pbev = self.pressButton()
+        m2ev = self.genM2ev()
+        deev = self.genDeev()
+        pbev = self.pressButton()
         trial_corr, accuracy = self.label_trial_corr()
         infer_corr, infer_error = self.inferev(trial_corr)
         pmod_sin, pmod_cos = self.hexagon_pm(infer_corr, ifold)
 
-        event_data = pd.concat([m1ev,infer_corr, infer_error,
+        event_data = pd.concat([m1ev,m2ev,deev,pbev,infer_corr, infer_error,
                                 pmod_sin, pmod_cos], axis=0)
         return event_data
 
@@ -222,12 +231,12 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/whole_hexagon/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/whole_hexagon_correct_trials/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/whole_hexagon/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/whole_hexagon_correct_trials/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")

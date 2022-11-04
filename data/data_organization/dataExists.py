@@ -5,9 +5,8 @@
 
 # The scripts check data for each subject
 
-import os
-
 #%%
+import os
 # 检测原始文件夹下被试数据是否完整
 def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
     with open(os.path.join(data_dir, 'data_exist_state.txt'),'w') as f:
@@ -47,12 +46,11 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
             f.write('\n')
 
 
-data_dir = '/mnt/workdir/DCM/sourcedata'
-sub_list = ['sub_'+str(i).zfill(3) for i in range(191,196)]
+data_dir = '/mnt/data/DCM/sourcedata'
+sub_list = ['sub_'+str(i).zfill(3) for i in range(196,204)]
 check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
                                     'pilot','fmri_task-game1','fmri_task-game2-train',
                                     'fmri_task-game2-test','placement'])
-
 #%%
 # 检测BIDS 目录下被试数据是否完整
 
