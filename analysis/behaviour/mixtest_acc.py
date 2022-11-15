@@ -3,7 +3,7 @@ import pandas as pd
 #%%
 # read training accuracy from  mixed test files
 sourcedata_dir = r'/mnt/workdir/DCM/sourcedata'
-sub_list = [f'sub_{str(s).zfill(3)}' for s in range(65,204)]
+sub_list = [f'sub_{str(s).zfill(3)}' for s in range(203,206)]
 sub_list.reverse()
 sub_mix_acc = pd.DataFrame({})
 for sub in sub_list:
@@ -60,7 +60,6 @@ for index,sub_acc in sub_mix_acc.iterrows():
 
 #%%
 # split the mix_offline performance into the 2 columns: train_ap; train_dp
-
 data = pd.read_csv(r'/mnt/workdir/DCM/tmp/participants.tsv',sep='\t')
 data_part1 = data[:76]
 data_part2 = data[76:]

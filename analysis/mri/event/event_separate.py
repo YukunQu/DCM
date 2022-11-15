@@ -460,7 +460,6 @@ def gen_sub_event(task, subjects):
 
 
 if __name__ == "__main__":
-
     task = 'game1'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')

@@ -11,8 +11,8 @@ import os
 def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
     with open(os.path.join(data_dir, 'data_exist_state.txt'),'w') as f:
         for sub in sub_list:
-            print('-----------------{} data Index----------------'.format(sub))
-            f.write('-----------------{} data Index----------------'.format(sub))
+            print('---------{} data Index-------'.format(sub))
+            f.write('-------{} data Index-------'.format(sub))
             f.write('\n')
             sub_data_dir = os.path.join(data_dir,sub)
             if stand_form:
@@ -46,11 +46,13 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
             f.write('\n')
 
 
-data_dir = '/mnt/data/DCM/sourcedata'
-sub_list = ['sub_'+str(i).zfill(3) for i in range(196,204)]
+data_dir = '/mnt/workdir/DCM/sourcedata'
+sub_list = ['sub_'+str(i).zfill(3) for i in range(172,173)]
+
 check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
                                     'pilot','fmri_task-game1','fmri_task-game2-train',
                                     'fmri_task-game2-test','placement'])
+
 #%%
 # 检测BIDS 目录下被试数据是否完整
 

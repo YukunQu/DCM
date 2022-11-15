@@ -6,6 +6,6 @@ out_file = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_8mm.nii
 di = maths.DilateImage(in_file = in_file,
                            operation = "mean",
                            kernel_shape = "sphere",
-                           kernel_size = 8,
+                           kernel_size = 5,
                            out_file = out_file)
 di.run()

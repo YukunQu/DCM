@@ -164,8 +164,8 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st,contrast_2n
     analysis2nd.run('MultiProc', plugin_args={'n_procs': 50})
 
 
-def level2nd_covar_acc(paricipants_info,task,glm_type,contrast_1st):
-    pid = paricipants_info['Participant_ID'].to_list()
+def level2nd_covar_acc(participants_info,task,glm_type,contrast_1st):
+    pid = participants_info['Participant_ID'].to_list()
     subject_list = [p.split('-')[-1] for p in pid]
 
     condition_names = ['mean', 'acc']
@@ -176,17 +176,17 @@ def level2nd_covar_acc(paricipants_info,task,glm_type,contrast_1st):
     # covariates
     covariates = {}
     if task == 'game1':
-        covariates['acc'] = paricipants_info['game1_acc'].to_list()
+        covariates['acc'] = participants_info['game1_acc'].to_list()
     elif task == 'game2':
-        covariates['acc'] = paricipants_info['game2_test_acc'].to_list()
+        covariates['acc'] = participants_info['game2_test_acc'].to_list()
     else:
         raise Exception("Task type is wrong.")
     covar_dir = 'acc'
     level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
 
 
-def level2nd_covar_age(paricipants_info,task,glm_type,contrast_1st):
-    pid = paricipants_info['Participant_ID'].to_list()
+def level2nd_covar_age(participants_info,task,glm_type,contrast_1st):
+    pid = participants_info['Participant_ID'].to_list()
     subject_list = [p.split('-')[-1] for p in pid]
 
     condition_names = ['mean', 'age']
@@ -196,7 +196,7 @@ def level2nd_covar_age(paricipants_info,task,glm_type,contrast_1st):
 
     # covariates
     covariates = {}
-    covariates['age'] = paricipants_info['Age'].to_list()
+    covariates['age'] = participants_info['Age'].to_list()
     covar_dir = 'age'
     level2nd_noPhi_covariate(subject_list,task,glm_type,contrast_1st, contrast_2nd, covariates,covar_dir)
 

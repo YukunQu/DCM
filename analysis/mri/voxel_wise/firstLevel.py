@@ -63,23 +63,28 @@ def run_info_separate(ev_file,motions_file=None):
             pmod_params.append(group[1].modulation.tolist())
             pmod_polys.append(1)
 
-    motions_df = pd.read_csv(motions_file,sep='\t')
+    run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
+    if conditions == ['M1','M2_corr','M2_error','decision_corr','decision_error']:
+        pmod = [None,run_pmod,None,run_pmod,None]
+        orth = ['No','No','No','No','No','No']
+    elif conditions == ['M1','M2_corr','decision_corr']:
+        pmod = [None,run_pmod,run_pmod]
+        orth = ['No','No','No']
+    else:
+        raise Exception("The conditions are not expected.")
 
+    motions_df = pd.read_csv(motions_file,sep='\t')
     motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z',
                       'csf','white_matter']
-
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
 
-    run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
     run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,
-                     pmod=[None,run_pmod,None,run_pmod,None],
-                     orth=['No','No','No','No','No'],regressor_names=motion_columns,regressors=motions)
+                     pmod=pmod,orth=orth,regressor_names=motion_columns,regressors=motions)
     return run_info
 
 
 def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
-
     # start cue
     start_time = time.time()
     print("Training set",set_id," ",ifold," start!")
@@ -124,34 +129,31 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
 
     # Specify GLM contrasts
     # Condition names
-    condition_names = ['M2_corrxcos^1','M2_corrxsin^1','decision_corrxcos^1','decision_corrxsin^1',
-                       'M2_corr','M2_error','decision_corr','decision_error']
+    condition_names = ['M2_corrxcos^1','M2_corrxsin^1','decision_corrxcos^1','decision_corrxsin^1','M2_corr','decision_corr']
 
     # contrastst
-    cont01 = ['m2_cos',        'T', condition_names,  [1,0,0,0,0,0,0,0]]
-    cont02 = ['m2_sin',        'T', condition_names,  [0,1,0,0,0,0,0,0]]
+    cont01 = ['m2_cos',        'T', condition_names,  [1,0,0,0,0,0]]
+    cont02 = ['m2_sin',        'T', condition_names,  [0,1,0,0,0,0]]
 
-    cont03 = ['decision_cos',  'T', condition_names,  [0,0,1,0,0,0,0,0]]
-    cont04 = ['decision_sin',  'T', condition_names,  [0,0,0,1,0,0,0,0]]
+    cont03 = ['decision_cos',  'T', condition_names,  [0,0,1,0,0,0]]
+    cont04 = ['decision_sin',  'T', condition_names,  [0,0,0,1,0,0]]
 
     cont05 = ['m2_hexagon',       'F', [cont01, cont02]]
     cont06 = ['decision_hexagon', 'F', [cont03, cont04]]
 
-    cont07 = ['m2',             'T', condition_names,  [0,0,0,0,1,1,0,0]]
-    cont08 = ['decision_corr',  'T', condition_names,  [0,0,0,0,0,0,1,0]]
+    cont07 = ['m2_corr',        'T', condition_names,  [0,0,0,0,1,0]]
+    cont08 = ['decision_corr',  'T', condition_names,  [0,0,0,0,0,1]]
 
-    cont09 =  ['cos',  'T',condition_names,  [1,0,1,0,0,0,0,0]]
-    cont010 = ['sin',  'T',condition_names,  [0,1,0,1,0,0,0,0]]
+    cont09 =  ['cos',  'T',condition_names,  [1,0,1,0,0,0]]
+    cont010 = ['sin',  'T',condition_names,  [0,1,0,1,0,0]]
     cont011 = ['hexagon', 'F', [cont09, cont010]]
 
-    cont012 = ['decision_corr-error',  'T', condition_names,  [0,0,0,0,0,0,1,-1]]
-
-    contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08,cont09,cont010,cont011,cont012]
+    contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08,cont09,cont010,cont011]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
 
-    # smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+    smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
 
     # prepare event file
     runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
@@ -201,8 +203,8 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                          (runs_prep, modelspec,     [('run_info','subject_info')]),
 
                          (selectfiles, gunzip_func,  [('func','in_file')]),
-                         #(gunzip_func, smooth,      [('out_file','in_files')]),
-                         (gunzip_func, modelspec,    [('out_file','functional_runs')]),
+                         (gunzip_func, smooth,      [('out_file','in_files')]),
+                         (smooth, modelspec,        [('smoothed_files','functional_runs')]),
 
                          (modelspec,level1design,[('session_info','session_info')]),
                          (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),

@@ -33,7 +33,10 @@ def rename_game1_behav_data(subjects):
                 save_path = os.path.join(game1_behav_data_dir, file_new_name)
                 print(run)
                 file_data.to_csv(save_path)
-        print(subid,"have",run_num,'runs file.')
+        if run_num == 6:
+            print(subid,"have",run_num,'runs files.')
+        else:
+            print("Warning:",subid,"have",run_num,'runs files.')
 
 
 def rename_game2_behav_data(subjects):
@@ -59,8 +62,10 @@ def rename_game2_behav_data(subjects):
                 save_path = os.path.join(game1_behav_data_dir, file_new_name)
                 #print(file_new_name)
                 file_data.to_csv(save_path)
-        print(subid,"have",run_num,'runs file.')
-
+        if run_num ==2:
+            print(subid,"have",run_num,'runs files.')
+        else:
+            print("Warning:",subid,"have",run_num,'runs files.')
 
 if __name__ =="__main__":
     #participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -68,7 +73,7 @@ if __name__ =="__main__":
     #data = participants_data.query('game2_fmri==1')
     #pid = data['Participant_ID'].to_list()
     #subject_list = [p.split('_')[-1] for p in pid]
-    subject_list = [str(i).zfill(3) for i in range(193,196)]
+    subject_list = [str(i).zfill(3) for i in range(172,173)]
     rename_game1_behav_data(subject_list)
-    #rename_game2_behav_data(subject_list)
+    rename_game2_behav_data(subject_list)
     

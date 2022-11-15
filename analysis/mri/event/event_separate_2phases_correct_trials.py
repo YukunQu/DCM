@@ -127,8 +127,8 @@ class Game1EV(object):
         m2ev_corr['trial_type'] = 'M2_corr'
         m2ev_error['trial_type'] = 'M2_error'
 
-        m2ev_corr = m2ev_corr.sort_values('onset',ignore_index=True)
-        m2ev_error = m2ev_error.sort_values('onset',ignore_index=True)
+        m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
+        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
         return m2ev_corr, m2ev_error
 
     def genDeev(self,trial_corr):
@@ -229,7 +229,7 @@ class Game2EV(object):
         elif 'fixation.started_raw' in columns:
             self.dformat = 'summary'
         else:
-            print("The data is not game2 behavioral data.")
+            raise Exception("You need specify behavioral data format.")
 
     def cal_start_time(self):
         self.game1_dformat()
@@ -240,28 +240,6 @@ class Game2EV(object):
         else:
             raise Exception("You need specify behavioral data format.")
         return starttime
-
-    def genM1ev(self):
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['testPic1.started'] - self.starttime
-            duration = self.behData['testPic2.started'] - self.behData['testPic1.started']
-            angle = self.behData['angles']
-
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m1ev['trial_type'] = 'M1'
-            m1ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['testPic1.started_raw'] - self.starttime
-            duration = self.behData['testPic2.started_raw'] - self.behData['testPic1.started_raw']
-            angle = self.behData['angles']
-
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m1ev['trial_type'] = 'M1'
-            m1ev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        m1ev = m1ev.sort_values('onset',ignore_index=True)
-        return m1ev
 
     def label_trial_corr(self):
         if self.dformat == 'trial_by_trial':
@@ -292,6 +270,8 @@ class Game2EV(object):
                     correctAns = 2
                 else:
                     correctAns = 1
+            else:
+                raise Exception("None of rule have been found in the file.")
             if (keyResp == 'None') or (keyResp == None):
                 trial_corr.append(False)
             elif int(keyResp) == correctAns:
@@ -301,8 +281,30 @@ class Game2EV(object):
         accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
         return trial_corr, accuracy
 
-    def genM2ev(self, trial_corr):
+    def genM1ev(self):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['testPic1.started'] - self.starttime
+            duration = self.behData['testPic2.started'] - self.behData['testPic1.started']
+            angle = self.behData['angles']
 
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev['trial_type'] = 'M1'
+            m1ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['testPic1.started_raw'] - self.starttime
+            duration = self.behData['testPic2.started_raw'] - self.behData['testPic1.started_raw']
+            angle = self.behData['angles']
+
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev['trial_type'] = 'M1'
+            m1ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        m1ev = m1ev.sort_values('onset',ignore_index=True)
+        return m1ev
+
+
+    def genM2ev(self, trial_corr):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['testPic2.started'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -325,6 +327,7 @@ class Game2EV(object):
 
         m2ev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
         m2ev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+
         for i, trial_label in enumerate(trial_corr):
             if trial_label == True:
                 m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
@@ -334,6 +337,9 @@ class Game2EV(object):
                 raise ValueError("The trial label should be True or False.")
         m2ev_corr['trial_type'] = 'M2_corr'
         m2ev_error['trial_type'] = 'M2_error'
+
+        m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
+        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
         return m2ev_corr, m2ev_error
 
     def genDeev(self,trial_corr):
@@ -369,6 +375,9 @@ class Game2EV(object):
                 raise ValueError("The trial label should be True or False.")
         deev_corr['trial_type'] = 'decision_corr'
         deev_error['trial_type'] = 'decision_error'
+
+        deev_corr = deev_corr.sort_values('onset',ignore_index=True)
+        deev_error = deev_error.sort_values('onset',ignore_index=True)
         return deev_corr, deev_error
 
     def pressButton(self):
@@ -388,6 +397,7 @@ class Game2EV(object):
             pbev['modulation'] = 1
         else:
             raise Exception("You need specify behavioral data format.")
+        pbev = pbev.sort_values('onset',ignore_index=True)
         return pbev
 
     def genpm(self, m2ev_corr, ifold):
@@ -404,10 +414,10 @@ class Game2EV(object):
     def game2ev(self, ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
+        pbev = self.pressButton()
         trial_corr, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
         deev_corr, deev_error = self.genDeev(trial_corr)
-        pbev = self.pressButton()
         pmod_sin, pmod_cos = self.genpm(m2ev_corr, ifold)
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error,deev_corr, deev_error,pbev,
@@ -419,12 +429,12 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_old/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_2phases_correct_trials/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_old/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_2phases_correct_trials/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")
@@ -456,7 +466,7 @@ def gen_sub_event(task, subjects):
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
     data = participants_data.query(f'{task}_fmri==1')

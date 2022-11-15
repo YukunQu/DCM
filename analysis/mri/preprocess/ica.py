@@ -1,3 +1,4 @@
+import os
 import time
 import pandas as pd
 from os.path import join as opj
@@ -5,7 +6,7 @@ from subprocess import Popen, PIPE
 import glob
 
 ## signle run ICA
-signal_ica = True
+signal_ica = False
 if signal_ica:
     func_data = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep/sub-011/func/sub-011_task-game1_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
     ica_output = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep/sub-011/func/sub-011_task-game1_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.ica'
@@ -35,7 +36,6 @@ sub_list = []
 sub_set_num = 0
 sub_set = []
 for i, sub in enumerate(subject_list):
-
     sub_set.append(sub)
     if len(sub_set) == 5:
         sub_list.append(sub_set)
@@ -45,16 +45,26 @@ for i, sub in enumerate(subject_list):
     else:
         continue
 
+
 for subject_chunk in sub_list:
     func_list = []
     for subj_id in subject_chunk:
+        sub_dir = f'/mnt/workdir/DCM/BIDS/derivatives/melodic/{subj_id}'
+        if not os.path.exists(sub_dir):
+                os.mkdir(sub_dir)
         func_list.extend(glob.glob(opj(fmriprep_dir,
-                                       f'{subj_id}/func/{subj_id}_task-*_run-*_space-MNI152NLin2009cAsym_res-2_desc-preproc_blod_smooth8.nii')))
+                                       f'{subj_id}/func/{subj_id}_task-game1_run-*_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz')))
     func_list.sort()
-    output_list = [f.replace('.nii', '.ica') for f in func_list]
+    output_list = []
+    for f in func_list:
+        f= f.replace('.nii', '.ica')
+        f= f.replace(fmriprep_dir, '/mnt/workdir/DCM/BIDS/derivatives/melodic')
+        f= f.replace('/func','')
+        output_list.append(f)
 
-    melodic_decomposition_command = 'melodic -i {} -o {} -v --nobet --bgthreshold=1 --tr=3 --mmthresh=0.5 --report'
-    cmds_list = [melodic_decomposition_command.format(func_data, ica_output) for func_data, ica_output in
+    melodic_decomposition_command = 'melodic -i {} -o {} -v --nobet -m {} --tr=3 --mmthresh=0.5 --report'
+    mask =  r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_6mm.nii'
+    cmds_list = [melodic_decomposition_command.format(func_data, ica_output,mask) for func_data, ica_output in
                  zip(func_list, output_list)]
     procs_list = []
     for cmd in cmds_list:

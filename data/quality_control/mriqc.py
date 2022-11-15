@@ -25,7 +25,7 @@ sub_set = ''
 for i,sub in enumerate(unexist_subjects):
     sub_set = sub_set + sub + ' '
     sub_set_num = sub_set_num+1
-    if sub_set_num == 8:
+    if sub_set_num == 10:
         sub_list.append(sub_set[:-1])
         sub_set_num = 0
         sub_set = ''
@@ -35,8 +35,8 @@ for i,sub in enumerate(unexist_subjects):
         continue
 
 #%%
-mriqc_participant = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out participant --participant_label {} -m T1w bold -v --omp-nthreads 66'
-mriqc_group = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out group -m T1w bold -v --omp-nthreads 66'
+mriqc_participant = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out participant --participant_label {} -m T1w bold -v --omp-nthreads 100'
+mriqc_group = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out group -m T1w bold -v --omp-nthreads 100'
 
 bids_dir = r'/mnt/workdir/DCM/BIDS'
 out_dir = r'/mnt/workdir/DCM/BIDS/derivatives/mriqc'
