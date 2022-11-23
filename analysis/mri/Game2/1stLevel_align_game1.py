@@ -25,7 +25,7 @@ from nipype.algorithms.misc import Gunzip
 from nipype.interfaces.io import DataSink
 from nipype.interfaces import spm
 
-from analysis.mri.zscore_nii import zscore_nii
+from analysis.mri.img.zscore_nii import zscore_nii
 
 
 def run_info(ev_file,motions_file=None):

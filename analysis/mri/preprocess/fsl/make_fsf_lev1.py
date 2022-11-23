@@ -11,7 +11,7 @@ from os.path import join as opj
 
 start_time = time.time()
 # Set this to the directory where you'll dump all the fsf files
-fsfdir = "/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF"
+fsfdir = "/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF/smooth_0"
 
 # filter subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'

@@ -35,7 +35,7 @@ for i,sub in enumerate(unexist_subjects):
         continue
 
 #%%
-mriqc_participant = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out participant --participant_label {} -m T1w bold -v --omp-nthreads 100'
+mriqc_participant = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out participant --participant_label {} -m T1w bold -v --omp-nthreads 10'
 mriqc_group = 'docker run --rm -v {}:/data:ro -v {}:/out nipreps/mriqc:latest /data /out group -m T1w bold -v --omp-nthreads 100'
 
 bids_dir = r'/mnt/workdir/DCM/BIDS'
@@ -50,7 +50,7 @@ for subj in sub_list:
 
 command = mriqc_group.format(bids_dir,out_dir)
 print("Command:",command)
-subprocess.call(command, shell=True)
+#subprocess.call(command, shell=True)
 
 endtime = time.time()
 print('总共的时间为:', round((endtime - starttime)/60/60,2), 'h')

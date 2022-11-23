@@ -1,6 +1,6 @@
 import os
 import pandas as pd
-from analysis.mri.zscore_nii import zscore_nii
+from analysis.mri.img.zscore_nii import zscore_nii
 from analysis.mri.voxel_wise.firstLevel import firstLevel_RSA
 
 # specify subjects

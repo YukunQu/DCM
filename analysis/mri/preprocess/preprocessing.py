@@ -34,7 +34,7 @@ sub_set = ''
 for i,sub in enumerate(subject_list):
     sub_set = sub_set + sub + ' '
     sub_set_num = sub_set_num+1
-    if sub_set_num == 8:
+    if sub_set_num == 3:
         sub_list.append(sub_set[:-1])
         sub_set_num = 0
         sub_set = ''
@@ -45,7 +45,7 @@ for i,sub in enumerate(subject_list):
 #%%
 #command_surfer = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 100'
 #command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 80 --fs-no-reconall'
-command_volume_fmapless = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w --no-tty -w {} --nthreads 80 --fs-no-reconall --use-syn-sdc'
+command_volume_fmapless = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w func --no-tty -w {} --nthreads 24 --fs-no-reconall --use-syn-sdc'
 
 starttime = time.time()
 for subj in sub_list:

@@ -1,17 +1,18 @@
 import os
 import pandas as pd
-from analysis.mri.zscore_nii import zscore_nii
+from analysis.mri.img.zscore_nii import zscore_nii
 from analysis.mri.voxel_wise.firstLevel import firstLevel_noPhi
+
 
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri==1')
-#data = data.query("(game1_acc>=0.8)and(Age>=18)")  # high performance subjects only
+#data = data.query("(game1_acc>=0.8)and(Age>=18)")  #high performance subjects only
 pid = data['Participant_ID'].to_list()
 
 # check the existence of preprocessing file
-fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/simulation_data'
+fmriprep_dir = r'/mnt/data/DCM/derivatives/fmriprep_volume_v22_nofmap'
 preprocess_subs = os.listdir(fmriprep_dir)
 preprocess_subs = [p for p in preprocess_subs if ('sub-'in p) and ('html' not in p)]
 for p in pid:
@@ -19,13 +20,13 @@ for p in pid:
         print(f"The {p} didn't have preprocess files.")
 
 # configure parameters
-configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/simulation_data',
+configs = {'data_root': fmriprep_dir,
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task':'game1',
-           'glm_type': 'separate_hexagon_2phases_correct_trials',  # look out
-           'func_name':'sub-{subj_id}_task-game1_run-0{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_simulated.nii.gz',
+           'glm_type': 'whole_hexagon_correct_trials',  # look out
+           'func_name': 'func/sub-{subj_id}_task-game1_run-0{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
-           'regressor_name':'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
+           'regressor_name':'func/sub-{subj_id}_task-game1_run-0{run_id}_desc-confounds_timeseries.tsv'}
 
 # filter the subjects who exist.
 target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/{}/Setall/6fold'.format(configs['glm_type'])
@@ -38,9 +39,8 @@ print("{} subjects are ready.".format(len(subject_list)))
 
 set_id = 'all'
 runs = [1,2,3,4,5,6]
-#runs = [1,2]
 ifold = '6fold'
-firstLevel_noPhi(subject_list, set_id, runs, ifold, configs)
+#firstLevel_noPhi(subject_list, set_id, runs, ifold, configs)
 
 # zscore 1st level
 cmap_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{configs["task"]}/{configs["glm_type"]}/Set{set_id}'

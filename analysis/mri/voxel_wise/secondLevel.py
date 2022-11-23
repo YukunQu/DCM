@@ -63,7 +63,14 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
     cont01 = ['Group', 'T', ['mean'], [1]]
     level2conestimate.inputs.contrasts = [cont01]
 
-    level2thresh = Node(Threshold(contrast_index=1,extent_fdr_p_threshold=0.05),
+    level2thresh = Node(Threshold(contrast_index=1,
+                                  use_topo_fdr=True,
+                                  use_fwe_correction=False,
+                                  extent_threshold=0,
+                                  height_threshold=0.01,
+                                  height_threshold_type='p-value',
+                                  extent_fdr_p_threshold=0.05,
+                                  ),
                         name="level2thresh")
 
     # 2nd workflow

@@ -16,7 +16,6 @@ from nipype.interfaces.io import DataSink
 from nipype.interfaces import spm
 
 
-
 def firstLevel_noPhi(subject_list,set_id,runs,ifold,configs):
     glm_type = configs['glm_type']
     if glm_type == 'separate_hexagon_2phases_correct_trials':
@@ -105,9 +104,9 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
     event_name = configs['event_name']
     regressor_name = configs['regressor_name']
 
-    templates = {'func': pjoin(data_root,'sub-{subj_id}/func',func_name),
+    templates = {'func': pjoin(data_root,'sub-{subj_id}',func_name),
                  'event': pjoin(event_dir,task, glm_type, 'sub-{subj_id}', ifold, event_name),
-                 'regressors':pjoin(data_root,'sub-{subj_id}/func',regressor_name)
+                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name)
                  }
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
@@ -171,7 +170,7 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                                      ),
                      name='modelspec')
 
-    mask_img = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_6mm.nii'
+    mask_img = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_3mm.nii'
     # Level1Design - Generates an SPM design matrix
     level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
                                      timing_units='secs',
@@ -203,10 +202,10 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                          (runs_prep, modelspec,     [('run_info','subject_info')]),
 
                          (selectfiles, gunzip_func,  [('func','in_file')]),
-                         (gunzip_func, smooth,      [('out_file','in_files')]),
-                         (smooth, modelspec,        [('smoothed_files','functional_runs')]),
+                         (gunzip_func, smooth,       [('out_file','in_files')]),
+                         (smooth, modelspec,         [('smoothed_files','functional_runs')]),
 
-                         (modelspec,level1design,[('session_info','session_info')]),
+                         (modelspec,level1design,    [('session_info','session_info')]),
                          (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
 
                          (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
@@ -221,7 +220,7 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                          ])
 
     # run the 1st analysis
-    analysis1st.run('MultiProc', plugin_args={'n_procs': 30})
+    analysis1st.run('MultiProc', plugin_args={'n_procs': 35})
 
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
@@ -830,16 +829,24 @@ def run_info_whole_correct_trials(ev_file,motions_file=None):
             pmod_params.append(group[1].modulation.tolist())
             pmod_polys.append(1)
 
-    motions_df = pd.read_csv(motions_file,sep='\t')
+    run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
+    if conditions == ['M1','infer_corr','infer_error']:
+        pmod = [None,run_pmod,None]
+        orth = ['No','No','No']
+    elif conditions == ['M1','infer_corr']:
+        pmod = [None,run_pmod]
+        orth = ['No','No']
+    else:
+        raise Exception("The conditions are not expected.")
 
-    motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z']
+    motions_df = pd.read_csv(motions_file,sep='\t')
+    motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z',
+                      'csf','white_matter']
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
 
-    run_pmod = Bunch(name=pmod_names,param=pmod_params,poly=pmod_polys)
-    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,pmod=[None,None,None,run_pmod,None,None],
-                     orth=['No','No','No','No','No','No'],
-                     regressor_names=motion_columns,regressors=motions)
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,
+                     pmod=pmod,orth=orth,regressor_names=motion_columns,regressors=motions)
     return run_info
 
 
@@ -864,9 +871,9 @@ def firstLevel_noPhi_whole_correct_trials(subject_list,set_id,runs,ifold,configs
     event_name = configs['event_name']
     regressor_name = configs['regressor_name']
 
-    templates = {'func': pjoin(data_root,'sub-{subj_id}/func',func_name),
-                 'event': pjoin(event_dir,task, glm_type,'sub-{subj_id}',ifold, event_name),
-                 'regressors':pjoin(data_root,'sub-{subj_id}/func',regressor_name)
+    templates = {'func': pjoin(data_root,'sub-{subj_id}',func_name),
+                 'event': pjoin(event_dir,task, glm_type, 'sub-{subj_id}', ifold, event_name),
+                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name)
                  }
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
@@ -888,15 +895,17 @@ def firstLevel_noPhi_whole_correct_trials(subject_list,set_id,runs,ifold,configs
 
     # Specify GLM contrasts
     # Condition names
-    condition_names = ['infer_corrxcos^1','infer_corrxsin^1','M2','decision','pressButton']
+    condition_names = ['infer_corrxcos^1','infer_corrxsin^1','M1']
 
     # contrasts
-    cont01 = ['infer_corrxcos^1',   'T', condition_names, [1, 0, 0, 0, 0]]
-    cont02 = ['infer_corrxsin^1',   'T', condition_names, [0, 1, 0, 0, 0]]
+    cont01 = ['infer_corrxcos^1',   'T', condition_names, [1, 0, 0]]
+    cont02 = ['infer_corrxsin^1',   'T', condition_names, [0, 1, 0]]
 
     cont03 = ['hexagon', 'F', [cont01, cont02]]
 
-    contrast_list = [cont01, cont02, cont03]
+    cont04 = ['visual','T',condition_names, [0, 0, 1]]
+
+    contrast_list = [cont01, cont02, cont03, cont04]
 
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
@@ -919,7 +928,7 @@ def firstLevel_noPhi_whole_correct_trials(subject_list,set_id,runs,ifold,configs
                                      ),
                      name='modelspec')
 
-    mask_img = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_6mm.nii'
+    mask_img = r'/mnt/workdir/DCM/docs/Reference/Mask/res-02_desc-brain_mask_12mm.nii'
     # Level1Design - Generates an SPM design matrix
     level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
                                      timing_units='secs',

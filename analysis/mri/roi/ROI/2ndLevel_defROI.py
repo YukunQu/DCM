@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 from nilearn.image import mean_img
-from analysis.mri.zscore_nii import zscore_nii
+from analysis.mri.img.zscore_nii import zscore_nii
 from analysis.mri.Whole_brain_analysis.secondLevel import level2nd_noPhi
 
 task = 'game1'

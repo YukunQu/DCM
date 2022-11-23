@@ -38,12 +38,27 @@ def run_feat_preprocess_parall(fsf_file_list):
 
 
 if  __name__ == "__main__":
-    fsf_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF'
+
+    """
+    # all fsf in fsf dir
+    fsf_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF/smooth_6'
     fsf_tempalte = 'design_sub-*_run-*.fsf'
 
     fsf_file_list = glob.glob(os.path.join(fsf_dir,fsf_tempalte))
     fsf_file_list.sort()
+    """
 
-    fsf_file_chunk = list_to_chunk(fsf_file_list,24)
+    #  fsf file of subjects
+    subject_list = [36,46]
+    subject_list = [str(s).zfill(3) for s in subject_list]
+
+    fsf_file_list = []
+    fsf_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF/smooth_0'
+    fsf_tempalte = 'design_sub-{}_run-0{}.fsf'
+    for s in subject_list:
+        for run_id in range(1,7):
+            fsf_file_list.append(os.path.join(fsf_dir,fsf_tempalte.format(s,run_id)))
+
+    fsf_file_chunk = list_to_chunk(fsf_file_list,30)
     for fsf_files in fsf_file_chunk:
         run_feat_preprocess_parall(fsf_files)

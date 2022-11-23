@@ -1,15 +1,15 @@
 import numpy as np
 import pandas as pd
 from nilearn import masking,image
-
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+sns.set_theme(style="whitegrid")
+#%%
 
 # Compare covariate effect in different ROI with different contrast
 covariate = 'age'
 
-zmap_template = r'/mnt/data/DCM/result_backup/2022.10.30/separate_hexagon_2phases_correct_trials/Setall/group/covariates' \
+zmap_template = r'/mnt/data/DCM/result_backup/2022.11.22/game1_hp_noICA/separate_hexagon_2phases_correct_trials/Setall/group/covariates' \
                 r'/{}/2ndLevel/_contrast_id_{}/spmT_0002.nii'
 
 # roi
@@ -17,11 +17,11 @@ rois = {'EC':r'/mnt/workdir/DCM/docs/Reference/Mask/EC_ROI/volume/EC-thr25-2mm.n
        'mPFC':r'/mnt/workdir/DCM/docs/Reference/Mask/Park_Grid_ROI/mPFC_roi.nii'}
 
 # contrast
-contrast = ['ZF_0005','ZF_0006','ZF_0011']
+contrast = ['ZF_0003']
 contrast_names = ['M2','Decision','Average']
 
 mni_template = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_T1w.nii.gz'
-
+#%%
 df1 = pd.DataFrame()
 df2 = pd.DataFrame()
 for roi_name,roi_path in rois.items():
@@ -43,11 +43,18 @@ g.set(ylim=(0,2),title="hexagonal effect covary with age.")
 
 #%%
 # mean effect of high performance subjects across different phase in EC
-zmap_template = r'/mnt/workdir/DCM/tmp/result_backup/2022.10.21/game1/whole_hexagon_correct_trials/Setall/group/hp/2ndLevel/_contrast_id_{}/spmT_0001.nii'
+mni_template = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_T1w.nii.gz'
+zmap_template = r'/mnt/data/DCM/result_backup/2022.11.22/game1_hp/separate_hexagon_2phases_correct_trials/Setall/group/hp/2ndLevel/_contrast_id_{}/spmT_0001.nii'
+roi_path = r'/mnt/workdir/DCM/docs/Reference/Mask/EC_ROI/volume/EC-thr50-2mm.nii.gz'
+
+contrast = ['ZF_0005','ZF_0006','ZF_0011']
+contrast_names = ['M2','Decision','Average']
+
 df1 = pd.DataFrame()
 df2 = pd.DataFrame()
 for i,con in enumerate(contrast):
     zmap = zmap_template.format(con)
+    roi_resampled = image.resample_to_img(roi_path,mni_template,'nearest')
     roi_zvalues = masking.apply_mask(zmap, roi_resampled)
     voxel_num_above_thr = sum(roi_zvalues >= 2.3)
     df1 = df1.append({'contrast':contrast_names[i],'voxel_num':voxel_num_above_thr,
@@ -56,11 +63,10 @@ for i,con in enumerate(contrast):
         df2 = df2.append({'contrast':contrast_names[i],'zvalue':v},ignore_index=True)
 sns.set_theme(style="whitegrid")
 
+
 plt.figure(figsize=(10,20))
-g=sns.violinplot(data=df2, x="contrast", y="zvalue",
-                palette="dark", alpha=.6)
-g.set_axis_labels("contrast", "t")
-sns.catplot(data=df2,kind='bar',x="contrast",y="zvalue",palette="dark", alpha=.6, height=6)
+g = sns.catplot(data=df2,kind='bar',x="contrast",y="zvalue",palette="dark", alpha=.6, height=6)
+g.set(ylim=(-1,0.5))
 #%%
 # chart the individual difference between different phases
 import numpy as np

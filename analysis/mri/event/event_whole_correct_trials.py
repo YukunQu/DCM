@@ -14,8 +14,7 @@ import pandas as pd
 
 class Game1EV(object):
     """
-    model the hexagonal effect from the onset of M2 to press button,
-    but also model the onset time of visual stimuli with stick function.
+    model the hexagonal effect from the onset from M2 to press button,
     """
     def __init__(self, behDataPath):
         self.behDataPath = behDataPath
@@ -63,70 +62,6 @@ class Game1EV(object):
             raise Exception("You need specify behavioral data format.")
         m1ev = m1ev.sort_values('onset',ignore_index=True)
         return m1ev
-
-    def genM2ev(self):
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['pic2_render.started'] - self.starttime
-            duration = 0
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['pic2_render.started_raw'] - self.starttime
-            duration = 0
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        else:
-            raise Exception("The input file is wrong! You need specify behavioral data format.")
-        m2ev = m2ev.sort_values('onset',ignore_index=True)
-        return m2ev
-
-    def genDeev(self):
-        # generate the event of decision
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1.started'] - self.starttime
-            duration = 0
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = 0
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        else:
-            raise Exception("The input file is wrong! You need specify behavioral data format.")
-        deev = deev.sort_values('onset',ignore_index=True)
-        return deev
-
-    def pressButton(self):
-        if self.dformat == 'trial_by_trial':
-            pb_data = self.behData.copy()
-            pb_data = pb_data.dropna(axis=0, subset=['resp.rt'])
-            onset = pb_data['cue1.started'] - self.starttime + pb_data['resp.rt']
-            duration = 0
-            angle = pb_data['angles']
-            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
-            pbev['trial_type'] = 'pressButton'
-            pbev['modulation'] = 1
-        elif self.dformat == 'summary':
-            pb_data = self.behData.copy()
-            pb_data = pb_data.dropna(axis=0, subset=['resp.rt_raw'])
-            onset = pb_data['cue1.started_raw'] - self.starttime + pb_data['resp.rt_raw']
-            duration = 0
-            angle = pb_data['angles']
-            pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
-            pbev['trial_type'] = 'pressButton'
-            pbev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        return pbev
 
     def label_trial_corr(self):
         self.behData = self.behData.fillna('None')
@@ -188,7 +123,6 @@ class Game1EV(object):
             raise Exception("You need specify behavioral data format.")
 
         assert len(inferev) == len(trial_corr), "The number of trial label didn't not same as the number of event-decision."
-
         infer_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
         infer_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
         for i, trial_label in enumerate(trial_corr):
@@ -215,14 +149,11 @@ class Game1EV(object):
     def game1ev(self, ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
-        m2ev = self.genM2ev()
-        deev = self.genDeev()
-        pbev = self.pressButton()
         trial_corr, accuracy = self.label_trial_corr()
         infer_corr, infer_error = self.inferev(trial_corr)
         pmod_sin, pmod_cos = self.hexagon_pm(infer_corr, ifold)
 
-        event_data = pd.concat([m1ev,m2ev,deev,pbev,infer_corr, infer_error,
+        event_data = pd.concat([m1ev,infer_corr, infer_error,
                                 pmod_sin, pmod_cos], axis=0)
         return event_data
 
@@ -270,7 +201,6 @@ def gen_sub_event(task, subjects):
 if __name__ == "__main__":
 
     task = 'game1'
-
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
     data = participants_data.query(f'{task}_fmri==1')

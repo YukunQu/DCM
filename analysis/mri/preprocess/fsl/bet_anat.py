@@ -36,7 +36,7 @@ for subject_chunk in sub_list:
     anat_list = []
     for subj_id in subject_chunk:
         # initilize the preprocessed image directory
-        sub_dir = f'/mnt/workdir/DCM/BIDS/derivatives/fsl/preprocessed/{subj_id}'
+        sub_dir = f'/mnt/workdir/DCM/BIDS/derivatives/fsl/preprocessed/smooth_6/{subj_id}'
         if not os.path.exists(sub_dir):
             os.mkdir(sub_dir)
             os.mkdir(os.path.join(sub_dir,'anat'))
@@ -49,13 +49,13 @@ for subject_chunk in sub_list:
 
     cp_list = []
     for a in anat_list:
-        a = a.replace(bids_dir, '/mnt/workdir/DCM/BIDS/derivatives/fsl/preprocessed')
+        a = a.replace(bids_dir, '/mnt/workdir/DCM/BIDS/derivatives/fsl/preprocessed/smooth_0')
         cp_list.append(a)
 
     output_list = []
     for a in anat_list:
         a = a.replace('T1w.nii', 'T1w_brain.nii')
-        a = a.replace(bids_dir, '/mnt/workdir/DCM/BIDS/derivatives/fsl/preprocessed')
+        a = a.replace(bids_dir, '/mnt/workdir/DCM/BIDS/derivatives/fsl/preprocessed/smooth_0')
         output_list.append(a)
 
     cp_command = 'cp {} {}'
