@@ -8,7 +8,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from preparation.stimuli.utils import genPairRelation
+from exp.exp_condition.utils import genPairRelation
 
 
 def plot6foldSpecificity(paramEsti_df):

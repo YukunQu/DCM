@@ -6,10 +6,10 @@ Created on Sat Sep 11 09:32:48 2021
 """
 import random
 import numpy as np
-from preparation.simulation import utils,plot
+from exp.simulation import utils,plot
 import matplotlib.pyplot as plt
 import pandas as pd
-from preparation.simulation.plot import plotAngleRadar
+from exp.simulation.plot import plotAngleRadar
 
 
 def testSimulation():
@@ -19,9 +19,6 @@ def testSimulation():
     plt.plot(np.deg2rad(angles),activation)
     plt.xtick()
     plt.show()
-    
-
-
 
 #%%
 pairRelation = pd.read_excel(r'C:\Myfile\File\工作\PhD\Development cognitive map\experiment\task\dcm_day1\map_set\5x5\map1/pairs_relationship.xlsx')

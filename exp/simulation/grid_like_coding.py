@@ -8,20 +8,16 @@ Created on Wed Sep  8 16:00:38 2021
 """
 import random
 import pandas as pd
-from preparation.simulation import utils
-from preparation.simulation import plot
+from exp.simulation import utils
+from exp.simulation import plot
 
 # setting parameters
-
 levels = 5
 ntrials = 252
 nsub=20
-ampNoise = 10
-
+ampNoise = 1
 #%%
 # grid-like coding simulation #
-
-
 # sampling the angles
 angles,m1s,m2s = utils.samplingAngle(levels,ntrials)
 

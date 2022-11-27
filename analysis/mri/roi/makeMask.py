@@ -3,17 +3,11 @@
 """
 Created on Tue Feb 22 17:54:13 2022
 
-@author: dell
+@author: QYK
 """
-import os
-from os.path import join as opj
 import numpy as np
-import pandas as pd
 from nilearn.masking import apply_mask
-from nilearn.image import load_img,resample_to_img,binarize_img,new_img_like
-from nltools.mask import create_sphere
-from nltools.data import Brain_Data
-from nibabel.affines import apply_affine
+from nilearn.image import load_img,resample_to_img,new_img_like
 
 
 def get_coordinate(image, mask):
@@ -26,9 +20,9 @@ def get_coordinate(image, mask):
     coords = np.where(data==peak_value)
     peak_coords = [coords[0][0], coords[1][0], coords[2][0]]
     return peak_coords
-    
 
-def sphere_roi(voxloc, radius, value, datashape = (91,109,91), data = None):
+
+def sphere_roi(voxloc, radius, value, datashape=(91,109,91), data = None):
     """
     Generate a sphere roi which centered in (x,y,z)
     Parameters:
@@ -39,7 +33,7 @@ def sphere_roi(voxloc, radius, value, datashape = (91,109,91), data = None):
         data: Add sphere roi into your data, by default data is an empty array
     output:
         data: sphere roi image data
-        loc: sphere roi coordinates
+        loc:  sphere roi coordinates
     """
     if data is not None:
         try:
@@ -73,8 +67,8 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None
     mask = resample_to_img(mask, image,interpolation='nearest')
     if coords == None:
         coords = get_coordinate(image,mask)
-    # mni_coords = apply_affine(image.affine, coords)
-    
+        print(coords)
+
     datashape = image.shape
     mask,loc = sphere_roi(coords,radius,label,datashape=datashape,data=image.get_fdata())
     
@@ -85,24 +79,13 @@ def makeSphereMask(imgpath,mask_path,savepath,radius=(2,2,2),label=1,coords=None
     roi_img.to_filename(savepath)
 
 
-#%%
-if __name__ == "__main__":
-    # define ROI from F-test group result
-    import os
-    task = 'game1'
-    glm_type = 'separate_hexagon'
+def makeSphereMask_coords(ref_img,savepath,coords,radius=(2,2,2),label=1):
+    image = load_img(ref_img)
+    datashape = image.shape
+    mask,loc = sphere_roi(coords,radius,label,datashape=datashape,data=image.get_fdata())
 
-    subjects = os.listdir(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/6fold')
-
-    # EC
-    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0006/spmT_0002.nii'
-    roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
-    savepath = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/defROI/EC/group_EC_func_roi.nii'
-    makeSphereMask(stats_map, roi, savepath, radius=(5/3,5/3,5/3))
-    """
-    # vmpfc
-    stats_map = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0011/spmT_0002.nii'
-    roi = r'/mnt/data/Template/VMPFC_roi.nii'
-    savepath =f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/defROI/vmPFC/vmPFC_func_roi.nii'
-    makeSphereMask(stats_map, roi, savepath, radius=(2,2,2))
-    """
+    roi_data = np.zeros_like(image.get_fdata())
+    for coord in loc:
+        roi_data[coord[0],coord[1],coord[2]] = 1
+    roi_img = new_img_like(image, roi_data)
+    roi_img.to_filename(savepath)

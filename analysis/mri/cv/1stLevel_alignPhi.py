@@ -38,7 +38,7 @@ def run_info(ev_file,motions_file=None):
     pmod_polys  = []
 
     ev_info = pd.read_csv(ev_file, sep='\t')
-    trial_con = ['M1','M2_corr','M2_error','decision_corr','decision_error','pressButton']
+    trial_con = ['M1','M2_corr','M2_error','decision_corr','decision_error']
     for group in ev_info.groupby('trial_type'):
         condition = group[0]
         if condition in trial_con:
@@ -71,7 +71,7 @@ def run_info(ev_file,motions_file=None):
     return run_info
 
 
-def alignFai_1stLevel(subject_list, set_id, runs, ifold, configs):
+def alignPhi_1stLevel(subject_list, set_id, runs, ifold, configs):
     # start cue
     print("test set", set_id, " ", ifold, " start!")
 
@@ -357,3 +357,5 @@ if __name__ == "__main__":
     end_time = time.time()
     run_time = end_time - start_time
     print("Run time cost {}".format(round(run_time / 60 / 60, 2)))
+
+

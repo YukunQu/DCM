@@ -8,7 +8,7 @@ Created on Fri Sep 17 20:42:57 2021
 import os 
 import numpy as np
 import pandas as pd
-from simulation.plot import plotAngleRadar
+from exp.simulation.plot import plotAngleRadar
 #%%
 bestSampleAngle = 0
 maxInferNum = 0

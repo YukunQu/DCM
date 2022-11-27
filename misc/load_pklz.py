@@ -1,2 +1,2 @@
 from nipype.utils.filemanip import loadpkl
-res = loadpkl(r'')
+res = loadpkl(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/game1/separate_hexagon_correct_trials_train/Set1/8fold/work_1st/_subj_id_120/level1conest/result_level1conest.pklz')

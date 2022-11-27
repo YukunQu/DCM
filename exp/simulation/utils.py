@@ -48,7 +48,7 @@ def genSimulateData(angles,omega=None,ampNoise=0.1):
     y_true = []
     for angle in angles:
         noise =  ampNoise * np.random.rand()
-        y_true.append(12 + 1*np.cos(np.deg2rad(6*(angle - omega))) + noise)
+        y_true.append(1 + 1*np.cos(np.deg2rad(6*(angle - omega))) + noise)
     return y_true
 
 
@@ -60,7 +60,7 @@ def gridCodeParamEsti(trainData,testData,ifold):
     x2 = np.cos(np.deg2rad([ifold*a for a in trainAngles]))
     X= np.stack((x0,x1,x2),axis=1)
     betaTrain = np.linalg.pinv(X).dot(trainData['activation'])
-    omega_estimate = np.rad2deg(np.arctan2(betaTrain[1],betaTrain[2]))/ifold
+    omega_estimate = np.rad2deg(np.arctan2(betaTrain[1],betaTrain[2])/ifold)
         
     # test the omega effect
     x = []
@@ -73,4 +73,3 @@ def gridCodeParamEsti(trainData,testData,ifold):
     fit_summary = glm_model.fit()
     beta_estimate = fit_summary.params[1]
     return omega_estimate, beta_estimate
-

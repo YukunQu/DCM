@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 
-class Game1_AlignPhi(object):
+class Game1_alignPhi(object):
     def __init__(self,behDataPath):
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
@@ -134,8 +134,8 @@ class Game1_AlignPhi(object):
         m2ev_corr['trial_type'] = 'M2_corr'
         m2ev_error['trial_type'] = 'M2_error'
 
-        m2ev_corr = m2ev_corr.sort_values('onset',ignore_index=True)
-        m2ev_error = m2ev_error.sort_values('onset',ignore_index=True)
+        m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
+        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
         return m2ev_corr, m2ev_error
 
     def genDeev(self,trial_corr):
@@ -178,19 +178,16 @@ class Game1_AlignPhi(object):
 
     def pressButton(self):
         if self.dformat == 'trial_by_trial':
-            pressB_data = self.behData.copy()
-            pressB_data = pressB_data.dropna(axis=0,subset=['resp.rt'])
-            onset = pressB_data['cue1.started'] - self.starttime + pressB_data['resp.rt']
+            onset = self.behData['cue1.started'] - self.starttime
             duration = 0
-            angle = pressB_data['angles']
+            angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
         elif self.dformat == 'summary':
-            pressB_data = self.behData.copy().dropna(axis=0, subset=['resp.rt_raw'])
-            onset = pressB_data['cue1.started_raw'] - self.starttime + pressB_data['resp.rt_raw']
+            onset = self.behData['cue1.started_raw'] - self.starttime
             duration = 0
-            angle = pressB_data['angles']
+            angle = self.behData['angles']
             pbev = pd.DataFrame({'onset':onset,'duration':duration,'angle':angle})
             pbev['trial_type'] = 'pressButton'
             pbev['modulation'] = 1
