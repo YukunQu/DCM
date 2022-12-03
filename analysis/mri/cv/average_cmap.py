@@ -5,16 +5,16 @@ from nilearn.image import load_img,mean_img
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')
-data = participants_data.query('game1_fmri==1')  # look out
+data = participants_data.query('game1_fmri>=0.5')  # look out
 pid = data['Participant_ID'].to_list()
 subjects = [p.replace('_','-') for p in pid]
 
 # set cmap directory
-cmap_dir1 = r'/mnt/data/DCM/result_backup/2022.11.27/EC/alignPhi_separate_correct_trials/Seteven'
-cmap_dir2 = r'/mnt/data/DCM/result_backup/2022.11.27/EC/alignPhi_separate_correct_trials/Setodd'
+cmap_dir1 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/alignPhi_separate_correct_trials_EC/Seteven'
+cmap_dir2 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/alignPhi_separate_correct_trials_EC/Setodd'
 
 # set save directory
-save_dir = r'/mnt/data/DCM/result_backup/2022.11.27/EC/alignPhi_separate_correct_trials/average'
+save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/alignPhi_separate_correct_trials_EC/average'
 
 # set folds and condition list
 folds = [str(i)+'fold' for i in range(6,7)]

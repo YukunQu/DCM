@@ -6,7 +6,7 @@ from analysis.mri.voxel_wise.firstLevel import firstLevel_noPhi_fir
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
-data = participants_data.query('game1_fmri==1')
+data = participants_data.query('game1_fmri>=0.5')
 pid = data['Participant_ID'].to_list()
 subject_list = [p.split('_')[-1] for p in pid]
 

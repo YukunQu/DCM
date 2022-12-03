@@ -3,10 +3,10 @@ import pandas as pd
 from analysis.mri.roi.makeMask import makeSphereMask,makeSphereMask_coords
 #%%
 # Given coodinates, generate a ROI
-stats_map = r'/mnt/data/DCM/result_backup/2022.11.22/game1/separate_hexagon_2phases_correct_trials/Setall/group/all/2ndLevel/_contrast_id_ZF_0005/spmT_0001.nii'
-coords = (48,37,67)
-radius = (5/3,5/3,5/3)
-savepath = r'/mnt/workdir/DCM/result/ROI/Group/PCC_roi.nii.gz'
+stats_map = r'/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials/Setall/6fold/group/all/2ndLevel/_contrast_id_ZF_0005/spmT_0001.nii'
+coords = (49,92,42)
+radius = (7,7,7)
+savepath = r'/mnt/workdir/DCM/result/ROI/Group/mPFC_roi.nii.gz'
 makeSphereMask_coords(stats_map,savepath,coords,radius)
 
 #%%
@@ -37,3 +37,34 @@ for sub in subject_list:
     savepath = savepath_template.format(sub)
     roi = r'/mnt/workdir/DCM/docs/Reference/EC_ROI/volume/EC-thr50-2mm.nii.gz'
     makeSphereMask(stats_map, roi, savepath, radius=radius)
+
+#%%
+# Computing a Region of Interest (ROI) mask by nilearn
+import numpy as np
+from nilearn.maskers import NiftiMasker
+from nilearn import image
+from analysis.mri.img.zscore_nii import zscore_img
+from nilearn.plotting import plot_stat_map
+
+# load z-transfrom map
+tmap = image.load_img(r'/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials/Setall/6fold/group/all/2ndLevel/_contrast_id_ZF_0005/spmT_0001.nii')
+
+# get threshold map
+img_data = tmap.get_fdata()
+img_data[img_data<3.1] = 0
+tmap_thr = image.new_img_like(tmap,img_data)
+plot_stat_map(tmap_thr,title='', annotate=False,cut_coords=(0,0,0))
+tmap_thr.to_filename('/mnt/workdir/DCM/result/ROI/Group/tmap_thr.nii.gz')
+
+# self-computed mask
+bin_tmap_thr = (img_data!=0)
+
+# load peak point mask
+peak_mask = image.get_data(image.load_img(r'/mnt/workdir/DCM/result/ROI/Group/mPFC_sphere_mask.nii.gz')).astype(bool)
+bin_tmap_thr_peak_spere = np.logical_and(peak_mask, bin_tmap_thr)
+#%%
+from nilearn.plotting import plot_roi, show
+bin_tmap_thr_peak_spere_img = image.new_img_like(tmap,bin_tmap_thr_peak_spere.astype(int))
+plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0,0,0))
+bin_tmap_thr_peak_spere_img.to_filename("/mnt/workdir/DCM/result/ROI/Group/bin_tmap_thr_peak_spere_img.nii")
+#%%

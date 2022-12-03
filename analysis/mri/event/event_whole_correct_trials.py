@@ -182,6 +182,8 @@ def gen_sub_event(task, subjects):
             save_dir = template['save_dir'].format(task,subj,ifold)
             if not os.path.exists(save_dir):
                 os.makedirs(save_dir)
+            else:
+                continue
 
             for idx in runs:
                 run_id = str(idx)
@@ -203,7 +205,7 @@ if __name__ == "__main__":
     task = 'game1'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query(f'{task}_fmri==1')
+    data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
     gen_sub_event(task,subjects)

@@ -25,7 +25,7 @@ from nipype.interfaces.utility import IdentityInterface
 from nipype.interfaces import spm
 
 
-def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
+def level2nd_onesample_ttest(subject_list,contrast_1st,data_root,templates,out_container):
     spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
 
     # data input and ouput
@@ -33,16 +33,12 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
     infosource.iterables = [('contrast_id', contrast_1st)]
     infosource.inputs.subj_id = subject_list
 
-    # SelectFiles
-    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/{set_id}/6fold','sub-{subj_id}', '{contrast_id}.nii')}
-
     # Create SelectFiles node
     selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{task}/{glm_type}/{set_id}/group/{sub_type}'
+    container_path = out_container
     datasink = Node(DataSink(base_directory=data_root,container=container_path),
                     name="datasink")
 
@@ -71,10 +67,9 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
                         name="level2thresh")
 
     # 2nd workflow
-    analysis2nd = Workflow(name='work_2nd',base_dir='/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/'
-                                                    '{}/{}/{}/group/{}'.format(task,glm_type,set_id,sub_type))
-    analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),
-                                                    ('subj_id', 'subj_id')]),
+    analysis2nd = Workflow(name='work_2nd',base_dir=os.path.join(data_root,'working_dir',container_path))
+    analysis2nd.connect([(infosource, selectfiles, [('contrast_id', 'contrast_id'),('subj_id', 'subj_id')]),
+
                          (selectfiles, onesamplettestdes, [('cons', 'in_files')]),
 
                          (onesamplettestdes, level2estimate, [('spm_mat_file','spm_mat_file')]),
@@ -96,7 +91,7 @@ def level2nd_noPhi(subject_list,sub_type,task,glm_type,set_id,contrast_1st):
     analysis2nd.run('MultiProc', plugin_args={'n_procs': 30})
 
 
-def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,contrast_1st,contrast_2nd,covariates,covar_type):
+def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1st,contrast_2nd,covariates,covar_type):
     spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
 
     # data input and ouput
@@ -106,14 +101,14 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,contrast_1st,cont
 
     # SelectFiles
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
-    templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/{set_id}/6fold','sub-{subj_id}', '{contrast_id}.nii')}
+    templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}','sub-{subj_id}', '{contrast_id}.nii')}
 
     # Create SelectFiles node
     selectfiles = MapNode(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{task}/{glm_type}/{set_id}/group/covariates/{covar_type}'
+    container_path = f'{task}/{glm_type}/{set_id}/{ifold}/group/covariates/{covar_type}'
     datasink = Node(DataSink(base_directory=data_root, container=container_path),
                     name="datasink")
 
@@ -171,7 +166,7 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,contrast_1st,cont
     analysis2nd.run('MultiProc', plugin_args={'n_procs': 30})
 
 
-def level2nd_covar_acc(participants_info,task,glm_type,set_id,contrast_1st):
+def level2nd_covar_acc(participants_info,task,glm_type,set_id,ifold,contrast_1st):
     pid = participants_info['Participant_ID'].to_list()
     subject_list = [p.split('-')[-1] for p in pid]
 
@@ -189,10 +184,10 @@ def level2nd_covar_acc(participants_info,task,glm_type,set_id,contrast_1st):
     else:
         raise Exception("Task type is wrong.")
     covar_dir = 'acc'
-    level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,contrast_1st, contrast_2nd, covariates,covar_dir)
+    level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1st,contrast_2nd,covariates,covar_dir)
 
 
-def level2nd_covar_age(participants_info,task,glm_type,set_id,contrast_1st):
+def level2nd_covar_age(participants_info,task,glm_type,set_id,ifold,contrast_1st):
     pid = participants_info['Participant_ID'].to_list()
     subject_list = [p.split('-')[-1] for p in pid]
 
@@ -205,10 +200,10 @@ def level2nd_covar_age(participants_info,task,glm_type,set_id,contrast_1st):
     covariates = {}
     covariates['age'] = participants_info['Age'].to_list()
     covar_dir = 'age'
-    level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,contrast_1st, contrast_2nd, covariates,covar_dir)
+    level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1st,contrast_2nd,covariates,covar_dir)
 
 
-def level2nd_covar_acc_age(paricipants_info,task,glm_type,set_id,contrast_1st):
+def level2nd_covar_acc_age(paricipants_info,task,glm_type,set_id,ifold,contrast_1st):
     pid = paricipants_info['Participant_ID'].to_list()
     subject_list = [p.split('-')[-1] for p in pid]
 
@@ -228,4 +223,4 @@ def level2nd_covar_acc_age(paricipants_info,task,glm_type,set_id,contrast_1st):
         raise Exception("Task type is wrong.")
     covariates['age'] = paricipants_info['Age'].to_list()
     covar_dir = 'acc_age'
-    level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,contrast_1st, contrast_2nd, covariates,covar_dir)
+    level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1st,contrast_2nd,covariates,covar_dir)

@@ -38,24 +38,25 @@ if __name__ == "__main__":
     # subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri==1')
+    data = participants_data.query('game1_fmri>=0.5')
     subjects = data['Participant_ID'].to_list()
 
     # set sin_cmap and cos_cmap
     cos_cmap_template = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-                        'game1/separate_hexagon_correct_trials_train/Set2/{}/{}/con_0001.nii'
+                        'game1/separate_hexagon_correct_trials_train/Set1/{}/{}/con_0009.nii'
 
     sin_cmap_template = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-                        'game1/separate_hexagon_correct_trials_train/Set2/{}/{}/con_0002.nii'
+                        'game1/separate_hexagon_correct_trials_train/Set1/{}/{}/con_0010.nii'
 
     # set ROI
-    roi = r'/mnt/workdir/DCM/result/ROI/Group/mPFC_m2_set2_roi.nii.gz'
+    #roi = r'/mnt/workdir/DCM/result/ROI/Group/estPhi_ROI-EC_On-average_Set2.csv'
+    roi = r'/mnt/workdir/DCM/docs/Mask/Park_Grid_ROI/EC_Grid_roi.nii'
 
     # set output
     outdir = r'/mnt/workdir/DCM/result/CV/Phi'
     if not os.path.exists(outdir):
         os.mkdir(outdir)
-    savepath = os.path.join(outdir,'estPhi_ROI-mPFC_On-m2_Set2.csv')
+    savepath = os.path.join(outdir,'estPhi_ROI-EC_On-average_Set1.csv')
 
     folds = [str(i)+'fold' for i in range(6,7)]
     subs_phi = pd.DataFrame(columns=['sub_id', 'ifold', 'Phi'])
