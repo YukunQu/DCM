@@ -120,8 +120,10 @@ class Game1EV(object):
                 m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
             elif trial_label == False:
                 m2ev_error = m2ev_error.append(m2ev.iloc[i])
+            elif trial_label == None:
+                continue
             else:
-                raise ValueError("The trial label should be True or False.")
+                raise ValueError("The trial label should be True,False or None.")
         m2ev_corr['trial_type'] = 'M2_corr'
         m2ev_error['trial_type'] = 'M2_error'
 

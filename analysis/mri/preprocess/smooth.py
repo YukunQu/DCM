@@ -41,4 +41,4 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     data_root = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep'
     templates = {'func':'{subj_id}/func/{subj_id}_task-*_run-*_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'}
-    # smooth_data(data_root=data_root,subject_list=pid,templates=templates)
+    #smooth_data(data_root=data_root,subject_list=pid,templates=templates)

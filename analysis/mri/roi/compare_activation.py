@@ -77,36 +77,57 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # roi
-roi = r'/mnt/workdir/DCM/docs/Reference/Mask/EC_ROI/volume/EC-thr25-2mm.nii.gz'
+roi = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_R_prob-80.nii.gz'
 mni_template = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_T1w.nii.gz'
 roi_resampled = image.resample_to_img(roi,mni_template,'nearest')
 
 # subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
-data = participants_data.query('game1_fmri==1')
-hp_data = data.query("(game1_acc>=0.8)and(Age>=18)")
-subjects = hp_data['Participant_ID'].to_list()
+data = participants_data.query('game1_fmri>=0.5')
+data = data.query("(game1_acc>=0.7)and(Age>=13)")
+subjects = data['Participant_ID'].to_list()
+age_list = data['Age'].to_list()
 # contrast
 contrast = ['0005','0014','0006','0011','0015']
 contrast_names = ['M2','Planning','Decision','Average','F-test']
 
-contrast = ['0005','0006','0011']
-contrast_names = ['M2','Decision','Average']
-zmap_template = r'/mnt/workdir/DCM/tmp/result_backup/2022.10.15/game1/separate_hexagon_old/' \
-                r'Setall/6fold/{}/ZF_{}.nii'
+zmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/cv_test_dmPFC/Setall/6fold/{}/ZT_0002.nii'
 
-df1 = pd.DataFrame()
-df2 = pd.DataFrame()
-for sub in subjects:
-    for i,con in enumerate(contrast):
-        zmap = zmap_template.format(sub,con)
+df = pd.DataFrame()
+for sub,age in zip(subjects,age_list):
+        zmap = zmap_template.format(sub)
         roi_zvalues = masking.apply_mask(zmap,roi_resampled)
-        voxel_num_above_thr = sum(roi_zvalues>=2.3)
-        df1 = df1.append({'subject':sub,'contrast':contrast_names[i],'voxel_num':voxel_num_above_thr,
-                          'mean':roi_zvalues.mean()},ignore_index=True)
-sns.set_theme(style="whitegrid")
+        df = df.append({'subject':sub,'Age':age,'mean_hexagonal modulation':roi_zvalues.mean()}, ignore_index=True)
+
+
+sns.set_theme(style="darkgrid")
+plt.figure(figsize=(7,7))
+plt.scatter(data=df, x="Age", y="mean_hexagonal modulation")
+
 #%%
-plt.figure(figsize=(15,15))
-g=sns.stripplot(data=df1, x="contrast", y="voxel_num",hue='subject',
-              palette="dark", alpha=.6,size=10)
+# roi
+roi = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_R_prob-80.nii.gz'
+mni_template = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_T1w.nii.gz'
+roi_resampled = image.resample_to_img(roi,mni_template,'nearest')
+
+# subjects
+participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+participants_data = pd.read_csv(participants_tsv, sep='\t')
+data = participants_data.query('game1_fmri>=0.5')
+data = data.query("(game1_acc>=0.7)and(Age>=13)")
+subjects = data['Participant_ID'].to_list()
+acc_list = data['game1_acc'].to_list()
+
+
+zmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/cv_test_dmPFC/Setall/6fold/{}/ZT_0002.nii'
+
+df = pd.DataFrame()
+for sub,acc in zip(subjects,acc_list):
+    zmap = zmap_template.format(sub)
+    roi_zvalues = masking.apply_mask(zmap,roi_resampled)
+    df = df.append({'subject':sub,'Acc':acc,'mean_hexagonal modulation':roi_zvalues.mean()}, ignore_index=True)
+
+sns.set_theme(style="darkgrid")
+plt.figure(figsize=(7,7))
+plt.scatter(data=df, x="Acc", y="mean_hexagonal modulation")

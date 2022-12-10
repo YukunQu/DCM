@@ -68,3 +68,13 @@ bin_tmap_thr_peak_spere_img = image.new_img_like(tmap,bin_tmap_thr_peak_spere.as
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0,0,0))
 bin_tmap_thr_peak_spere_img.to_filename("/mnt/workdir/DCM/result/ROI/Group/bin_tmap_thr_peak_spere_img.nii")
 #%%
+import numpy as np
+from nilearn import image
+
+roi = image.load_img(r'/mnt/workdir/DCM/result/ROI/Group/juelich_EC_R_prob-80.nii.gz')
+roi_data = roi.get_fdata()
+roi_data[roi_data<80]=0
+bin_roi_data = (roi_data!=0)
+new_roi = image.new_img_like(roi,bin_roi_data)
+new_roi_resampled = image.resample_to_img(new_roi,r'/mnt/workdir/DCM/result/ROI/Group/tmap_thr.nii.gz','nearest')
+new_roi_resampled.to_filename(r'/mnt/workdir/DCM/result/ROI/Group/juelich_EC_R_prob-80_new.nii.gz')

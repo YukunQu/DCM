@@ -51,14 +51,14 @@ def get_averge_bmap(bmap_template,indexs):
 
 # peri_stimulus
 # load spm files
-spm_path = r'D:\Project\Development_cognitive_map\Data\BIDS\derivatives\Nipype\fir_hexagon\sub-180\level1estimate/SPM.mat'
+spm_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/game1/separate_hexagon_2phases_correct_trials/Setall/6fold/work_1st/_subj_id_187/level1conest/SPM.mat'
 spmfile = SPMfile(spm_path)
 # get index from spm file
-cos_regs_names = ['infer_corrxcos^1*bf({})'.format(i) for i in range(1,6)] # bf(1) ~ bf(5)
+cos_regs_names = ['infer_corrxcos^1*bf({})'.format(i) for i in range(1,6)]  # bf(1) ~ bf(5)
 sin_regs_names = ['infer_corrxsin^1*bf({})'.format(i) for i in range(1,6)]
 cos_regs_index = spmfile.get_regs_index(cos_regs_names)
 sin_regs_index = spmfile.get_regs_index(sin_regs_names)
-
+#%%
 # extract beta images
 beta_template = r'D:\Project\Development_cognitive_map\Data\BIDS\derivatives\Nipype\fir_hexagon\sub-180\level1estimate\beta_{}.nii'
 cos_peri_stimuli_maps = [get_averge_bmap(beta_template,index) for index in cos_regs_index]

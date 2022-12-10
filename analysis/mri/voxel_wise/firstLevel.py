@@ -9,6 +9,8 @@ from nipype.interfaces.spm import Smooth
 from nipype.interfaces.spm import Level1Design
 from nipype.interfaces.spm import EstimateModel
 from nipype.interfaces.spm import EstimateContrast
+from niflow.nipype1.workflows.fmri.fsl import create_susan_smooth
+from nipype.interfaces.fsl.utils import ExtractROI
 
 from nipype import SelectFiles
 from nipype.algorithms.misc import Gunzip
@@ -20,8 +22,12 @@ def firstLevel_noPhi(subject_list,set_id,runs,ifold,configs):
     glm_type = configs['glm_type']
     if glm_type == 'separate_hexagon_2phases_correct_trials':
         firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs)
-    elif glm_type == 'separate_hexagon_correct_trials_train':
-        firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs)
+    elif glm_type in 'cv_train':
+        firstLevel_cv_train(subject_list,set_id,runs,ifold,configs)
+    elif glm_type in 'cv_train2':
+        firstLevel_cv_train2(subject_list,set_id,runs,ifold,configs)
+    elif 'cv_test' in glm_type:
+        firstLevel_cv_test(subject_list,set_id,runs,ifold,configs)
     elif glm_type == 'separate_hexagon_2phases_all_trials':
         firstLevel_noPhi_separate_all_trials(subject_list,set_id,runs,ifold,configs)
     elif glm_type == 'whole_hexagon_correct_trials':
@@ -83,8 +89,10 @@ def run_info_separate(ev_file,motions_file=None):
         raise Exception("The conditions are not expected.")
 
     motions_df = pd.read_csv(motions_file,sep='\t')
+    confounds_name = motions_df.columns
+    outilers = [confound for confound in confounds_name if 'motion_outlier' in confound]
     motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z',
-                      'csf','white_matter']
+                      'csf','white_matter']  # + outilers
     motions = motions_df[motion_columns]
     motions = motions.fillna(0.0).values.T.tolist()
 
@@ -113,10 +121,13 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
     func_name = configs['func_name']
     event_name = configs['event_name']
     regressor_name = configs['regressor_name']
+    #mask_name = 'func/sub-{subj_id}_task-game1_space-MNI152NLin2009cAsym_res-2_desc-brain_mask_sum.nii'
+    mask_img1 = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
+    mask_img2 = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
 
     templates = {'func': pjoin(data_root,'sub-{subj_id}',func_name),
                  'event': pjoin(event_dir,task, glm_type, 'sub-{subj_id}', ifold, event_name),
-                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name)
+                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name),
                  }
 
     # SelectFiles - to grab the data (alternativ to DataGrabber)
@@ -163,7 +174,15 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
     # Specify Nodes
     gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
 
-    smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+    #smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+    susan = create_susan_smooth()
+    susan.inputs.inputnode.fwhm = 8
+    susan.inputs.inputnode.mask_file = [mask_img1]*6
+
+    trim = MapNode(ExtractROI(),name='trim',iterfield=['in_file'])
+    trim.inputs.t_min = 0
+    trim.inputs.t_size = -1
+    trim.inputs.output_type = 'NIFTI'
 
     # prepare event file
     runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
@@ -181,8 +200,6 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                                      ),
                      name='modelspec')
 
-    mask_img = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
-    #mask_img = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
     # Level1Design - Generates an SPM design matrix
     level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
                                      timing_units='secs',
@@ -190,7 +207,7 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                                      model_serial_correlations='AR(1)',
                                      microtime_resolution=49,
                                      microtime_onset=24,
-                                     mask_image=mask_img,
+                                     mask_image=mask_img2,
                                      flags={'mthresh':float("-inf"),
                                             'volt':1}),
                         name="level1design")
@@ -213,11 +230,19 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                                                      ('regressors','motions_file')]),
                          (runs_prep, modelspec,     [('run_info','subject_info')]),
 
-                         (selectfiles, gunzip_func,  [('func','in_file')]),
-                         (gunzip_func, smooth,       [('out_file','in_files')]),
-                         (smooth, modelspec,         [('smoothed_files','functional_runs')]),
+                         # susan smooth
+                         (selectfiles, susan,      [('func','inputnode.in_files')]),
+                         #(selectfiles, susan,      [('mask','inputnode.mask_file')]),
+                         (susan,trim,              [('outputnode.smoothed_files','in_file')]),
+                         (trim, modelspec,         [('roi_file','functional_runs')]),
+
+                         # normal smooth
+                         #(selectfiles, gunzip_func,  [('func','in_file')]),
+                         #(gunzip_func, smooth,       [('out_file','in_files')]),
+                         #(smooth, modelspec,         [('smoothed_files','functional_runs')]),
 
                          (modelspec,level1design,    [('session_info','session_info')]),
+                        # (selectfiles, level1design, [('mask','mask_image')]),  # look out
                          (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
 
                          (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
@@ -232,11 +257,10 @@ def firstLevel_noPhi_separate(subject_list,set_id,runs,ifold,configs):
                          ])
 
     # run the 1st analysis
-    analysis1st.run('MultiProc',{'n_procs': 50,'memory_gb' : 100})
+    analysis1st.run('MultiProc',{'n_procs': 30,'memory_gb' : 100})
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
     print(f"Run time cost {run_time}")
-
 
 
 def run_info_m2(ev_file,motions_file=None):
@@ -415,6 +439,590 @@ def firstLevel_m2_hexagon(subject_list,set_id,runs,ifold,configs):
     end_time = time.time()
     run_time = round((end_time - start_time)/60/60, 2)
     print(f"Run time cost {run_time}")
+
+
+def run_info_cv_train(ev_file,motions_file=None):
+    import pandas as pd
+    from nipype.interfaces.base import Bunch
+    onsets = []
+    conditions = []
+    durations = []
+
+    pmod_names_odd = []
+    pmod_params_odd = []
+    pmod_polys_odd = []
+
+    pmod_names_even = []
+    pmod_params_even = []
+    pmod_polys_even = []
+
+    ev_info = pd.read_csv(ev_file, sep='\t')
+    trial_con = ['M1','M2_corr_even','M2_corr_odd','M2_error','decision']
+    for group in ev_info.groupby('trial_type'):
+        condition = group[0]
+        if condition in trial_con:
+            conditions.append(condition)
+            onsets.append(group[1].onset.tolist())
+            durations.append(group[1].duration.tolist())
+        elif condition in ['sin_odd','cos_odd']:
+            pmod_names_odd.append(condition)
+            pmod_params_odd.append(group[1].modulation.tolist())
+            pmod_polys_odd.append(1)
+        elif condition in ['sin_even','cos_even']:
+            pmod_names_even.append(condition)
+            pmod_params_even.append(group[1].modulation.tolist())
+            pmod_polys_even.append(1)
+
+    run_pmod_odd = Bunch(name=pmod_names_odd,param=pmod_params_odd,poly=pmod_polys_odd)
+    run_pmod_even = Bunch(name=pmod_names_even,param=pmod_params_even,poly=pmod_polys_even)
+    if conditions == ['M1','M2_corr_even','M2_corr_odd','M2_error','decision']:
+        pmod = [None,run_pmod_even,run_pmod_odd,None,None]
+        orth = ['No','No','No','No','No']
+    elif conditions == ['M1','M2_corr_even','M2_corr_odd','decision']:
+        pmod = [None,run_pmod_even,run_pmod_odd,None]
+        orth = ['No','No','No','No']
+    else:
+        raise Exception("The conditions are not expected.")
+
+    motions_df = pd.read_csv(motions_file,sep='\t')
+    motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z',
+                      'csf','white_matter']
+    motions = motions_df[motion_columns]
+    motions = motions.fillna(0.0).values.T.tolist()
+
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,
+                     pmod=pmod,orth=orth,regressor_names=motion_columns,regressors=motions)
+    return run_info
+
+
+def firstLevel_cv_train(subject_list,set_id,runs,ifold,configs):
+    # start cue
+    start_time = time.time()
+    print("Training set",set_id," ",ifold," start!")
+
+    # set parameters and specify which SPM to use
+    tr = 3.
+    spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
+
+    # Specify input & output stream
+    infosource = Node(IdentityInterface(fields=['subj_id']),name="infosource")
+    infosource.iterables = [('subj_id', subject_list)]
+
+    data_root = configs['data_root']
+    event_dir = configs['event_dir']
+    task = configs['task']
+    glm_type = configs['glm_type']
+    func_name = configs['func_name']
+    event_name = configs['event_name']
+    regressor_name = configs['regressor_name']
+
+    templates = {'func': pjoin(data_root,'sub-{subj_id}',func_name),
+                 'event': pjoin(event_dir,task, glm_type, 'sub-{subj_id}', ifold, event_name),
+                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name)
+                 }
+
+    # SelectFiles - to grab the data (alternativ to DataGrabber)
+    selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
+                       name='selectfiles')
+    selectfiles.inputs.run_id = runs
+
+    # Datasink - creates output folder for important outputs
+    datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
+    working_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{task}/{glm_type}/Set{set_id}/{ifold}'
+    container_path = os.path.join(task,glm_type,f'Set{set_id}')
+    datasink = Node(DataSink(base_directory=datasink_dir,
+                             container=container_path),
+                    name="datasink")
+
+    # Use the following DataSink output substitutions
+    substitutions = [('_subj_id_', 'sub-')]
+    datasink.inputs.substitutions = substitutions
+
+    # Specify GLM contrasts
+    # Condition names
+    condition_names = ['M2_corr_oddxcos_odd^1','M2_corr_oddxsin_odd^1',
+                       'M2_corr_evenxcos_even^1','M2_corr_evenxsin_even^1',
+                       'M2_corr_odd','M2_corr_even','decision']
+
+    # contrastst
+    cont01 = ['m2_cos_odd',        'T', condition_names,  [1,0,0,0,0,0,0]]
+    cont02 = ['m2_sin_odd',        'T', condition_names,  [0,1,0,0,0,0,0]]
+    cont03 = ['m2_cos_even',       'T', condition_names,  [0,0,1,0,0,0,0]]
+    cont04 = ['m2_sin_even',       'T', condition_names,  [0,0,0,1,0,0,0]]
+
+    cont05 = ['m2_odd_hexagon',    'F', [cont01, cont02]]
+    cont06 = ['m2_even_hexagon',   'F', [cont03, cont04]]
+
+    cont07 = ['m2',          'T', condition_names,  [0,0,0,0,1,1,0]]
+    cont08 = ['decision',    'T', condition_names,  [0,0,0,0,0,0,1]]
+
+    contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08]
+
+    # Specify Nodes
+    gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
+
+    smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+
+    # prepare event file
+    runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
+                                 output_names=['run_info'],
+                                 function=run_info_cv_train),
+                        name='runsinfo',
+                        iterfield=['ev_file','motions_file'])
+
+    # SpecifyModel - Generates SPM-specific Model
+    modelspec = Node(SpecifySPMModel(concatenate_runs=False,
+                                     input_units='secs',
+                                     output_units='secs',
+                                     time_repetition=tr,
+                                     high_pass_filter_cutoff=100.,
+                                     ),
+                     name='modelspec')
+
+    mask_img = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    #mask_img = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
+    # Level1Design - Generates an SPM design matrix
+    level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
+                                     timing_units='secs',
+                                     interscan_interval=3.,
+                                     model_serial_correlations='AR(1)',
+                                     microtime_resolution=49,
+                                     microtime_onset=24,
+                                     mask_image=mask_img,
+                                     flags={'mthresh':float("-inf"),
+                                            'volt':1}),
+                        name="level1design")
+
+    # EstimateModel - estimate the parameters of the model
+    level1estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
+                          name="level1estimate")
+
+    # EstimateContrast - estimates contrasts
+    level1conest = Node(EstimateContrast(contrasts=contrast_list),
+                        name="level1conest")
+
+    # Specify Workflow
+    # Initiation of the 1st-level analysis workflow
+    analysis1st = Workflow(name='work_1st', base_dir=working_dir)
+
+    # Connect up the 1st-level analysis components
+    analysis1st.connect([(infosource, selectfiles,  [('subj_id','subj_id')]),
+                         (selectfiles, runs_prep,   [('event','ev_file'),
+                                                     ('regressors','motions_file')]),
+                         (runs_prep, modelspec,     [('run_info','subject_info')]),
+
+                         (selectfiles, gunzip_func,  [('func','in_file')]),
+                         (gunzip_func, smooth,       [('out_file','in_files')]),
+                         (smooth, modelspec,         [('smoothed_files','functional_runs')]),
+
+                         (modelspec,level1design,    [('session_info','session_info')]),
+                         (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
+
+                         (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
+                                                         ('beta_images','beta_images'),
+                                                         ('residual_image','residual_image')
+                                                         ]),
+                         (level1conest, datasink, [('spm_mat_file','{}.@spm_mat'.format(ifold)),
+                                                   ('spmT_images', '{}.@T'.format(ifold)),
+                                                   ('con_images',  '{}.@con'.format(ifold)),
+                                                   ('spmF_images', '{}.@F'.format(ifold)),
+                                                   ])
+                         ])
+
+    # run the 1st analysis
+    analysis1st.run('MultiProc',{'n_procs': 50,'memory_gb': 100})
+    end_time = time.time()
+    run_time = round((end_time - start_time)/60/60, 2)
+    print(f"Run time cost {run_time}")
+
+
+def run_info_cv_train2(ev_file,motions_file=None):
+    import pandas as pd
+    from nipype.interfaces.base import Bunch
+    onsets = []
+    conditions = []
+    durations = []
+
+    pmod_names_odd = []
+    pmod_params_odd = []
+    pmod_polys_odd = []
+
+    pmod_names_even = []
+    pmod_params_even = []
+    pmod_polys_even = []
+
+    ev_info = pd.read_csv(ev_file, sep='\t')
+    trial_con = ['M1','M2','decision_corr_even','decision_corr_odd','decision_error']
+    for group in ev_info.groupby('trial_type'):
+        condition = group[0]
+        if condition in trial_con:
+            conditions.append(condition)
+            onsets.append(group[1].onset.tolist())
+            durations.append(group[1].duration.tolist())
+        elif condition in ['sin_odd','cos_odd']:
+            pmod_names_odd.append(condition)
+            pmod_params_odd.append(group[1].modulation.tolist())
+            pmod_polys_odd.append(1)
+        elif condition in ['sin_even','cos_even']:
+            pmod_names_even.append(condition)
+            pmod_params_even.append(group[1].modulation.tolist())
+            pmod_polys_even.append(1)
+
+    run_pmod_odd = Bunch(name=pmod_names_odd,param=pmod_params_odd,poly=pmod_polys_odd)
+    run_pmod_even = Bunch(name=pmod_names_even,param=pmod_params_even,poly=pmod_polys_even)
+    if conditions == ['M1','M2','decision_corr_even','decision_corr_odd','decision_error']:
+        pmod = [None,None,run_pmod_even,run_pmod_odd,None]
+        orth = ['No','No','No','No','No']
+    elif conditions == ['M1','M2','decision_corr_even','decision_corr_odd']:
+        pmod = [None,None,run_pmod_even,run_pmod_odd]
+        orth = ['No','No','No','No']
+    else:
+        raise Exception("The conditions are not expected.")
+
+    motions_df = pd.read_csv(motions_file,sep='\t')
+    motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z',
+                      'csf','white_matter']
+    motions = motions_df[motion_columns]
+    motions = motions.fillna(0.0).values.T.tolist()
+
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,
+                     pmod=pmod,orth=orth,regressor_names=motion_columns,regressors=motions)
+    return run_info
+
+
+def firstLevel_cv_train2(subject_list,set_id,runs,ifold,configs):
+    # start cue
+    start_time = time.time()
+    print("Training set",set_id," ",ifold," start!")
+
+    # set parameters and specify which SPM to use
+    tr = 3.
+    spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
+
+    # Specify input & output stream
+    infosource = Node(IdentityInterface(fields=['subj_id']),name="infosource")
+    infosource.iterables = [('subj_id', subject_list)]
+
+    data_root = configs['data_root']
+    event_dir = configs['event_dir']
+    task = configs['task']
+    glm_type = configs['glm_type']
+    func_name = configs['func_name']
+    event_name = configs['event_name']
+    regressor_name = configs['regressor_name']
+
+    templates = {'func': pjoin(data_root,'sub-{subj_id}',func_name),
+                 'event': pjoin(event_dir,task, glm_type, 'sub-{subj_id}', ifold, event_name),
+                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name)
+                 }
+
+    # SelectFiles - to grab the data (alternativ to DataGrabber)
+    selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
+                       name='selectfiles')
+    selectfiles.inputs.run_id = runs
+
+    # Datasink - creates output folder for important outputs
+    datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
+    working_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{task}/{glm_type}/Set{set_id}/{ifold}'
+    container_path = os.path.join(task,glm_type,f'Set{set_id}')
+    datasink = Node(DataSink(base_directory=datasink_dir,
+                             container=container_path),
+                    name="datasink")
+
+    # Use the following DataSink output substitutions
+    substitutions = [('_subj_id_', 'sub-')]
+    datasink.inputs.substitutions = substitutions
+
+    # Specify GLM contrasts
+    # Condition names
+    condition_names = ['decision_corr_oddxcos_odd^1', 'decision_corr_oddxsin_odd^1',
+                       'decision_corr_evenxcos_even^1', 'decision_corr_evenxsin_even^1',
+                       'decision_corr_odd', 'decision_corr_even', 'M2']
+    # contrastst
+    cont01 = ['decision_cos_odd',        'T', condition_names,  [1,0,0,0,0,0,0]]
+    cont02 = ['decision_sin_odd',        'T', condition_names,  [0,1,0,0,0,0,0]]
+    cont03 = ['decision_cos_even',       'T', condition_names,  [0,0,1,0,0,0,0]]
+    cont04 = ['decision_sin_even',       'T', condition_names,  [0,0,0,1,0,0,0]]
+
+    cont05 = ['decision_odd_hexagon',    'F', [cont01, cont02]]
+    cont06 = ['decision_even_hexagon',   'F', [cont03, cont04]]
+
+    cont07 = ['decision',        'T', condition_names,  [0,0,0,0,1,1,0]]
+    cont08 = ['m2',              'T', condition_names,  [0,0,0,0,0,0,1]]
+    contrast_list = [cont01,cont02,cont03,cont04,cont05,cont06,cont07,cont08]
+
+    # Specify Nodes
+    gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
+
+    smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+
+    # prepare event file
+    runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
+                                 output_names=['run_info'],
+                                 function=run_info_cv_train2),
+                        name='runsinfo',
+                        iterfield=['ev_file','motions_file'])
+
+    # SpecifyModel - Generates SPM-specific Model
+    modelspec = Node(SpecifySPMModel(concatenate_runs=False,
+                                     input_units='secs',
+                                     output_units='secs',
+                                     time_repetition=tr,
+                                     high_pass_filter_cutoff=100.,
+                                     ),
+                     name='modelspec')
+
+    mask_img = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    #mask_img = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
+    # Level1Design - Generates an SPM design matrix
+    level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
+                                     timing_units='secs',
+                                     interscan_interval=3.,
+                                     model_serial_correlations='AR(1)',
+                                     microtime_resolution=49,
+                                     microtime_onset=24,
+                                     mask_image=mask_img,
+                                     flags={'mthresh':float("-inf"),
+                                            'volt':1}),
+                        name="level1design")
+
+    # EstimateModel - estimate the parameters of the model
+    level1estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
+                          name="level1estimate")
+
+    # EstimateContrast - estimates contrasts
+    level1conest = Node(EstimateContrast(contrasts=contrast_list),
+                        name="level1conest")
+
+    # Specify Workflow
+    # Initiation of the 1st-level analysis workflow
+    analysis1st = Workflow(name='work_1st', base_dir=working_dir)
+
+    # Connect up the 1st-level analysis components
+    analysis1st.connect([(infosource, selectfiles,  [('subj_id','subj_id')]),
+                         (selectfiles, runs_prep,   [('event','ev_file'),
+                                                     ('regressors','motions_file')]),
+                         (runs_prep, modelspec,     [('run_info','subject_info')]),
+
+                         (selectfiles, gunzip_func,  [('func','in_file')]),
+                         (gunzip_func, smooth,       [('out_file','in_files')]),
+                         (smooth, modelspec,         [('smoothed_files','functional_runs')]),
+
+                         (modelspec,level1design,    [('session_info','session_info')]),
+                         (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
+
+                         (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
+                                                         ('beta_images','beta_images'),
+                                                         ('residual_image','residual_image')
+                                                         ]),
+                         (level1conest, datasink, [('spm_mat_file','{}.@spm_mat'.format(ifold)),
+                                                   ('spmT_images', '{}.@T'.format(ifold)),
+                                                   ('con_images',  '{}.@con'.format(ifold)),
+                                                   ('spmF_images', '{}.@F'.format(ifold)),
+                                                   ])
+                         ])
+
+    # run the 1st analysis
+    analysis1st.run('MultiProc',{'n_procs': 50,'memory_gb': 100})
+    end_time = time.time()
+    run_time = round((end_time - start_time)/60/60, 2)
+    print(f"Run time cost {run_time}")
+
+
+
+def run_info_cv_test(ev_file,motions_file=None):
+    import pandas as pd
+    from nipype.interfaces.base import Bunch
+    onsets = []
+    conditions = []
+    durations = []
+
+    pmod_names_odd = []
+    pmod_params_odd = []
+    pmod_polys_odd = []
+
+    pmod_names_even = []
+    pmod_params_even = []
+    pmod_polys_even = []
+
+    ev_info = pd.read_csv(ev_file, sep='\t')
+    trial_con = ['M1','M2_corr_even','M2_corr_odd','M2_error',
+                 'decision_corr_even','decision_corr_odd','decision_error']
+    for group in ev_info.groupby('trial_type'):
+        condition = group[0]
+        if condition in trial_con:
+            conditions.append(condition)
+            onsets.append(group[1].onset.tolist())
+            durations.append(group[1].duration.tolist())
+        elif condition in ['alignPhi_odd']:
+            pmod_names_odd.append(condition)
+            pmod_params_odd.append(group[1].modulation.tolist())
+            pmod_polys_odd.append(1)
+        elif condition in ['alignPhi_even']:
+            pmod_names_even.append(condition)
+            pmod_params_even.append(group[1].modulation.tolist())
+            pmod_polys_even.append(1)
+
+    run_pmod_odd = Bunch(name=pmod_names_odd,param=pmod_params_odd,poly=pmod_polys_odd)
+    run_pmod_even = Bunch(name=pmod_names_even,param=pmod_params_even,poly=pmod_polys_even)
+    if conditions == ['M1','M2_corr_even','M2_corr_odd','M2_error',
+                      'decision_corr_even','decision_corr_odd','decision_error']:
+        pmod = [None,run_pmod_even,run_pmod_odd,None,run_pmod_even,run_pmod_odd,None]
+        orth = ['No','No','No','No','No','No','No']
+    elif conditions == ['M1','M2_corr_even','M2_corr_odd',
+                        'decision_corr_even','decision_corr_odd']:
+        pmod = [None,run_pmod_even,run_pmod_odd,run_pmod_even,run_pmod_odd]
+        orth = ['No','No','No','No','No']
+    else:
+        raise Exception("The conditions are not expected.")
+
+    motions_df = pd.read_csv(motions_file,sep='\t')
+    motion_columns = ['trans_x','trans_y','trans_z','rot_x','rot_y','rot_z',
+                      'csf','white_matter']
+    motions = motions_df[motion_columns]
+    motions = motions.fillna(0.0).values.T.tolist()
+
+    run_info = Bunch(conditions=conditions,onsets=onsets,durations=durations,
+                     pmod=pmod,orth=orth,regressor_names=motion_columns,regressors=motions)
+    return run_info
+
+
+def firstLevel_cv_test(subject_list,set_id,runs,ifold,configs):
+    # start cue
+    start_time = time.time()
+    print("Training set",set_id," ",ifold," start!")
+
+    # set parameters and specify which SPM to use
+    tr = 3.
+    spm.SPMCommand().set_mlab_paths(paths='/usr/local/MATLAB/R2020b/toolbox/spm12/')
+
+    # Specify input & output stream
+    infosource = Node(IdentityInterface(fields=['subj_id']),name="infosource")
+    infosource.iterables = [('subj_id', subject_list)]
+
+    data_root = configs['data_root']
+    event_dir = configs['event_dir']
+    task = configs['task']
+    glm_type = configs['glm_type']
+    func_name = configs['func_name']
+    event_name = configs['event_name']
+    regressor_name = configs['regressor_name']
+
+    templates = {'func': pjoin(data_root,'sub-{subj_id}',func_name),
+                 'event': pjoin(event_dir,task, glm_type, 'sub-{subj_id}', ifold, event_name),
+                 'regressors':pjoin(data_root,'sub-{subj_id}',regressor_name)
+                 }
+
+    # SelectFiles - to grab the data (alternativ to DataGrabber)
+    selectfiles = Node(SelectFiles(templates, base_directory=data_root, sort_filelist=True),
+                       name='selectfiles')
+    selectfiles.inputs.run_id = runs
+
+    # Datasink - creates output folder for important outputs
+    datasink_dir = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
+    working_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/working_dir/{task}/{glm_type}/Set{set_id}/{ifold}'
+    container_path = os.path.join(task,glm_type,f'Set{set_id}')
+    datasink = Node(DataSink(base_directory=datasink_dir,
+                             container=container_path),
+                    name="datasink")
+
+    # Use the following DataSink output substitutions
+    substitutions = [('_subj_id_', 'sub-')]
+    datasink.inputs.substitutions = substitutions
+
+    # Specify GLM contrasts
+    # Condition names
+    condition_names = ['M2_corr_oddxalignPhi_odd^1',
+                       'M2_corr_evenxalignPhi_even^1',
+                       'decision_corr_oddxalignPhi_odd^1',
+                       'decision_corr_evenxalignPhi_even^1',
+                       'M2_corr_odd','M2_corr_even','decision_corr_odd','decision_corr_even']
+    # contrastst
+    cont01 = ['m2_alignPhi',           'T', condition_names,  [1,1,0,0,0,0,0,0]]
+    cont02 = ['decision_alignPhi',     'T', condition_names,  [0,0,1,1,0,0,0,0]]
+    cont03 = ['alignPhi',              'T', condition_names,  [1,1,1,1,0,0,0,0]]
+    cont04 = ['m2',                    'T', condition_names,  [0,0,0,0,1,1,0,0]]
+    cont05 = ['decision',              'T', condition_names,  [0,0,0,0,0,0,1,1]]
+
+    contrast_list = [cont01,cont02,cont03,cont04,cont05]
+
+    # Specify Nodes
+    gunzip_func = MapNode(Gunzip(), name='gunzip_func',iterfield=['in_file'])
+
+    smooth = Node(Smooth(fwhm=[8.,8.,8.]), name="smooth")
+
+    # prepare event file
+    runs_prep = MapNode(Function(input_names=['ev_file','motions_file'],
+                                 output_names=['run_info'],
+                                 function=run_info_cv_test),
+                        name='runsinfo',
+                        iterfield=['ev_file','motions_file'])
+
+    # SpecifyModel - Generates SPM-specific Model
+    modelspec = Node(SpecifySPMModel(concatenate_runs=False,
+                                     input_units='secs',
+                                     output_units='secs',
+                                     time_repetition=tr,
+                                     high_pass_filter_cutoff=100.,
+                                     ),
+                     name='modelspec')
+
+    mask_img = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    #mask_img = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
+    # Level1Design - Generates an SPM design matrix
+    level1design = Node(Level1Design(bases={'hrf': {'derivs': [0,0]}},
+                                     timing_units='secs',
+                                     interscan_interval=3.,
+                                     model_serial_correlations='AR(1)',
+                                     microtime_resolution=49,
+                                     microtime_onset=24,
+                                     mask_image=mask_img,
+                                     flags={'mthresh':float("-inf"),
+                                            'volt':1}),
+                        name="level1design")
+
+    # EstimateModel - estimate the parameters of the model
+    level1estimate = Node(EstimateModel(estimation_method={'Classical': 1}),
+                          name="level1estimate")
+
+    # EstimateContrast - estimates contrasts
+    level1conest = Node(EstimateContrast(contrasts=contrast_list),
+                        name="level1conest")
+
+    # Specify Workflow
+    # Initiation of the 1st-level analysis workflow
+    analysis1st = Workflow(name='work_1st', base_dir=working_dir)
+
+    # Connect up the 1st-level analysis components
+    analysis1st.connect([(infosource, selectfiles,  [('subj_id','subj_id')]),
+                         (selectfiles, runs_prep,   [('event','ev_file'),
+                                                     ('regressors','motions_file')]),
+                         (runs_prep, modelspec,     [('run_info','subject_info')]),
+
+                         (selectfiles, gunzip_func,  [('func','in_file')]),
+                         (gunzip_func, smooth,       [('out_file','in_files')]),
+                         (smooth, modelspec,         [('smoothed_files','functional_runs')]),
+
+                         (modelspec,level1design,    [('session_info','session_info')]),
+                         (level1design, level1estimate, [('spm_mat_file', 'spm_mat_file')]),
+
+                         (level1estimate, level1conest, [('spm_mat_file','spm_mat_file'),
+                                                         ('beta_images','beta_images'),
+                                                         ('residual_image','residual_image')
+                                                         ]),
+                         (level1conest, datasink, [('spm_mat_file','{}.@spm_mat'.format(ifold)),
+                                                   ('spmT_images', '{}.@T'.format(ifold)),
+                                                   ('con_images',  '{}.@con'.format(ifold)),
+                                                   ('spmF_images', '{}.@F'.format(ifold)),
+                                                   ])
+                         ])
+
+    # run the 1st analysis
+    analysis1st.run('MultiProc',{'n_procs': 50,'memory_gb': 100})
+    end_time = time.time()
+    run_time = round((end_time - start_time)/60/60, 2)
+    print(f"Run time cost {run_time}")
+
 
 
 def run_info_decision(ev_file,motions_file=None):

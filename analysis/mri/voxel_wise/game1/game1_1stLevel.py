@@ -21,7 +21,7 @@ for p in pid:
 configs = {'data_root': fmriprep_dir,
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task': 'game1',
-           'glm_type': 'whole_hexagon_correct_trials',  # look out
+           'glm_type': 'separate_hexagon_2phases_correct_trials',  # look out
            'func_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
            'regressor_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
 
@@ -48,7 +48,6 @@ for set_id in sets:
 
         firstLevel_noPhi(subject_list, set_id, runs, ifold, configs)
         # zscore 1st level
-
         cmap_dir = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/{configs["task"]}/{configs["glm_type"]}/Set{set_id}'
         data_dir = os.path.join(cmap_dir, ifold)
         sub_list = os.listdir(data_dir)
@@ -59,4 +58,4 @@ for set_id in sets:
             for cmap in cmap_list:
                 if 'spm' in cmap:
                     zscore_nii(sub_cmap_dir, cmap, 'Z')
-            print("The cmap of", sub, 'was zscored.')
+            print("The stasticial map of", sub, 'was zscored.')

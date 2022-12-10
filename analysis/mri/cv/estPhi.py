@@ -43,20 +43,19 @@ if __name__ == "__main__":
 
     # set sin_cmap and cos_cmap
     cos_cmap_template = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-                        'game1/separate_hexagon_correct_trials_train/Set1/{}/{}/con_0009.nii'
+                        'game1/cv_train2/Setall/{}/{}/con_0003.nii'
 
     sin_cmap_template = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-                        'game1/separate_hexagon_correct_trials_train/Set1/{}/{}/con_0010.nii'
+                        'game1/cv_train2/Setall/{}/{}/con_0004.nii'
 
     # set ROI
-    #roi = r'/mnt/workdir/DCM/result/ROI/Group/estPhi_ROI-EC_On-average_Set2.csv'
-    roi = r'/mnt/workdir/DCM/docs/Mask/Park_Grid_ROI/EC_Grid_roi.nii'
+    roi = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_R_prob-80.nii.gz'
 
     # set output
     outdir = r'/mnt/workdir/DCM/result/CV/Phi'
     if not os.path.exists(outdir):
         os.mkdir(outdir)
-    savepath = os.path.join(outdir,'estPhi_ROI-EC_On-average_Set1.csv')
+    savepath = os.path.join(outdir,'estPhi_ROI-EC_On-Decision_trial-even.csv')
 
     folds = [str(i)+'fold' for i in range(6,7)]
     subs_phi = pd.DataFrame(columns=['sub_id', 'ifold', 'Phi'])
