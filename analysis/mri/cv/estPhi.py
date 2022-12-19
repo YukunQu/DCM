@@ -38,24 +38,21 @@ if __name__ == "__main__":
     # subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri>=0.5')
+    data = participants_data.query('game2_fmri>0.5')
     subjects = data['Participant_ID'].to_list()
 
     # set sin_cmap and cos_cmap
-    cos_cmap_template = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-                        'game1/cv_train2/Setall/{}/{}/con_0003.nii'
-
-    sin_cmap_template = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
-                        'game1/cv_train2/Setall/{}/{}/con_0004.nii'
+    cos_cmap_template = '/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials/Setall/{}/{}/con_0001.nii'
+    sin_cmap_template = '/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials/Setall/{}/{}/con_0002.nii'
 
     # set ROI
-    roi = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_R_prob-80.nii.gz'
+    roi = r'/mnt/workdir/DCM/result/ROI/Group/F-test_mPFC_thr2.3.nii.gz'
 
     # set output
-    outdir = r'/mnt/workdir/DCM/result/CV/Phi'
+    outdir = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.21'
     if not os.path.exists(outdir):
         os.mkdir(outdir)
-    savepath = os.path.join(outdir,'estPhi_ROI-EC_On-Decision_trial-even.csv')
+    savepath = os.path.join(outdir,'estPhi_ROI-bigmPFC_On-M2_trial-corr_subject-all.csv')
 
     folds = [str(i)+'fold' for i in range(6,7)]
     subs_phi = pd.DataFrame(columns=['sub_id', 'ifold', 'Phi'])
@@ -71,7 +68,7 @@ if __name__ == "__main__":
             # load roi
             mask = load_img(roi)
             # extract Phi
-            phi = estPhi(sin_cmap, cos_cmap, mask,ifold=ifold,method='mean')
+            phi = estPhi(sin_cmap, cos_cmap, mask,ifold=ifold,method='circmean')
             sub_phi = {'sub_id': sub, 'ifold': ifold,'Phi': phi}
             subs_phi = subs_phi.append(sub_phi, ignore_index=True)
     subs_phi.to_csv(savepath, index=False)

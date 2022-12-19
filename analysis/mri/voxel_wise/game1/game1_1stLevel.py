@@ -22,7 +22,7 @@ configs = {'data_root': fmriprep_dir,
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task': 'game1',
            'glm_type': 'separate_hexagon_2phases_correct_trials',  # look out
-           'func_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
+           'func_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii',
            'regressor_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
 
 # set parameter
@@ -39,9 +39,11 @@ for set_id in sets:
         # filter the subjects who exist.
         target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
                      r'game1/{}/Set{}/{}'.format(configs['glm_type'], set_id, ifold)
+        """"""
         if os.path.exists(target_dir):
             already_sub = os.listdir(target_dir)
             subject_list = [p.split('-')[-1] for p in pid if p not in already_sub]
+            #subject_list = [p.split('-')[-1] for p in pid]
         else:
             subject_list = [p.split('-')[-1] for p in pid]
         print("{} subjects are ready.".format(len(subject_list)))

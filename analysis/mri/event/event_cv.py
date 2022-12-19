@@ -36,10 +36,8 @@ class Game1_cv(Game1EV):
 
     @staticmethod
     def _split_whole_trials(trial_corr):
-        i = 0
         trial_label = []
-        for tc in trial_corr:
-            i += 1
+        for i in range(1, len(trial_corr) + 1):
             if i % 2 == 0:
                 trial_label.append('even')
             else:
@@ -79,12 +77,12 @@ class Game1_cv(Game1EV):
 
         assert len(m2ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
 
-        for i, trial_label in enumerate(trial_label):
-            if trial_label == 'odd':
+        for i, label in enumerate(trial_label):
+            if label == 'odd':
                 m2ev_corr_odd = m2ev_corr_odd.append(m2ev.iloc[i])
-            elif trial_label == 'even':
+            elif label == 'even':
                 m2ev_corr_even = m2ev_corr_even.append(m2ev.iloc[i])
-            elif trial_label == 'error':
+            elif label == 'error':
                 m2ev_error = m2ev_error.append(m2ev.iloc[i])
             else:
                 raise ValueError("The trial label should be True,False or None.")
@@ -96,6 +94,48 @@ class Game1_cv(Game1EV):
         m2ev_corr_even = m2ev_corr_even.sort_values('onset', ignore_index=True)
         m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
         return m2ev_corr_odd, m2ev_corr_even, m2ev_error
+
+    def genM2ev_whole_trials(self, trial_label):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        m2ev_odd = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        m2ev_even = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        m2ev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+
+        assert len(m2ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        for i,label in enumerate(trial_label):
+            if label == 'odd':
+                m2ev_odd = m2ev_odd.append(m2ev.iloc[i])
+            elif label == 'even':
+                m2ev_even = m2ev_even.append(m2ev.iloc[i])
+            elif label == 'error':
+                m2ev_error = m2ev_error.append(m2ev.iloc[i])
+            else:
+                raise ValueError("The trial label should be True,False or None.")
+        m2ev_odd['trial_type'] = 'M2_odd'
+        m2ev_even['trial_type'] = 'M2_even'
+        m2ev_error['trial_type'] = 'M2_error'
+
+        m2ev_odd = m2ev_odd.sort_values('onset', ignore_index=True)
+        m2ev_even = m2ev_even.sort_values('onset', ignore_index=True)
+        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
+        return m2ev_odd, m2ev_even, m2ev_error
 
     def genDeev(self, trial_label):
         # generate the event of decision
@@ -140,6 +180,53 @@ class Game1_cv(Game1EV):
         deev_corr_even = deev_corr_even.sort_values('onset', ignore_index=True)
         deev_error = deev_error.sort_values('onset', ignore_index=True)
         return deev_corr_odd, deev_corr_even, deev_error
+
+    def genDeev_whole_trials(self, trial_corr, trial_label):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        deev_odd = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        deev_even = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        deev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+
+        assert len(deev) == len(
+            trial_label), "The number of trial label didn't not  same as the number of event-decision."
+        assert len(deev) == len(
+            trial_corr), "The number of trial label didn't not  same as the number of event-decision."
+
+        for i, corr, label in enumerate(trial_corr, trial_label):
+            if corr:
+                if label == 'odd':
+                    deev_odd = deev_odd.append(deev.iloc[i])
+                elif label == 'even':
+                    deev_even = deev_even.append(deev.iloc[i])
+            elif not corr:
+                deev_error = deev_error.append(deev.iloc[i])
+            else:
+                raise ValueError("The trial label should be True or False.")
+        deev_odd['trial_type'] = 'decision_odd_corr'
+        deev_even['trial_type'] = 'decision_even_corr'
+        deev_error['trial_type'] = 'decision_error'
+
+        deev_odd = deev_odd.sort_values('onset', ignore_index=True)
+        deev_even = deev_even.sort_values('onset', ignore_index=True)
+        deev_error = deev_error.sort_values('onset', ignore_index=True)
+        return deev_odd, deev_even, deev_error
 
     def genM2ev_without_pmod(self):
         if self.dformat == 'trial_by_trial':
@@ -240,8 +327,64 @@ class Game1_cv(Game1EV):
         pmod_sin_odd, pmod_cos_odd = self.genpm_train(deev_corr_odd, ifold, 'odd')
         pmod_sin_even, pmod_cos_even = self.genpm_train(deev_corr_even, ifold, 'even')
 
-
         event = pd.concat([m1ev, m2ev, deev_corr_odd, deev_corr_even, deev_error,
+                           pmod_sin_odd, pmod_cos_odd, pmod_sin_even, pmod_cos_even], axis=0)
+        return event
+
+    def genDeev_corr(self, trial_corr):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        deev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+        deev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
+
+        assert len(deev) == len(
+            trial_corr), "The number of trial label didn't not  same as the number of event-decision."
+
+        for i, label in enumerate(trial_corr):
+            if label == True:
+                deev_corr = deev_corr.append(deev.iloc[i])
+            elif label == False:
+                deev_error = deev_error.append(deev.iloc[i])
+            else:
+                raise ValueError("The trial label should be True or False.")
+        deev_corr['trial_type'] = 'decision_corr'
+        deev_error['trial_type'] = 'decision_error'
+
+        deev_corr = deev_corr.sort_values('onset', ignore_index=True)
+        deev_error = deev_error.sort_values('onset', ignore_index=True)
+        return deev_corr, deev_error
+
+    def game1_cv_train3(self, ifold):
+        self.starttime = self.cal_start_time()
+        m1ev = self.genM1ev()  # m1
+        # m2
+        trial_corr, accuracy = self.label_trial_corr()
+        trial_label = self.split_trials(trial_corr, 'whole_trials')
+        m2ev_odd, m2ev_even, _ = self.genM2ev_whole_trials(trial_label)
+        # pmod
+        pmod_sin_odd, pmod_cos_odd = self.genpm_train(m2ev_odd, ifold, 'odd')
+        pmod_sin_even, pmod_cos_even = self.genpm_train(m2ev_even, ifold, 'even')
+        # decision
+        decision_corr, decision_error = self.genDeev_corr(trial_corr)
+        # pressButton
+        pressButton = self.pressButton()
+        event = pd.concat([m1ev, m2ev_odd, m2ev_even, decision_corr, decision_error, pressButton,
                            pmod_sin_odd, pmod_cos_odd, pmod_sin_even, pmod_cos_even], axis=0)
         return event
 
@@ -262,6 +405,46 @@ class Game1_cv(Game1EV):
                                 pmod_alignPhi_odd, pmod_alignPhi_even], axis=0)
         return event_data
 
+    def game1_cv_test2(self, ifold, odd_phi, even_phi):
+        self.starttime = self.cal_start_time()
+        m1ev = self.genM1ev()  # m1
+        # m2
+        trial_corr, accuracy = self.label_trial_corr()
+        trial_label = self.split_trials(trial_corr, 'whole_trials')
+        m2ev_odd, m2ev_even, _ = self.genM2ev_whole_trials(trial_label)
+        # decision
+        decision_corr, decision_error = self.genDeev_without_pmod()
+        # pmod
+        pmod_alignPhi_odd = self.genpm_test(m2ev_odd, ifold, even_phi, 'odd')
+        pmod_alignPhi_even = self.genpm_test(m2ev_even, ifold, odd_phi, 'even')
+        # pressButton
+        pressButton = self.pressButton()
+        event_data = pd.concat([m1ev, m2ev_odd, m2ev_even, decision_corr, decision_error, pressButton,
+                                pmod_alignPhi_odd, pmod_alignPhi_even], axis=0)
+        return event_data
+
+    def game1_cv_test3(self, ifold, odd_phi, even_phi):
+        # using whole trials
+        self.starttime = self.cal_start_time()
+        m1ev = self.genM1ev()  # m1
+        # m2
+        trial_corr, accuracy = self.label_trial_corr()
+        trial_label = self.split_trials(trial_corr, 'whole_trials')
+        m2ev_odd, m2ev_even, _ = self.genM2ev_whole_trials(trial_label)
+        # decision
+        deev_odd, deev_even, deev_error = self.genDeev_whole_trials(trial_corr, trial_label)
+        # pmod
+        pmod_alignPhi_m2_odd = self.genpm_test(m2ev_odd, ifold, even_phi, 'odd')
+        pmod_alignPhi_m2_even = self.genpm_test(m2ev_even, ifold, odd_phi, 'even')
+
+        pmod_alignPhi_decision_odd = self.genpm_test(deev_odd, ifold, even_phi, 'odd')
+        pmod_alignPhi_decision_even = self.genpm_test(deev_even, ifold, odd_phi, 'even')
+
+        event_data = pd.concat([m1ev, m2ev_odd, m2ev_even, deev_odd, deev_even,deev_error,
+                                pmod_alignPhi_m2_odd, pmod_alignPhi_m2_even,
+                                pmod_alignPhi_decision_odd,pmod_alignPhi_decision_even], axis=0)
+        return event_data
+
 
 def gen_event_game1_cv_train():
     # define subject list
@@ -273,7 +456,7 @@ def gen_event_game1_cv_train():
 
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_train2/sub-{}/{}fold'
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_train1/sub-{}/{}fold'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
 
     # set folds and runs for cross validation
@@ -287,9 +470,10 @@ def gen_event_game1_cv_train():
                 # generate event
                 behDataPath = behav_path.format(sub, sub, run_id)
                 game1_cv = Game1_cv(behDataPath)
-                event = game1_cv.game1_cv_train2(ifold)
+                event = game1_cv.game1_cv_train1(ifold)
                 # save
                 out_dir = save_dir.format(sub, ifold)
+                print(out_dir)
                 if not os.path.exists(out_dir):
                     os.makedirs(out_dir)
                 tsv_save_path = join(out_dir, event_file.format(sub, run_id))
@@ -306,14 +490,14 @@ def gen_event_game1_cv_test():
 
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_EC/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test1_bigmPFC/sub-{}/{}fold'  # look out
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
 
     # set Phi estimated from specific ROI
-    odd_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/estPhi_ROI-EC_On-Decision_trial-odd.csv'  # look out
+    odd_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.19/estPhi_ROI-bigmPFC_On-M2_trial-oddcorr_subject-all.csv'  # look out
     odd_phi_data = pd.read_csv(odd_phi_file)
 
-    even_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/estPhi_ROI-EC_On-Decision_trial-even.csv'  # look out
+    even_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.19/estPhi_ROI-bigmPFC_On-M2_trial-evencorr_subject-all.csv'  # look out
     even_phi_data = pd.read_csv(even_phi_file)
 
     # set folds and runs for cross validation
@@ -328,7 +512,7 @@ def gen_event_game1_cv_test():
             for run_id in runs:
                 behDataPath = behav_path.format(sub, sub, run_id)
                 game1_cv = Game1_cv(behDataPath)
-                event = game1_cv.game1_cv_test(ifold, odd_phi, even_phi)
+                event = game1_cv.game1_cv_test(ifold, odd_phi, even_phi)  # look out
                 # save
                 out_dir = save_dir.format(sub, ifold)
                 if not os.path.exists(out_dir):
@@ -346,6 +530,7 @@ def Test_gen_event_game1_cv_train():
     subject_list = [p.split('-')[-1] for p in pid]
     subject_list = random.sample(subject_list, 3)
     pass
+
 
 #gen_event_game1_cv_train()
 gen_event_game1_cv_test()

@@ -15,7 +15,7 @@ from nilearn.glm.first_level import make_first_level_design_matrix
 
 def load_ev_separate(event_path):
     event = pd.read_csv(event_path,sep='\t')
-    event_condition = event.query("trial_type in ['M1','M2_corr','M2_error','decision_corr','decision_error','pressButton']")
+    event_condition = event.query("trial_type in ['M1','M2_corr','M2_error','decision_corr','decision_error']")
 
     pmod_cos = event.query("trial_type =='cos'")
     pmod_sin = event.query("trial_type =='sin'")
@@ -87,7 +87,7 @@ def prepare_data(subj,run_list,ifold,configs):
         # creat design matrix
         n_scans = func_img.shape[-1]
         frame_times = np.arange(n_scans) * tr
-        high_pass_fre = 1/128
+        high_pass_fre = 1/100
         design_matrix = make_first_level_design_matrix(
             frame_times,
             event,
@@ -209,7 +209,6 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri==1')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = ['180']
     aleary_subs = os.listdir('/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/6fold')
     aleary_subs = [a.split('-')[-1] for a in aleary_subs]
 

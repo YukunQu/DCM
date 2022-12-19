@@ -48,8 +48,8 @@ def gen_design_matrix(event_path):
 
 
 if __name__ == "__main__":
-    event_template = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/separate_hexagon_2phases_correct_trials/' \
-                     r'sub-120/6fold/sub-120_task-game1_run-{}_events.tsv'
+    event_template = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_train3/sub-180/6fold' \
+                     r'/sub-180_task-game1_run-{}_events.tsv'
 
     for i in range(1,7):
         event_path = event_template.format(i)
