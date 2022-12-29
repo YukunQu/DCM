@@ -14,7 +14,7 @@ subject_list = [p.split('_')[-1] for p in pid]
 configs = {'data_root': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_ica',
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task':'game1',
-           'glm_type': 'RSA',
+           'glm_type': 'rsa',
            'func_name':'sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
            'regressor_name':'sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}

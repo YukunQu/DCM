@@ -5,7 +5,7 @@ import nibabel as nib
 import rsatoolbox
 import rsatoolbox.data as rsd
 import rsatoolbox.rdm as rsr
-from nilearn.image import index_img, mean_img,load_img, resample_to_img
+from nilearn.image import index_img, mean_img, load_img, resample_to_img
 from nilearn.masking import apply_mask
 
 
@@ -33,7 +33,7 @@ def rsa(subjects,condition,roi_name):
     for i,sub_id in enumerate(subjects):
         cons_img_path = []
         for j,con_name in enumerate(condition):
-            con_img_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/RSA/Setall/6fold/' \
+            con_img_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/rsa/Setall/6fold/' \
                            r'sub-{}/con_{}.nii'.format(sub_id,str(j+1).zfill(4))
             cons_img_path.append(con_img_path)
 
@@ -82,10 +82,10 @@ for roi_name in rois:
     sub_rdms, model_RDM, subs_sim = rsa(subjects,condition,roi_name)
     roi_label.extend([roi_name]*len(subs_sim))
     roi_sim.extend(subs_sim)
-    sub_rdms.save(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/RSA/rsa_result/{}_rdms.hdf5'.format(roi_name))
-    np.save(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/RSA/rsa_result/{}_rs.npy'.format(roi_name),np.array(subs_sim))
+    sub_rdms.save(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/rsa/rsa_result/{}_rdms.hdf5'.format(roi_name))
+    np.save(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/rsa/rsa_result/{}_rs.npy'.format(roi_name),np.array(subs_sim))
 
-model_RDM.save(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/RSA/rsa_result/model_RDM.hdf5')
+model_RDM.save(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/rsa/rsa_result/model_RDM.hdf5')
 sns.set_theme(palette="pastel")
 sns.boxplot(x=roi_label, y=roi_sim,palette=['b'])
 
@@ -95,7 +95,7 @@ acc = data['game1_acc']
 age = data['Age']
 
 for roi_name in rois:
-    rs = np.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/RSA/rsa_result/{}_rs.npy'.format(roi_name))
+    rs = np.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/rsa/rsa_result/{}_rs.npy'.format(roi_name))
     res = pearsonr(age,rs)
     r = res[0]
     p = res[1]
@@ -111,5 +111,5 @@ for roi_name in rois:
     else:
         g.fig.suptitle('r:{}, p:{}'.format(round(r,3),round(p,3)),fontsize=18)
 
-    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/RSA/rsa_result/plot/age/{}_rs_correlation.png'.format(roi_name)
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/rsa/rsa_result/plot/age/{}_rs_correlation.png'.format(roi_name)
     g.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300)

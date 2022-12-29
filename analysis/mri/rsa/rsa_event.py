@@ -90,18 +90,16 @@ class Game1RSAEV(object):
             raise Exception("You need specify behavioral data format.")
         return ev
 
-
-
 def gen_sub_rsa_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/RSA/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/rsa/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/RSA/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/sub-{}/{}/rsa/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     else:
         raise Exception("The type of task is wrong.")

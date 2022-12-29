@@ -418,7 +418,7 @@ class Game1_cv(Game1EV):
         pmod_alignPhi_odd = self.genpm_test(m2ev_odd, ifold, even_phi, 'odd')
         pmod_alignPhi_even = self.genpm_test(m2ev_even, ifold, odd_phi, 'even')
         # pressButton
-        pressButton = self.pressButton()
+        pressButton = self.response()
         event_data = pd.concat([m1ev, m2ev_odd, m2ev_even, decision_corr, decision_error, pressButton,
                                 pmod_alignPhi_odd, pmod_alignPhi_even], axis=0)
         return event_data
@@ -490,14 +490,14 @@ def gen_event_game1_cv_test():
 
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test1_bigmPFC/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test1_bigmPFC_weighted-average/sub-{}/{}fold'  # look out
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
 
     # set Phi estimated from specific ROI
-    odd_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.19/estPhi_ROI-bigmPFC_On-M2_trial-oddcorr_subject-all.csv'  # look out
+    odd_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.29/estPhi_ROI-bigmPFC_On-M2_trial-corrodd_subjects-all_weighted-average.csv'  # look out
     odd_phi_data = pd.read_csv(odd_phi_file)
 
-    even_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.19/estPhi_ROI-bigmPFC_On-M2_trial-evencorr_subject-all.csv'  # look out
+    even_phi_file = r'/mnt/workdir/DCM/result/CV/Phi/2022.12.29/estPhi_ROI-bigmPFC_On-M2_trial-correven_subjects-all_weighted-average.csv'  # look out
     even_phi_data = pd.read_csv(even_phi_file)
 
     # set folds and runs for cross validation

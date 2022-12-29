@@ -8,19 +8,18 @@ from analysis.mri.voxel_wise.secondLevel import level2nd_covar_age,level2nd_cova
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')  # look out
+#data = data.query("Participant_ID!='sub-186'")
 
-#contrast_1st = ['ZF_0003','con_0004']
-#contrast_1st = ['con_0001','con_0002','con_0003','con_0004','con_0005']
-#contrast_1st =  ['ZF_0005','ZF_0006','con_0001','con_0002','con_0003','con_0004','con_0007','con_0008']
-#contrast_1st = ['ZF_0005','ZF_0006','con_0007','con_0008']
-#contrast_1st = ['ZF_0005','ZF_0006','ZF_0011','con_0007','con_0008','con_0012','con_0013','con_0014']
-contrast_1st = ['ZF_0005','ZF_0006','ZF_0011','con_0007','con_0008']
+#contrast_1st = ['ZF_0005']
 #contrast_1st = ['con_0001','con_0002','con_0003','con_0004','ZF_0005']
+contrast_1st = ['con_0001','con_0002','con_0003','con_0004','con_0005']
+#contrast_1st = ['ZF_0005','ZF_0006','ZF_0011','con_0007','con_0008','con_0012','con_0013','con_0014']
 #contrast_1st = ['con_0001','con_0002','ZF_0003']
+#contrast_1st = ['rs-corr_img_coarse','rs-corr_zmap_coarse']
 
 data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
 task = 'game1'
-glm_type = 'separate_hexagon_2phases_correct_trials'
+glm_type = 'cv_test1_bigmPFC_weighted-average'
 set_id = 'Setall'
 ifold = '6fold'
 templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}','sub-{subj_id}', '{contrast_id}.nii')}
