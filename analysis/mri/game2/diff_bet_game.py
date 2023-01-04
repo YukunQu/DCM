@@ -54,7 +54,7 @@ x = np.arange(len(rois))  # the label locations
 width = 0.35  # the width of the bars
 
 rects1 = ax.bar(x - width/2, game1_means, width, yerr=game1_std, label='Game1')
-rects2 = ax.bar(x + width/2, game2_means, width, yerr=game2_std, label='Game2')
+rects2 = ax.bar(x + width/2, game2_means, width, yerr=game2_std, label='game2')
 
 ax.set_ylabel('Beta')
 ax.set_title('Difference between game1 and game2 in HC and EC')

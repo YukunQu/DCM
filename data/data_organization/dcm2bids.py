@@ -5,7 +5,9 @@ Created on Wed Feb  9 21:02:34 2022
 
 @author: dell
 """
-#%%
+
+
+# %%
 def dcm2bids_helper(subjects):
     # generate the help files for dicom to bids
     import subprocess
@@ -13,24 +15,27 @@ def dcm2bids_helper(subjects):
         subj = str(subj).zfill(3)
         ori_dir = r'/mnt/data/DCM/sourcedata/sub_{}/NeuroData/MRI'.format(subj)
         out_dir = r'/mnt/data/DCM/tmp/{}_helper'.format(subj)
-        command = r'dcm2bids_helper -d {} -o {}'.format(ori_dir,out_dir)
-        print("Command:",command)
-        subprocess.call(command,shell=True)
+        command = r'dcm2bids_helper -d {} -o {}'.format(ori_dir, out_dir)
+        print("Command:", command)
+        subprocess.call(command, shell=True)
 
-subjects = [90]
+
+subjects = [66]
 dcm2bids_helper(subjects)
-#%%
+# %%
 import subprocess
-def dcm2bids(subjects,config_file):
+
+
+def dcm2bids(subjects, config_file):
     for subj in subjects:
         subj = str(subj).zfill(3)
         config = config_file
-        
+
         ori_dir = r'/mnt/workdir/DCM/sourcedata/sub_{}/NeuroData/MRI'.format(subj)
         out_dir = r'/mnt/workdir/DCM/BIDS'
-        command = r'dcm2bids -d {} -p {} -c {} -o {} --forceDcm2niix'.format(ori_dir,subj,config,out_dir)
-        print("Command:",command)
-        subprocess.call(command,shell=True)
+        command = r'dcm2bids -d {} -p {} -c {} -o {} --forceDcm2niix'.format(ori_dir, subj, config, out_dir)
+        print("Command:", command)
+        subprocess.call(command, shell=True)
 
 
 subjects_list = [208]

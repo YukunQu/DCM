@@ -46,14 +46,12 @@ if __name__ == "__main__":
     # zscore the 1st level result
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri>=0.5')  # look out
+    data = participants_data.query('game2_fmri>0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
-    cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/{}/rs-corr_img_coarse.nii'
-    save_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/{}/rs-corr_zmap_coarse.nii'
+    cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/{}/rs-corr_img_coarse.nii'
+    save_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/{}/rs-corr_zmap_coarse.nii'
     for sub_id in subjects:
-        #if sub_id == 'sub-186':
-        #    continue
         zscored_map = zscore_img(cmap_template.format(sub_id))
         zscored_map.to_filename(save_template.format(sub_id))
         print("The map of {} have been zscored.".format(sub_id))

@@ -10,7 +10,7 @@ def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)
         template = {'behav_path':r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_2phases_correct_trials/sub-{}/{}fold',
+                    'save_dir':r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/separate_hexagon_2phases_correct_trials_demean/sub-{}/{}fold',
                     'event_file':'sub-{}_task-{}_run-{}_events.tsv'}
     elif task == 'game2':
         runs = range(1,3)
@@ -20,7 +20,7 @@ def gen_sub_event(task, subjects):
     else:
         raise Exception("The type of task is wrong.")
 
-    ifolds = range(4,9)
+    ifolds = range(6,7)
 
     for subj in subjects:
         subj = str(subj).zfill(3)
@@ -39,7 +39,7 @@ def gen_sub_event(task, subjects):
                     event_data = event.game1ev(ifold)
                 elif task == 'game2':
                     event = Game2EV(behDataPath)
-                    event_data = event.game2ev(ifold)
+                    event_data = event.game2ev_corr_trials(ifold)
                 else:
                     raise Exception("The type of task is wrong.")
                 tsv_save_path = join(save_dir,template['event_file'].format(subj,task,run_id))

@@ -59,17 +59,16 @@ def calc_rdm_angular_distance(angles_set,deg=True,scale='fine'):
 
 
 if __name__ == "__main__":
-    ev_file_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/grid_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'
-    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/{}/{}_grid_RDM_coarse.npy'
+    ev_file_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game2/grid_rsa/{}/6fold/{}_task-game2_run-{}_events.tsv'
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/{}/{}_grid_RDM_coarse.npy'
 
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
-
     for sub_id in subjects:
         ev_files = []
-        for i in range(1,7):
+        for i in range(1,3):
             ev_files.append(ev_file_tempalte.format(sub_id,sub_id,i))
         sub_angles_set = sub_angles(ev_files)
         rdm = calc_rdm_angular_distance(sub_angles_set,scale='coarse')

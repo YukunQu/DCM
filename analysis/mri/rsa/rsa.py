@@ -26,6 +26,7 @@ def upper_tri(RDM):
     r, c = np.triu_indices(m, 1)
     return RDM[r, c]
 
+
 def RDMcolormapObject(direction=1):
     """
     Returns a matplotlib color map object for RSA and brain plotting
@@ -42,11 +43,11 @@ def RDMcolormapObject(direction=1):
 
 def calc_rs_map(sub_id):
     # set path
-    neural_RDM_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/' \
+    neural_RDM_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/' \
                       r'{}/{}-neural_RDM.hdf5'.format(sub_id,sub_id)
-    gird_RDM_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/' \
+    gird_RDM_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/' \
                     r'{}/{}_grid_RDM_coarse.npy'.format(sub_id,sub_id)
-    rsmap_savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/' \
+    rsmap_savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/' \
                      r'{}/rs-corr_img_coarse.nii'.format(sub_id,sub_id)
 
     #  load neural RDM for each voxel
@@ -62,7 +63,7 @@ def calc_rs_map(sub_id):
     eval_score = [np.float64(e.evaluations) for e in eval_results]
 
     # Create an 3D array, with the size of mask, and
-    tmp_img = nib.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/grid_rsa_8mm/Setall/6fold/'
+    tmp_img = nib.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/'
                        r'{}/con_0001.nii'.format(sub_id))
     # we infer the mask by looking at non-nan voxels
     mask = ~np.isnan(tmp_img.get_fdata())
@@ -93,7 +94,7 @@ def list_to_chunk(orignal_list,chunk_volume=30):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri>=0.5')  # look out
+    data = participants_data.query('game2_fmri>0.5')  # look out
     subjects = data['Participant_ID'].to_list()
     subjects_chunk = list_to_chunk(subjects)
 

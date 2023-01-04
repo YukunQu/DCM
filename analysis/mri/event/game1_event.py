@@ -213,13 +213,23 @@ class Game1EV(object):
         pmod_cos['modulation'] = np.cos(np.deg2rad(ifold * angle))
         return pmod_sin, pmod_cos
 
+    def genpm_demean(self, m2ev_corr, ifold):
+        angle = m2ev_corr['angle']
+        pmod_sin = m2ev_corr.copy()
+        pmod_cos = m2ev_corr.copy()
+        pmod_sin['trial_type'] = 'sin'
+        pmod_cos['trial_type'] = 'cos'
+        pmod_sin['modulation'] = np.sin(np.deg2rad(ifold * angle)) - np.mean(np.sin(np.deg2rad(ifold * angle)))
+        pmod_cos['modulation'] = np.cos(np.deg2rad(ifold * angle)) - np.mean(np.cos(np.deg2rad(ifold * angle)))
+        return pmod_sin, pmod_cos
+
     def game1ev(self, ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
         deev_corr, deev_error = self.genDeev(trial_corr)
-        pmod_sin, pmod_cos = self.genpm(m2ev_corr, ifold)
+        pmod_sin, pmod_cos = self.genpm_demean(m2ev_corr, ifold)
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 pmod_sin, pmod_cos], axis=0)

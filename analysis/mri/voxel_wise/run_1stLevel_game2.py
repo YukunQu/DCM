@@ -21,8 +21,9 @@ for p in pid:
 configs = {'data_root': fmriprep_dir,
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task': 'game2',
-           'glm_type': 'alignPhi_mPFC',  # look out
-           'func_name': 'func/sub-{subj_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
+           'glm_type': 'grid_rsa',  # look out
+           'event_name':'sub-{subj_id}_task-game2_run-{run_id}_events.tsv',
+           'func_name': 'func/sub-{subj_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii',
            'regressor_name': 'func/sub-{subj_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv'}
 
 # set parameter
@@ -31,8 +32,6 @@ folds = [str(i) + 'fold' for i in [6]]
 runs = [1, 2]
 
 for set_id in sets:
-    event_name_template = 'sub-{subj_id}_task-game2_run-{run_id}_events.tsv'
-    configs['event_name'] = event_name_template
     for ifold in folds:
         # filter the subjects who exist.
         target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/' \
