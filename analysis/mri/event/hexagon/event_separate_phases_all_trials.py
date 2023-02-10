@@ -7,6 +7,7 @@ import pandas as pd
 class Game1EV(object):
     """"""
     def __init__(self,behDataPath):
+        self.starttime = None
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
         self.behData = self.behData.dropna(axis=0, subset=['pairs_id'])
@@ -96,10 +97,11 @@ class Game1EV(object):
         deev = deev.sort_values('onset',ignore_index=True)
         return deev
 
-    def genpm(self,m2ev,ifold):
-        angle = m2ev['angle']
-        pmod_sin = m2ev.copy()
-        pmod_cos = m2ev.copy()
+    def genpm(self, ev, ifold):
+        # ev is reference event of one trial type to provide angle of each trial
+        angle = ev['angle']
+        pmod_sin = ev.copy()
+        pmod_cos = ev.copy()
         pmod_sin['trial_type'] = 'sin'
         pmod_cos['trial_type'] = 'cos'
         pmod_sin['modulation'] = np.sin(np.deg2rad(ifold*angle))
@@ -364,7 +366,7 @@ if __name__ == "__main__":
     task = 'game1'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query(f'{task}_fmri==1')
+    data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
     gen_sub_event(task, subjects)

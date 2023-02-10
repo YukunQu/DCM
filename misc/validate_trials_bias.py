@@ -55,13 +55,14 @@ plotAngleRadar(even_trials_angle)
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')  # look out
-data = data.query("0.8<game1_acc")
+#data = data.query("game1_acc")
 pid = data['Participant_ID'].to_list()
 
 #  calculate the angle
 run_template = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/separate_hexagon_2phases_correct_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'
 corr_trials_angle = []
 error_trials_angle = []
+acc_trials_angle = []
 for sub_id in pid:
     for run_id in range(1,7):
         run_path = run_template.format(sub_id,sub_id,run_id)

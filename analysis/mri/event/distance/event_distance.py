@@ -5,6 +5,7 @@ import pandas as pd
 from analysis.mri.event.game1_event import Game1EV
 from analysis.mri.event.game2_event import Game2EV
 
+
 class Game1EV_distance(Game1EV):
     # A variant of event generator only care about the hexagonal effect on M2.
     def __init__(self, behDataPath):
@@ -236,3 +237,4 @@ if __name__ == "__main__":
                 event_data = event.game2ev_distance()
                 tsv_save_path = join(save_dir,template['event_file'].format(subj,task,run_id))
                 event_data.to_csv(tsv_save_path, sep="\t", index=False)
+

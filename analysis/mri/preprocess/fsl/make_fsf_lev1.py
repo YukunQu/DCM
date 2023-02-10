@@ -9,9 +9,10 @@ import time
 import pandas as pd
 from os.path import join as opj
 
+
 start_time = time.time()
 # Set this to the directory where you'll dump all the fsf files
-fsfdir = "/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF/smooth_0"
+fsfdir = r"/mnt/workdir/DCM/BIDS/derivatives/FSL/1st_level/fsf/full_analysis"
 
 # filter subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -19,6 +20,7 @@ participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri==1')  # look out
 data = data.query("(game1_acc>=0.8)and(Age>=18)")
 subject_list = data['Participant_ID'].to_list()
+subject_list = ['sub-079']
 
 # Get all the paths!
 bids_dir = '/mnt/workdir/DCM/BIDS'
@@ -44,8 +46,8 @@ for func_path in func_list:
 
     ntime = os.popen(f'fslnvols {func_path}').read().rstrip()
     replacements = {'SUB_ID':sub_id, 'NTPTS':ntime, 'RUNID':run_id}
-    with open("%s/template_preprocess.fsf"%(fsfdir)) as infile:
-      with open("%s/design_%s_%s.fsf"%(fsfdir, sub_id, run_id), 'w') as outfile:
+    with open("%s/full_analysis_template.fsf"%(fsfdir)) as infile:
+      with open("%s/%s_%s_full_analysis.fsf"%(fsfdir, sub_id, run_id), 'w') as outfile:
           for line in infile:
             for src, target in replacements.items():
               line = line.replace(src, target)

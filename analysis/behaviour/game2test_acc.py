@@ -43,6 +43,7 @@ for sub in subjects:  # sub_id-1 ~ sub_id
     accuracy = game2_acc(game2_data)
     sub_game2_acc = {'Participant_ID':sub,'game2_test_acc':accuracy}
     game2test_acc = game2test_acc.append(sub_game2_acc,ignore_index=True)
+
 #%%
 participants_tsv = r'/mnt/workdir/DCM/tmp/participants.tsv'
 participants_data = pd.read_csv(participants_tsv,sep='\t')

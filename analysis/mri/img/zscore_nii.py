@@ -42,16 +42,24 @@ def zscore_nii(source_dir,file,prefix):
     map_zscore.to_filename(os.path.join(source_dir,prefix+file[3:]))
 
 
+#%%
+fmap = r'/mnt/workdir/DCM/result/tmp_test/average_fmap_across_sub/spmF_0005.nii'
+zscore_map = zscore_img(fmap)
+zscore_map.to_filename('/mnt/workdir/DCM/result/tmp_test/average_fmap_across_sub/ZF_0005.nii')
+
+#%%
 if __name__ == "__main__":
     # zscore the 1st level result
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri>0.5')  # look out
+    data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
-    cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/{}/rs-corr_img_coarse.nii'
-    save_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/{}/rs-corr_zmap_coarse.nii'
-    for sub_id in subjects:
-        zscored_map = zscore_img(cmap_template.format(sub_id))
-        zscored_map.to_filename(save_template.format(sub_id))
-        print("The map of {} have been zscored.".format(sub_id))
+    for ifold in range(8,9):
+        cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/decision_grid_rsa/Setall/6fold/{}/rs-corr_img_coarse_{}fold.nii'
+        save_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/decision_grid_rsa/Setall/6fold/{}/rs-corr_zmap_coarse_{}fold.nii'
+        for sub_id in subjects:
+            zscored_map = zscore_img(cmap_template.format(sub_id,ifold))
+            zscored_map.to_filename(save_template.format(sub_id,ifold))
+            print("The map of {} have been zscored.".format(sub_id))
+        print("{}fold have been completed.".format(ifold))

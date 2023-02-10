@@ -21,7 +21,7 @@ for p in pid:
 configs = {'data_root': fmriprep_dir,
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task': 'game2',
-           'glm_type': 'grid_rsa',  # look out
+           'glm_type': 'grid_rsa_corr_trials',  # look out
            'event_name':'sub-{subj_id}_task-game2_run-{run_id}_events.tsv',
            'func_name': 'func/sub-{subj_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii',
            'regressor_name': 'func/sub-{subj_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv'}

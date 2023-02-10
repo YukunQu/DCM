@@ -37,6 +37,7 @@ def run_feat_preprocess_parall(fsf_file_list):
     print(f"Run time cost {run_time}")
 
 
+
 if  __name__ == "__main__":
 
     """
@@ -49,12 +50,12 @@ if  __name__ == "__main__":
     """
 
     #  fsf file of subjects
-    subject_list = [36,46]
+    subject_list = [79]
     subject_list = [str(s).zfill(3) for s in subject_list]
 
     fsf_file_list = []
-    fsf_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fsl/FSF/smooth_0'
-    fsf_tempalte = 'design_sub-{}_run-0{}.fsf'
+    fsf_dir = r'/mnt/workdir/DCM/BIDS/derivatives/FSL/1st_level/fsf/full_analysis'
+    fsf_tempalte = 'sub-{}_run-0{}_full_analysis.fsf'
     for s in subject_list:
         for run_id in range(1,7):
             fsf_file_list.append(os.path.join(fsf_dir,fsf_tempalte.format(s,run_id)))

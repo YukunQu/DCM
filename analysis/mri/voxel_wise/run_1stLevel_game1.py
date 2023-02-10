@@ -7,8 +7,8 @@ from analysis.mri.voxel_wise.firstLevel import firstLevel_noPhi
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')
-data = data.query("(game1_acc>=0.80)and(Age>=18)")
 pid = data['Participant_ID'].to_list()
+
 
 # check the existence of preprocessing file
 fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep'
@@ -22,7 +22,7 @@ for p in pid:
 configs = {'data_root': fmriprep_dir,
            'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
            'task': 'game1',
-           'glm_type': 'cv_test1_RSA-EC_weighted_average',  # look out
+           'glm_type': 'grid_rsa_corr_trials',  # look out
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
            'func_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii',
            'regressor_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}

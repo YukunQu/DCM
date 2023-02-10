@@ -100,7 +100,7 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1s
     infosource.inputs.subj_id = subject_list
 
     # SelectFiles
-    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nipype'
+    data_root = '/mnt/data/DCM/result_backup/2022.11.27'
     templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}','sub-{subj_id}', '{contrast_id}.nii')}
 
     # Create SelectFiles node
@@ -108,7 +108,7 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1s
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{task}/{glm_type}/{set_id}/{ifold}/group/covariates/{covar_type}'
+    container_path = f'{task}/{glm_type}/{set_id}/{ifold}/group_select_sub/covariates/{covar_type}'
     datasink = Node(DataSink(base_directory=data_root, container=container_path),
                     name="datasink")
 

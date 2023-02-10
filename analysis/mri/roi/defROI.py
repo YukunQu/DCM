@@ -6,9 +6,9 @@ from analysis.mri.roi.makeMask import makeSphereMask, makeSphereMask_coords
 def defROI_by_coord():
     # Given coodinates, generate a ROI
     stats_map = r'/mnt/workdir/DCM/docs/Reference/Alexa/data/fig2MNI152NL.nii.gz'
-    coords = (48, 92, 42)
-    radius = (8, 11, 18)
-    savepath = r'/mnt/workdir/DCM/result/ROI/Group/mPFC.nii.gz'
+    coords = (49, 85, 43)
+    radius = (2.5, 2.5, 2.5)
+    savepath = r'/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials/Setall/6fold/group_nilearn/age/mPFC_Peak_ROI.nii.gz'
     makeSphereMask_coords(stats_map, savepath, coords, radius)
 
 

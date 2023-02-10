@@ -1,3 +1,4 @@
+import os
 import numpy as np
 import pandas as pd
 import seaborn as sns
@@ -41,14 +42,12 @@ def RDMcolormapObject(direction=1):
     return cmap
 
 
-def calc_rs_map(sub_id):
+def calc_rs_map(sub_id, ifold):
     # set path
-    neural_RDM_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/' \
-                      r'{}/{}-neural_RDM.hdf5'.format(sub_id,sub_id)
-    gird_RDM_path = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/' \
-                    r'{}/{}_grid_RDM_coarse.npy'.format(sub_id,sub_id)
-    rsmap_savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/' \
-                     r'{}/rs-corr_img_coarse.nii'.format(sub_id,sub_id)
+    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_corr_trials/Setall/6fold'
+    neural_RDM_path = os.path.join(default_dir,'{}/{}-neural_RDM.hdf5'.format(sub_id,sub_id))
+    gird_RDM_path = os.path.join(default_dir,'{}/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
+    rsmap_savepath = os.path.join(default_dir,'{}/rs-corr_img_coarse_{}fold.nii'.format(sub_id,ifold))
 
     #  load neural RDM for each voxel
     neural_RDM = load_rdm(neural_RDM_path)
@@ -63,8 +62,7 @@ def calc_rs_map(sub_id):
     eval_score = [np.float64(e.evaluations) for e in eval_results]
 
     # Create an 3D array, with the size of mask, and
-    tmp_img = nib.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/'
-                       r'{}/con_0001.nii'.format(sub_id))
+    tmp_img = nib.load(os.path.join(default_dir,'{}/con_0001.nii'.format(sub_id)))
     # we infer the mask by looking at non-nan voxels
     mask = ~np.isnan(tmp_img.get_fdata())
     x, y, z = mask.shape
@@ -74,7 +72,7 @@ def calc_rs_map(sub_id):
 
     corr_img = new_img_like(tmp_img, RDM_brain)
     corr_img.to_filename(rsmap_savepath)
-    print("The calculation of {} have been done.".format(sub_id))
+    print("The calculation of {}-{} have been done.".format(ifold,sub_id))
 
 def list_to_chunk(orignal_list,chunk_volume=30):
     chunk_list = []
@@ -98,6 +96,8 @@ if __name__ == "__main__":
     subjects = data['Participant_ID'].to_list()
     subjects_chunk = list_to_chunk(subjects)
 
-    for sub_chunk in subjects_chunk:
-        with concurrent.futures.ProcessPoolExecutor(max_workers=15) as executor:
-            results = [executor.submit(calc_rs_map,sub_id) for sub_id in sub_chunk]
+    for ifold in [4,5,6,7,8]:
+        print('-------------{} fold start.-------------------' .format(ifold))
+        for sub_chunk in subjects_chunk:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=15) as executor:
+                results = [executor.submit(calc_rs_map,sub_id,ifold) for sub_id in sub_chunk]

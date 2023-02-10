@@ -7,113 +7,102 @@ from nilearn.glm.second_level import make_second_level_design_matrix
 from nilearn.glm import threshold_stats_img
 
 
-def second_level_covariate(subjects,task,glm_type,contrast_id,covariates,datasink,centring=False):
+def run_2nd_ttest(subjects, contrast_id, cmap_template, datasink):
     # Select cmaps
-    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    cmap_template = pjoin(data_root, f'{task}/{glm_type}/Setall/6fold','sub-{}', f'{contrast_id}.nii.gz')
-    cmap_files = []
-    for subj_id in subjects:
-        cmap_files.append(cmap_template.format(subj_id))
+    cmaps = [cmap_template.format(sub_id, contrast_id) for sub_id in subjects]
+    # Set design matrix
+    design_matrix = pd.DataFrame([1] * len(cmaps), columns=['intercept'])
+    # run glm
+    glm_2nd = SecondLevelModel(smoothing_fwhm=6.0)
+    glm_2nd = glm_2nd.fit(cmaps, design_matrix=design_matrix)
+    stats_map = glm_2nd.compute_contrast(second_level_contrast='intercept',output_type='all')
+    t_map = stats_map['stat']
+    z_map = stats_map['z_score']
+    # save
+    if not os.path.exists(datasink):
+        os.makedirs(datasink)
+
+    t_image_path = os.path.join(datasink,'%s_tmap.nii.gz' % contrast_id)
+    t_map.to_filename(t_image_path)
+
+    z_image_path = os.path.join(datasink, '%s_zmap.nii.gz' % contrast_id)
+    #z_map.to_filename(z_image_path)
+
+
+def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink):
+    # Select cmaps
+    cmaps = [cmap_template.format(sub_id, contrast_id) for sub_id in subjects]
 
     # Set design matrix
     covariate_name = covariates.keys()
     extra_info_subjects = pd.DataFrame(covariates)
     extra_info_subjects['subject_label'] = subjects
 
-    design_matrix = make_second_level_design_matrix(subjects,extra_info_subjects)
-    # for key in covariate_name:
-    #    design_matrix[key] = design_matrix[key] - design_matrix[key].mean()
+    design_matrix = make_second_level_design_matrix(subjects, extra_info_subjects)
+    for key in covariate_name:
+        design_matrix[key] = design_matrix[key] - design_matrix[key].mean()
 
     # estimate second level model
-    mni_mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
-    model = SecondLevelModel()
-    model.fit(cmap_files, design_matrix=design_matrix)
+    glm_2nd = SecondLevelModel(smoothing_fwhm=6.0)
+    glm_2nd = glm_2nd.fit(cmaps, design_matrix=design_matrix)
 
     if not os.path.exists(datasink):
         os.mkdir(datasink)
 
     for index, covariate in enumerate(covariate_name):
-        stats_map = model.compute_contrast(covariate, output_type='all')
+        stats_map = glm_2nd.compute_contrast(covariate, output_type='all')
         t_map = stats_map['stat']
         z_map = stats_map['z_score']
 
         # write the resulting stat images to file
-        tmap_path = pjoin(datasink,'{}_{}_tmap.nii.gz'.format(contrast_id,covariate))
+        tmap_path = pjoin(datasink, '{}_{}_tmap.nii.gz'.format(contrast_id, covariate))
         t_map.to_filename(tmap_path)
 
-        zmap_path = pjoin(datasink,'{}_{}_zmap.nii.gz'.format(contrast_id,covariate))
-        z_map.to_filename(zmap_path)
-
-
-def second_covariate():
-    task = 'game1'  # look out
-    glm_type = 'separate_hexagon'
-
-    # load behavioural results
-    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-    participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri==1')  # look out
-    pid = data['Participant_ID'].to_list()
-    subject_list = [p.split('-')[-1] for p in pid]
-    accuracy = data['game1_acc'].to_list()  # look out
-    #age = data['Age'].to_list()
-    #covariate = {'Age':age}
-    covariate = {'Acc':accuracy}
-    datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/group'
-
-    # load contrast data
-    contrast_1st = ['m2_hexagon_cmap','decision_hexagon_cmap','hexagon_cmap']
-    for contrast_id in contrast_1st:
-        second_level_covariate(subject_list,task,glm_type,contrast_id,covariate,datasink,centring=True)
+        zmap_path = pjoin(datasink, '{}_{}_zmap.nii.gz'.format(contrast_id, covariate))
+        #z_map.to_filename(zmap_path)
 
 
 if __name__ == "__main__":
-    """
-    task = 'game1'
-    glm_type = 'separate_hexagon'
-
+    # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-    participants_data = pd.read_csv(participants_tsv,sep='\t')
-    data = participants_data.query('game1_fmri==1')  # look out
-
-    adult_data = data.query('Age>18')
-    adolescent_data = data.query('12<Age<=18')
-    children_data = data.query('Age<=12')
-    hp_data = data.query('game1_acc>=0.8')
-
-    print("Participants:", len(data))
-    print("Adult:",len(adult_data))
-    print("Adolescent:",len(adolescent_data))
-    print("Children:", len(children_data))
-    print("High performance:",len(hp_data),"({} adult)".format(len(hp_data.query('Age>18'))))
-
+    participants_data = pd.read_csv(participants_tsv, sep='\t')
+    data = participants_data.query('game1_fmri>=0.5')  # look out
     pid = data['Participant_ID'].to_list()
-    subject_list = [p.split('_')[-1] for p in pid]
-    #subject_list.remove('079')
-    print(len(subject_list))
+    sub_list = [p.split('-')[-1] for p in pid]
 
-    # Select cmaps
-    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    cmap_template = pjoin(data_root, f'{task}/{glm_type}/Setall/6fold','sub-{}', 'hexagon_zmap.nii.gz')
-    cmap_files = []
-    for subj_id in subject_list:
-        cmap_files.append(cmap_template.format(subj_id))
+    print("{} subjects".format(len(sub_list)))
 
-    design_matrix = pd.DataFrame([1] * len(cmap_files), columns=['intercept'])
+    hp_data = data.query("(game1_acc>=0.80)and(Age>=18)")  # look out
+    hp_pid = hp_data['Participant_ID'].to_list()
+    hp_sub_list = [p.split('-')[-1] for p in hp_pid]
+    print("{} hp subjects".format(len(hp_sub_list)))
 
-    second_level_model = SecondLevelModel()
-    second_level_model = second_level_model.fit(cmap_files,design_matrix=design_matrix)
+    # configure
+    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn_test'
+    task = 'game1'
+    glm_type = 'distance_whole_trials'
+    set_id = 'Setall'
+    ifold = '6fold'
+    templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}','sub-{}/zmap', '{}_zmap.nii.gz')
 
-    stats_map = second_level_model.compute_contrast(output_type='all')
+    contrast_1st = ['M1', 'M2', 'decision','M2xdistance','decisionxdistance','distance']
 
-    t_map = stats_map['stat']
-    z_map = stats_map['z_score']
-    # write the resulting stat images to file
-    datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/group'.format(task,glm_type)
-    tmap_path = pjoin(datasink,'hexagon_tmap.nii.gz')
-    t_map.to_filename(tmap_path)
+    data_root = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}','group')
+    for contrast_id in contrast_1st:
+        datasink = os.path.join(data_root,'mean')
+        run_2nd_ttest(sub_list, contrast_id, templates, datasink)
 
-    zmap_path = pjoin(datasink,'hexagon_zmap.nii.gz')
-    z_map.to_filename(zmap_path)
-    """
-    second_covariate()
+        datasink = os.path.join(data_root,'hp')
+        run_2nd_ttest(hp_sub_list, contrast_id, templates, datasink)
+
+        # age
+        age = data['Age'].to_list()
+        covariates = {'Age':age}
+        datasink = os.path.join(data_root,'age')
+        run_2nd_covariate(sub_list, contrast_id, templates, covariates, datasink)
+
+        # acc
+        accuracy = data['game1_acc'].to_list()
+        covariates = {'acc':accuracy}
+        datasink = os.path.join(data_root,'acc')
+        run_2nd_covariate(sub_list, contrast_id, templates, covariates, datasink)

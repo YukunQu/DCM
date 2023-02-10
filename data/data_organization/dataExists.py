@@ -46,8 +46,8 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
             f.write('\n')
 
 
-data_dir = '/mnt/workdir/DCM/sourcedata'
-sub_list = ['sub_'+str(i).zfill(3) for i in range(172,173)]
+data_dir = '/mnt/data/DCM/sourcedata'
+sub_list = ['sub_'+str(i).zfill(3) for i in range(232,238)]
 
 check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
                                     'pilot','fmri_task-game1','fmri_task-game2-train',

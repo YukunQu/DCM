@@ -23,7 +23,6 @@ def load_ev_separate(event_path):
     # generate parametric modulation for M2
     m2_corrxcos = pmod_cos.copy()
     m2_corrxcos['trial_type'] = 'M2_corrxcos'
-
     m2_corrxsin = pmod_sin.copy()
     m2_corrxsin['trial_type'] = 'M2_corrxsin'
 
@@ -73,12 +72,8 @@ def prepare_data(subj,run_list,ifold,configs):
         event = load_ev_separate(event_path)
 
         # load motion
-        add_reg_names =  ['trans_x', 'trans_x_derivative1', 'trans_x_derivative1_power2', 'trans_x_power2',
-                          'trans_y', 'trans_y_derivative1', 'trans_y_derivative1_power2', 'trans_y_power2',
-                          'trans_z', 'trans_z_derivative1', 'trans_z_derivative1_power2', 'trans_z_power2',
-                          'rot_x', 'rot_x_derivative1', 'rot_x_derivative1_power2', 'rot_x_power2',
-                          'rot_y', 'rot_y_derivative1', 'rot_y_derivative1_power2', 'rot_y_power2',
-                          'rot_z', 'rot_z_derivative1', 'rot_z_derivative1_power2', 'rot_z_power2']
+        add_reg_names = ['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z',
+                          'csf', 'white_matter']
         confound_file = os.path.join(func_dir,f'sub-{subj}', 'func',regressor_file.format(subj,run_id))
         confound_factors = pd.read_csv(confound_file,sep="\t")
         motion = confound_factors[add_reg_names]
@@ -102,6 +97,7 @@ def prepare_data(subj,run_list,ifold,configs):
 def pad_vector(contrast_, n_columns):
     """A small routine to append zeros in contrast vectors"""
     return np.hstack((contrast_, np.zeros(n_columns - len(contrast_))))
+
 
 def set_contrasts(design_matrices):
     regressors_num = set([len(dm) for dm in design_matrices])
@@ -153,12 +149,12 @@ def set_contrasts(design_matrices):
     return contrasts
 
 
-def first_level_glm(datasink,run_imgs,design_matrices):
+def first_level_glm(datasink, run_imgs, design_matrices):
     # fit first level glm to estimate mean orientation
     mni_mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
     fmri_glm = FirstLevelModel(t_r=3.0,slice_time_ref=0.5,hrf_model='spm',
-                               drift_model=None,high_pass=1/128,mask_img=mni_mask,
-                               smoothing_fwhm=8,verbose=1,n_jobs=10)
+                               drift_model=None,high_pass=1/100,mask_img=mni_mask,
+                               smoothing_fwhm=8,verbose=1,n_jobs=6)
     fmri_glm = fmri_glm.fit(run_imgs, design_matrices=design_matrices)
 
     # define contrast
@@ -196,8 +192,8 @@ def first_level_glm(datasink,run_imgs,design_matrices):
 if __name__ == "__main__":
     run_list = [1,2,3,4,5,6]
     ifold = 6
-    configs = {'TR':3.0, 'task':'game1', 'glm_type':'separate_hexagon',
-               'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume/fmriprep',
+    configs = {'TR':3.0, 'task':'game1', 'glm_type':'separate_hexagon_2phases_correct_trials',
+               'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'func_name': r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                'events_name':r'sub-{}_task-game1_run-{}_events.tsv',
@@ -206,12 +202,12 @@ if __name__ == "__main__":
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri==1')
+    data = participants_data.query('game1_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    aleary_subs = os.listdir('/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon/Setall/6fold')
+    os.makedirs('/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon_2phases_correct_trials/Setall/6fold')
+    aleary_subs = os.listdir('/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/separate_hexagon_2phases_correct_trials/Setall/6fold')
     aleary_subs = [a.split('-')[-1] for a in aleary_subs]
-
     for subj in subjects:
         if subj in aleary_subs:
             continue
@@ -219,5 +215,6 @@ if __name__ == "__main__":
         datasink = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold/sub-{}'.format(configs['task'],
                                                                                                   configs['glm_type'],
                                                                                                   ifold,subj)
+        os.makedirs(datasink)
         functional_imgs, design_matrices = prepare_data(subj,run_list,ifold,configs)
         first_level_glm(datasink,functional_imgs,design_matrices)
