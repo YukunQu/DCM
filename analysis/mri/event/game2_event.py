@@ -6,12 +6,13 @@ import pandas as pd
 
 
 class Game2EV(object):
-    """"""
+    """The father class of Game2"""
     def __init__(self, behDataPath):
+        self.dformat = None
         self.behDataPath = behDataPath
         self.behData = pd.read_csv(behDataPath)
         self.behData = self.behData.dropna(axis=0, subset=['pairs_id'])
-        self.dformat = None
+        self.starttime = self.cal_start_time()
 
     def game1_dformat(self):
         columns = self.behData.columns
@@ -31,6 +32,72 @@ class Game2EV(object):
         else:
             raise Exception("You need specify behavioral data format.")
         return starttime
+
+    def genM1ev(self):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['testPic1.started'] - self.starttime
+            duration = self.behData['testPic2.started'] - self.behData['testPic1.started']
+            angle = self.behData['angles']
+
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev['trial_type'] = 'M1'
+            m1ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['testPic1.started_raw'] - self.starttime
+            duration = self.behData['testPic2.started_raw'] - self.behData['testPic1.started_raw']
+            angle = self.behData['angles']
+
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m1ev['trial_type'] = 'M1'
+            m1ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        m1ev = m1ev.sort_values('onset',ignore_index=True)
+        return m1ev
+
+    def response(self):
+        self.behData = self.behData.fillna('None')
+        if self.dformat == 'trial_by_trial':
+            onsets = []
+            duration = 0
+            angles = []
+            for index, row in self.behData.iterrows():
+                onset = row['dResp.started'] - self.starttime
+                rt = row['dResp.rt']
+                if rt != 'None':
+                    onsets.append(onset + rt)
+                    angles.append(row['angles'])
+            pbev = pd.DataFrame({'onset': onsets, 'duration': duration, 'angle': angles})
+            pbev['trial_type'] = 'response'
+            pbev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onsets = []
+            duration = 0
+            angles = []
+            for index, row in self.behData.iterrows():
+                onset = row['dResp.started_raw'] - self.starttime
+                rt = row['dResp.rt_raw']
+                if rt != 'None':
+                    onsets.append(onset + rt)
+                    angles.append(row['angles'])
+            pbev = pd.DataFrame({'onset': onsets, 'duration': duration, 'angle': angles})
+            pbev['trial_type'] = 'response'
+            pbev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        pbev = pbev.sort_values('onset', ignore_index=True)
+        return pbev
+
+    @staticmethod
+    def genpm(ev, ifold):
+        angle = ev['angle']
+        pmod_sin = ev.copy()
+        pmod_cos = ev.copy()
+        pmod_sin['trial_type'] = 'sin'
+        pmod_cos['trial_type'] = 'cos'
+        pmod_sin['modulation'] = np.sin(np.deg2rad(ifold * angle))
+        pmod_cos['modulation'] = np.cos(np.deg2rad(ifold * angle))
+        return pmod_sin, pmod_cos
 
     def label_trial_corr(self):
         self.behData = self.behData.fillna('None')
@@ -72,211 +139,3 @@ class Game2EV(object):
                 trial_corr.append(False)
         accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
         return trial_corr, accuracy
-
-    def genM1ev(self):
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['testPic1.started'] - self.starttime
-            duration = self.behData['testPic2.started'] - self.behData['testPic1.started']
-            angle = self.behData['angles']
-
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m1ev['trial_type'] = 'M1'
-            m1ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['testPic1.started_raw'] - self.starttime
-            duration = self.behData['testPic2.started_raw'] - self.behData['testPic1.started_raw']
-            angle = self.behData['angles']
-
-            m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m1ev['trial_type'] = 'M1'
-            m1ev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        m1ev = m1ev.sort_values('onset',ignore_index=True)
-        return m1ev
-
-    def genM2ev(self, trial_corr):
-        # generate M2 correct trials event
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['testPic2.started'] - self.starttime
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['testPic2.started_raw'] - self.starttime
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-
-        assert len(m2ev) == len(trial_corr), "The number of trial label didn't not same as the number of event-M2."
-
-        m2ev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        m2ev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-
-        for i, label in enumerate(trial_corr):
-            if label == True:
-                m2ev_corr = m2ev_corr.append(m2ev.iloc[i])
-            elif label == False:
-                m2ev_error = m2ev_error.append(m2ev.iloc[i])
-            else:
-                raise ValueError("The trial label should be True or False.")
-        m2ev_corr['trial_type'] = 'M2_corr'
-        m2ev_error['trial_type'] = 'M2_error'
-
-        m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
-        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
-        return m2ev_corr, m2ev_error
-
-    def genDeev(self,trial_corr):
-        # generate the event of decision
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1.started'] - self.starttime
-            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-
-        assert len(deev) == len(trial_corr), "The number of trial label didn't not  same as the number of " \
-                                             "event-decision. "
-
-        deev_corr = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        deev_error = pd.DataFrame(columns=['onset', 'duration', 'angle'])
-        for i, label in enumerate(trial_corr):
-            if label == True:
-                deev_corr = deev_corr.append(deev.iloc[i])
-            elif label == False:
-                deev_error = deev_error.append(deev.iloc[i])
-            else:
-                raise ValueError("The trial label should be True or False.")
-        deev_corr['trial_type'] = 'decision_corr'
-        deev_error['trial_type'] = 'decision_error'
-
-        deev_corr = deev_corr.sort_values('onset',ignore_index=True)
-        deev_error = deev_error.sort_values('onset',ignore_index=True)
-        return deev_corr, deev_error
-
-    def response(self):
-        self.behData = self.behData.fillna('None')
-        if self.dformat == 'trial_by_trial':
-            onsets = []
-            duration = 0
-            angles = []
-            for index, row in self.behData.iterrows():
-                onset = row['dResp.started'] - self.starttime
-                rt = row['dResp.rt']
-                if rt != 'None':
-                    onsets.append(onset + rt)
-                    angles.append(row['angles'])
-            pbev = pd.DataFrame({'onset': onsets, 'duration': duration, 'angle': angles})
-            pbev['trial_type'] = 'response'
-            pbev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onsets = []
-            duration = 0
-            angles = []
-            for index, row in self.behData.iterrows():
-                onset = row['dResp.started_raw'] - self.starttime
-                rt = row['dResp.rt_raw']
-                if rt != 'None':
-                    onsets.append(onset + rt)
-                    angles.append(row['angles'])
-            pbev = pd.DataFrame({'onset': onsets, 'duration': duration, 'angle': angles})
-            pbev['trial_type'] = 'response'
-            pbev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        pbev = pbev.sort_values('onset', ignore_index=True)
-        return pbev
-
-    def genpm(self, m2ev_corr, ifold):
-        angle = m2ev_corr['angle']
-        pmod_sin = m2ev_corr.copy()
-        pmod_cos = m2ev_corr.copy()
-        pmod_sin['trial_type'] = 'sin'
-        pmod_cos['trial_type'] = 'cos'
-        pmod_sin['modulation'] = np.sin(np.deg2rad(ifold * angle))
-        pmod_cos['modulation'] = np.cos(np.deg2rad(ifold * angle))
-        return pmod_sin, pmod_cos
-
-    def game2ev_corr_trials(self, ifold):
-        self.starttime = self.cal_start_time()
-        m1ev = self.genM1ev()
-        pbev = self.response()
-        trial_corr, accuracy = self.label_trial_corr()
-        m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
-        deev_corr, deev_error = self.genDeev(trial_corr)
-        pmod_sin, pmod_cos = self.genpm(m2ev_corr, ifold)
-
-        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error,deev_corr, deev_error,pbev,
-                                pmod_sin, pmod_cos], axis=0)
-        return event_data
-
-    def genM2ev_whole_trials(self):
-        # generate M2 correct trials event
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['testPic2.started'] - self.starttime
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['testPic2.started_raw'] - self.starttime
-            duration = [2.5] * len(self.behData)
-            angle = self.behData['angles']
-            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            m2ev['trial_type'] = 'M2'
-            m2ev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        m2ev = m2ev.sort_values('onset', ignore_index=True)
-        return m2ev
-
-    def genDeev_whole_trials(self):
-        # generate the event of decision
-        if self.dformat == 'trial_by_trial':
-            onset = self.behData['cue1.started'] - self.starttime
-            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        elif self.dformat == 'summary':
-            onset = self.behData['cue1.started_raw'] - self.starttime
-            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
-            angle = self.behData['angles']
-            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
-            deev['trial_type'] = 'decision'
-            deev['modulation'] = 1
-        else:
-            raise Exception("You need specify behavioral data format.")
-        deev = deev.sort_values('onset',ignore_index=True)
-        return deev
-
-    def game2ev_whole_trials(self, ifold):
-        self.starttime = self.cal_start_time()
-        m1ev = self.genM1ev()
-        pbev = self.response()
-        m2ev = self.genM2ev_whole_trials()
-        deev = self.genDeev_whole_trials()
-        pmod_sin, pmod_cos = self.genpm(m2ev, ifold)
-
-        event_data = pd.concat([m1ev,m2ev,deev,pbev,
-                                pmod_sin, pmod_cos], axis=0)
-        return event_data

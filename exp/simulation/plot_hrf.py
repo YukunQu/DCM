@@ -24,16 +24,19 @@ event1 = pd.DataFrame({'onset':onset,'trial_type':trial_type,
 
 trial_type = ['stick']* len(onset)
 duration = [0] * len(onset)
-event2 = pd.DataFrame({'onset':onset,'trial_type':trial_type,
+onset1 = [0]
+trial_type = ['stick']* len(onset1)
+duration = [0] * len(onset1)
+event2 = pd.DataFrame({'onset':onset1,'trial_type':trial_type,
                        'duration':duration})
 
 events = pd.concat([event1,event2],axis=0)
-frame_times=  0.5 * (np.arange(133))
+frame_times= 0.5 * (np.arange(133))
 design_matrix = make_first_level_design_matrix(frame_times,events=events,
                                                hrf_model='spm')
-box_car = design_matrix.loc[:100,'box car']
+box_car = design_matrix.loc[:100,'box_car']
 stick = design_matrix.loc[:100,'stick']
 
-plt.plot(box_car)
+#plt.plot(box_car)
 plt.plot(stick)
 plt.show()

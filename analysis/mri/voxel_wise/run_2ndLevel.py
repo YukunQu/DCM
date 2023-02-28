@@ -39,7 +39,8 @@ templates = {'cons': pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}','sub
 # set subjects
 pid = data['Participant_ID'].to_list()
 sub_list = [p.split('-')[-1] for p in pid]
-out_container = f'{task}/{glm_type}/{set_id}/{ifold}/group_select_sub/all'  # output = data_root + out_container
+sub_list.remove("186")
+out_container = f'{task}/{glm_type}/{set_id}/{ifold}/group_reomove_bad186/all'  # output = data_root + out_container
 level2nd_onesample_ttest(sub_list,contrast_1st,data_root,templates,out_container)
 
 # ------------------Mean effect for high performance adults--------------------
@@ -48,13 +49,13 @@ hp_data = data.query("(game1_acc>=0.80)and(Age>=18)")  # look out
 hp_pid = hp_data['Participant_ID'].to_list()
 hp_sub_list = [p.split('-')[-1] for p in hp_pid]
 print("High performance subjects number:",len(hp_sub_list))
-out_container = f'{task}/{glm_type}/{set_id}/{ifold}/group_select_sub/hp-adult'  # output = data_root + out_container
+out_container = f'{task}/{glm_type}/{set_id}/{ifold}/group_reomove_bad186/hp-adult'  # output = data_root + out_container
 level2nd_onesample_ttest(hp_sub_list,contrast_1st,data_root,templates,out_container)
 
 hp_data = data.query("(game1_acc>=0.7)and(Age>=13)")  # look out
 hp_pid = hp_data['Participant_ID'].to_list()
 hp_sub_list = [p.split('-')[-1] for p in hp_pid]
-out_container = f'{task}/{glm_type}/{set_id}/{ifold}/group_select_sub/acc_0.7_age_13'  # output = data_root + out_container
+out_container = f'{task}/{glm_type}/{set_id}/{ifold}/group_reomove_bad186/acc_0.7_age_13'  # output = data_root + out_container
 print(len(hp_sub_list))
 #level2nd_onesample_ttest(hp_sub_list,contrast_1st,data_root,templates,out_container)
 

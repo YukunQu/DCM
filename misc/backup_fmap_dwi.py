@@ -5,9 +5,9 @@ from os.path import join as opj
 
 
 # copy data to new directory selectively
-def copy_mri_data(sub_id):
+def copy_mri_data(sub_id,mri_modes=('fmap','dwi')):
     original_dir = r'/mnt/workdir/DCM/BIDS'
-    output_dir = '/mnt/data//DCM/fmap_backup/'
+    output_dir = '/mnt/data/DCM/fmap_backup'
 
     sourMriDir = opj(original_dir, sub_id)
     targMriDir = opj(output_dir, sub_id.replace('-', '-'))
@@ -15,10 +15,8 @@ def copy_mri_data(sub_id):
     if not os.path.exists(targMriDir):
         os.makedirs(targMriDir)
 
-    mri_modes = ['fmap','dwi']
-
     for mode in mri_modes:
-        if mode in ['anat', 'dwi', 'fmap']:
+        if mode in ['dwi', 'fmap']:
             source_file_path = opj(sourMriDir, mode)
             target_file_path = opj(targMriDir, mode)
             try:
@@ -26,7 +24,14 @@ def copy_mri_data(sub_id):
             except:
                 print("The ", sub_id, "didn't have", mode)
                 continue
-
+        elif mode == 'anat':
+            source_file_path = opj(sourMriDir, mode)
+            target_file_path = opj(targMriDir, mode)
+            try:
+                shutil.copytree(source_file_path, target_file_path)
+            except:
+                print("The ", sub_id, "didn't have", mode)
+                continue
         elif mode == 'func':
             file_list = os.listdir(opj(sourMriDir, 'func'))
             target_files = []
@@ -52,7 +57,6 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri>=0.5')
     subject_list = data['Participant_ID'].to_list()
     subject_list = [s.replace('-', '-') for s in subject_list]
-
-    subject_list = ['sub-{}'.format(i) for i in range(232,238)]
+    subject_list = [f'sub-{i}' for i in range(247,250)]
     for sub in subject_list:
-        copy_mri_data(sub)
+        copy_mri_data(sub,mri_modes=['anat','dwi','fmap'])

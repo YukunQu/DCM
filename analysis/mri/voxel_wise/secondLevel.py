@@ -108,7 +108,7 @@ def level2nd_noPhi_covariate(subject_list,task,glm_type,set_id,ifold,contrast_1s
                           name='selectfiles', iterfield=['subj_id'])
 
     # Initiate DataSink node here
-    container_path = f'{task}/{glm_type}/{set_id}/{ifold}/group_select_sub/covariates/{covar_type}'
+    container_path = f'{task}/{glm_type}/{set_id}/{ifold}/group_reomove_bad186/covariates/{covar_type}'
     datasink = Node(DataSink(base_directory=data_root, container=container_path),
                     name="datasink")
 

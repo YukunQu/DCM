@@ -1,5 +1,5 @@
 from misc.load_spm import SPMfile
-from analysis.mri.voxel_wise.nilearn.Ftest.game1_separate_nilearn2 import prepare_data
+from analysis.mri.voxel_wise.nilearn.Ftest.game1_separate_phases_correct_trials import prepare_data
 import nilearn.plotting as plotting
 
 subj = '010'

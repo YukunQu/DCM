@@ -9,7 +9,6 @@ participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')
 pid = data['Participant_ID'].to_list()
 
-
 # check the existence of preprocessing file
 fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep'
 preprocess_subs = os.listdir(fmriprep_dir)
@@ -24,7 +23,7 @@ configs = {'data_root': fmriprep_dir,
            'task': 'game1',
            'glm_type': 'grid_rsa_corr_trials',  # look out
            'event_name':'sub-{subj_id}_task-game1_run-{run_id}_events.tsv',
-           'func_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii',
+           'func_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth.nii',
            'regressor_name': 'func/sub-{subj_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv'}
 
 # set parameter

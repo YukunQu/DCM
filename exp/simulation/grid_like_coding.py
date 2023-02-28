@@ -29,7 +29,7 @@ trainData['angles'] = angles[:int(len(angles)/2)]
 testData['angles'] = angles[int(len(angles)/2):]
 
 # generate the simulation-data
-omegas = range(-29,30,5) # 根据Erie 的代码重新改范围
+omegas = range(-29,30,5)  # 根据Erie 的代码重新改范围
 omega = random.choice(omegas) 
 trainData['activation'] = utils.genSimulateData(trainData['angles'],omega,ampNoise)
 testData['activation'] = utils.genSimulateData(testData['angles'],omega,ampNoise)

@@ -7,10 +7,8 @@ import os
 import numpy as np
 import pandas as pd
 from os.path import join
-from nilearn.image import math_img, load_img,resample_to_img,concat_imgs
-from nilearn.masking import apply_mask
+from nilearn.image import load_img, concat_imgs
 from nilearn.glm.first_level import FirstLevelModel
-from nilearn.glm.first_level import make_first_level_design_matrix
 
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 

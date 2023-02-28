@@ -15,7 +15,7 @@ for sub in subjects_list:
     sub_fmap_dir = os.path.join(bids_dir,sub,'fmap')
     if not os.path.exists(sub_fmap_dir):
         i += 1
-        print(sub,f'have none fmap file.')
+        # print(sub,f'have none fmap file.')
         sub_name.append(sub)
         fmaps_num.append(0)
     else:
@@ -26,7 +26,9 @@ for sub in subjects_list:
             print(sub,f'have {fmap_num} fmap files.')
             sub_name.append(sub)
             fmaps_num.append(fmap_num)
+        else:
+            print(sub,f'have {fmap_num} fmap files.')
+
 lack_df = pd.DataFrame({'sub':sub_name, 'fmaps_num':fmaps_num})
 #%%
 lack_df.to_csv(r"/mnt/workdir/DCM/tmp/lack_df.csv",index=False)
-

@@ -7,7 +7,7 @@ import time
 import subprocess
 
 import pandas as pd
-#%%
+
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')
@@ -27,6 +27,7 @@ for f in pid:
 subject_list = [p.split('-')[-1] for p in unexist_subjects]
 subject_list.sort()
 
+subject_list = ['153']
 # split the subjects into subject units. Each unit includes only five subjects to prevent memory overflow.
 sub_list = []
 sub_set_num = 0
@@ -34,7 +35,7 @@ sub_set = ''
 for i,sub in enumerate(subject_list):
     sub_set = sub_set + sub + ' '
     sub_set_num = sub_set_num+1
-    if sub_set_num == 8:
+    if sub_set_num == 9:
         sub_list.append(sub_set[:-1])
         sub_set_num = 0
         sub_set = ''
@@ -44,12 +45,9 @@ for i,sub in enumerate(subject_list):
         continue
 
 #%%
-
-sub_list = ['197 232 233 234 235 236 237']
 # command_surfer = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 100'
 # command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 80 --fs-no-reconall'
-
-command_volume_fmapless = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w func --no-tty -w {} --nthreads 66 --fs-no-reconall --use-syn-sdc'
+command_volume_fmapless = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w func --no-tty -w {} --nthreads 30 --fs-no-reconall --use-syn-sdc'
 
 starttime = time.time()
 for subj in sub_list:

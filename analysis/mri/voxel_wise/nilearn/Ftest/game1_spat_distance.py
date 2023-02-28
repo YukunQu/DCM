@@ -7,16 +7,13 @@ import os
 import numpy as np
 import pandas as pd
 from os.path import join
-from nilearn.image import math_img, load_img, resample_to_img, concat_imgs
-from nilearn.masking import apply_mask
+from nilearn.image import load_img, concat_imgs
 from nilearn.glm.first_level import FirstLevelModel
 from nilearn.glm.first_level import make_first_level_design_matrix
 
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 
 from joblib import Parallel, delayed, Memory
-
-memory = Memory(cachedir='/tmp/joblib', verbose=0, bytes_limit=80 * 1024 ** 3)
 
 
 def load_ev_separate(event_path):
@@ -25,6 +22,7 @@ def load_ev_separate(event_path):
 
     cos_mod = event.query("trial_type =='cos'")['modulation'].to_list()
     sin_mod = event.query("trial_type =='sin'")['modulation'].to_list()
+    distance_mod = event.query("trial_type =='distance'")['modulation'].to_list()
 
     # generate parametric modulation for M2
     m2xcos = event.query("trial_type == 'M2'").copy()
@@ -35,6 +33,10 @@ def load_ev_separate(event_path):
     m2xsin.loc[:, 'modulation'] = sin_mod
     m2xsin['trial_type'] = 'M2xsin'
 
+    m2xdistance = event.query("trial_type == 'M2'").copy()
+    m2xdistance.loc[:, 'modulation'] = distance_mod
+    m2xdistance['trial_type'] = 'M2xdistance'
+
     # generate parametric modulation for decision
     decisionxcos = event.query("trial_type == 'decision'").copy()
     decisionxcos.loc[:, 'modulation'] = cos_mod
@@ -44,7 +46,11 @@ def load_ev_separate(event_path):
     decisionxsin.loc[:, 'modulation'] = sin_mod
     decisionxsin['trial_type'] = 'decisionxsin'
 
-    event_condition = event_condition.append([m2xcos,m2xsin,decisionxcos,decisionxsin])
+    decisionxdistance = event.query("trial_type == 'decision'").copy()
+    decisionxdistance.loc[:, 'modulation'] = distance_mod
+    decisionxdistance['trial_type'] = 'decisionxdistance'
+
+    event_condition = event_condition.append([m2xcos,m2xsin,decisionxcos,decisionxsin,m2xdistance,decisionxdistance])
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
     return event_condition
 
@@ -68,7 +74,7 @@ def prepare_data(subj, run_list, ifold, configs, concat_runs=False):
     design_matrices = []
     for i, run_id in enumerate(run_list):
         # load image
-        func_path = join(func_dir, f'sub-{subj}', 'func', func_name.format(subj, run_id))
+        func_path = join(func_dir, f'sub-{subj}',  func_name.format(subj, run_id))
         func_img = load_img(func_path)
         functional_imgs.append(func_img)
 
@@ -127,7 +133,8 @@ def get_reg_index(design_matrix, target_name):
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1','M2','decision','M2xcos', 'M2xsin', 'decisionxcos', 'decisionxsin']
+    contrast_name = ['M1','M2','decision','M2xcos', 'M2xsin', 'decisionxcos', 'decisionxsin',
+                     'M2xdistance','decisionxdistance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -143,6 +150,7 @@ def set_contrasts(design_matrix):
     contrasts_set['m2_hexagon'] = np.vstack([contrasts_set['M2xcos'], contrasts_set['M2xsin']])
     contrasts_set['decision_hexagon'] = np.vstack([contrasts_set['decisionxcos'], contrasts_set['decisionxsin']])
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'], contrasts_set['sin']])
+    contrasts_set['distance'] = contrasts_set['M2xdistance'] + contrasts_set['decisionxdistance']
     return contrasts_set
 
 
@@ -185,14 +193,14 @@ def first_level_glm(datasink, run_imgs, design_matrices):
         z_map.to_filename(z_image_path)
 
 
-@memory.cache
 def run_glm(subj):
     run_list = [1, 2, 3, 4, 5, 6]
+    # run_list = [1, 2]
     ifold = 6
-    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'separate_hexagon_2phases_all_trials',
+    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'hexagon_spat_distance',
                'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'func_name': r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
+               'func_name': r'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv'}
 
@@ -217,8 +225,7 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects.remove('197')
 
-    subjects_chunk = list_to_chunk(subjects,4)
+    subjects_chunk = list_to_chunk(subjects,6)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=80)(delayed(run_glm)(subj) for subj in chunk)
+        results_list = Parallel(n_jobs=30)(delayed(run_glm)(subj) for subj in chunk)

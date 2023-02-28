@@ -1,4 +1,5 @@
 import os
+from nilearn.image import binarize_img
 import pandas as pd
 from analysis.mri.roi.makeMask import makeSphereMask, makeSphereMask_coords
 
@@ -6,19 +7,32 @@ from analysis.mri.roi.makeMask import makeSphereMask, makeSphereMask_coords
 def defROI_by_coord():
     # Given coodinates, generate a ROI
     stats_map = r'/mnt/workdir/DCM/docs/Reference/Alexa/data/fig2MNI152NL.nii.gz'
-    coords = (49, 85, 43)
+    coords = (49, 55, 58)
     radius = (2.5, 2.5, 2.5)
-    savepath = r'/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials/Setall/6fold/group_nilearn/age/mPFC_Peak_ROI.nii.gz'
+    savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/distance_spat/Setall/6fold/group_zmap/PCC_ROI.nii.gz'
     makeSphereMask_coords(stats_map, savepath, coords, radius)
 
 
+
+#%%
 def defROI_by_group_peak():
     """Generate Group ROI accoording to the peak point in mask"""
-    stats_map = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon_correct_trials_train/Set2/group/all/ 2ndLevel/_contrast_id_ZF_0005/spmT_0001.nii'
-    mask = r'/mnt/workdir/DCM/docs/Mask/VMPFC/VMPFC_nilearn.nii.gz'
-    savepath = r'/mnt/workdir/DCM/result/ROI/Group/mPFC_m2_set2_roi.nii.gz'
-    radius = (5 / 3, 5 / 3, 5 / 3)
-    makeSphereMask(stats_map, mask, savepath, radius=radius)
+    stats_map = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_separate_phases_correct_trials/Setall/6fold/group_sm8/mean/hexagon_tmap.nii.gz'
+    mask = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz'
+    mask_bin = binarize_img(mask)
+    savepath = r'/mnt/workdir/DCM/result/ROI/Group_nilearn/hexagon_EC_ROI.nii.gz'
+    radius = (2.5, 2.5, 2.5)
+    makeSphereMask(stats_map, mask_bin, savepath, radius=radius)
+
+
+def defROI_by_group_thr():
+    """Generate Group ROI accoording to the peak point in mask"""
+    stats_map = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_separate_phases_correct_trials/Setall/6fold/group_sm8/mean/hexagon_tmap.nii.gz'
+    mask = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz'
+    mask_bin = binarize_img(mask)
+    savepath = r'/mnt/workdir/DCM/result/ROI/Group_nilearn/hexagon_EC_ROI.nii.gz'
+    radius = (2.5, 2.5, 2.5)
+    makeSphereMask(stats_map, mask_bin, savepath, radius=radius)
 
 
 def defROI_by_indivi_peak():
@@ -60,21 +74,21 @@ from analysis.mri.img.zscore_nii import zscore_img
 from nilearn.plotting import plot_stat_map
 from nilearn.plotting import plot_roi
 
-# load z-transfromed map
-tmap = image.load_img(r'/mnt/data/DCM/result_backup/2023.1.2/game1/grid_rsa_8mm/Setall/6fold/group/hp-adult'
+# load statistic map
+stats_map = image.load_img(r'/mnt/data/DCM/result_backup/2023.1.2/game1/grid_rsa_8mm/Setall/6fold/group/hp-adult'
                       r'/2ndLevel/_contrast_id_rs-corr_zmap_coarse/spmT_0001.nii')
 
 # get threshold map
-img_data = tmap.get_fdata()
-img_data[img_data < 4] = 0
-tmap_thr = image.new_img_like(tmap, img_data)
-plot_stat_map(tmap_thr, title='', annotate=False, cut_coords=(0, 0, 0))
+img_data = stats_map.get_fdata()
+img_data[img_data < 2.3] = 0
+stats_map_thr = image.new_img_like(stats_map, img_data)
+plot_stat_map(stats_map_thr, title='', annotate=False, cut_coords=(0, -4, 0))
 bin_tmap_thr = (img_data != 0)  # self-computed mask
 
 # load peak point mask/ anatomaical mask
 mask = image.get_data(image.load_img(r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL.nii.gz'))
 bin_tmap_thr_masked = np.logical_and(mask.astype(bool), bin_tmap_thr)
 # plot roi and save
-bin_tmap_thr_peak_spere_img = image.new_img_like(tmap, bin_tmap_thr_masked.astype(int))
+bin_tmap_thr_peak_spere_img = image.new_img_like(stats_map, bin_tmap_thr_masked.astype(int))
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0, 0, 0))
 bin_tmap_thr_peak_spere_img.to_filename("/mnt/workdir/DCM/result/ROI/Group/RSA-EC_thr4.nii.gz")

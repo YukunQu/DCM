@@ -20,7 +20,7 @@ def dcm2bids_helper(subjects):
         subprocess.call(command, shell=True)
 
 
-subjects = ['206']
+subjects = ['247']
 dcm2bids_helper(subjects)
 
 # %%
@@ -44,10 +44,16 @@ participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')
 subjects_list = data['Participant_ID'].to_list()
+subjects_list.sort()
 subjects_list = [s.split("-")[-1] for s in subjects_list]
-subjects_list = ['206']
 
-config_type = 'individual'
+subjects_list = ['010','011','012','015','016','017','027',
+                 '047','056','087','089','117','123','124',
+                 '125','136','147','166','173','197']
+subjects_list.reverse()
+
+#%%
+config_type = 'DWI'  # key parameter
 if config_type == 'CS':
     config_ibp = r'/mnt/workdir/DCM/config/config_CS.json'  # 中科院扫描的配置文件
     dcm2bids(subjects_list, config_ibp)
@@ -56,8 +62,11 @@ elif config_type == 'PKU':
     dcm2bids(subjects_list, config_pk)
 elif config_type == 'individual':
     for sub in subjects_list:
-        individual_config = r'/mnt/workdir/DCM/config/config206-232/config_{}.json'.format(sub)
+        individual_config = r'/mnt/workdir/DCM/config/config_{}.json'.format(sub)
         dcm2bids([sub], individual_config)
 elif config_type == 'DWI':
     config_dwi = r'/mnt/workdir/DCM/config/config_dwi.json'
+    dcm2bids(subjects_list, config_dwi)
+elif config_type == 'sbref':
+    config_dwi = r'/mnt/workdir/DCM/config/config_sbref.json'
     dcm2bids(subjects_list, config_dwi)

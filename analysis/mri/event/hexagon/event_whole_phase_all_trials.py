@@ -104,6 +104,9 @@ class Game1EV(object):
         event_data = pd.concat([m1ev,inferev,pmod_sin, pmod_cos], axis=0)
         return event_data
 
+
+
+
 def gen_sub_event(task, subjects):
     if task == 'game1':
         runs = range(1,7)

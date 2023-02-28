@@ -1,41 +1,48 @@
 # -*- coding: utf-8 -*-
 """
-# distance effect
+
 @author: QYK
 """
 import os
 import numpy as np
 import pandas as pd
 from os.path import join
-from nilearn.image import math_img, load_img, resample_to_img, concat_imgs
-from nilearn.masking import apply_mask
+from nilearn.image import load_img, concat_imgs
 from nilearn.glm.first_level import FirstLevelModel
 from nilearn.glm.first_level import make_first_level_design_matrix
 
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
-from joblib import Parallel, delayed, Memory
 
-memory = Memory(cachedir='/tmp/joblib', verbose=0, bytes_limit=80 * 1024 ** 3)
+from joblib import Parallel, delayed
 
 
-def load_ev_distance(event_path):
+def load_ev_separate(event_path):
     event = pd.read_csv(event_path, sep='\t')
-    event_condition = event.query("trial_type in ['M1', 'M2_corr','M2_error', 'decision_corr', 'decision_error']")
+    event_condition = event.query("trial_type in ['M1','M2_corr','M2_error','decision_corr','decision_error']")
 
-    pmod_distance = event.query("trial_type =='distance'")
-    distance_mod = pmod_distance['modulation'].to_list()
+    pmod_cos = event.query("trial_type =='cos'")
+    pmod_sin = event.query("trial_type =='sin'")
 
     # generate parametric modulation for M2
-    m2xdistance = event.query("trial_type == 'M2_corr'").copy()
-    m2xdistance.loc[:, 'modulation'] = distance_mod
-    m2xdistance['trial_type'] = 'M2_corrxdistance'
+    m2_corrxcos = pmod_cos.copy()
+    m2_corrxcos['trial_type'] = 'M2_corrxcos'
+    m2_corrxsin = pmod_sin.copy()
+    m2_corrxsin['trial_type'] = 'M2_corrxsin'
 
     # generate parametric modulation for decision
-    decisionxdistance = event.query("trial_type == 'decision_corr'").copy()
-    decisionxdistance.loc[:, 'modulation'] = distance_mod
-    decisionxdistance['trial_type'] = 'decision_corrxdistance'
+    cos_mod = pmod_cos['modulation'].to_list()
+    sin_mod = pmod_sin['modulation'].to_list()
 
-    event_condition = event_condition.append([m2xdistance,decisionxdistance])
+    decision_corrxcos = event.query("trial_type == 'decision_corr'")
+    decision_corrxsin = decision_corrxcos.copy()
+
+    decision_corrxcos = decision_corrxcos.replace('decision_corr', 'decision_corrxcos')
+    decision_corrxsin = decision_corrxsin.replace('decision_corr', 'decision_corrxsin')
+
+    decision_corrxcos.loc[:, 'modulation'] = cos_mod
+    decision_corrxsin.loc[:, 'modulation'] = sin_mod
+
+    event_condition = event_condition.append([m2_corrxcos, m2_corrxsin, decision_corrxcos, decision_corrxsin])
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
     return event_condition
 
@@ -59,13 +66,13 @@ def prepare_data(subj, run_list, ifold, configs, concat_runs=False):
     design_matrices = []
     for i, run_id in enumerate(run_list):
         # load image
-        func_path = join(func_dir, f'sub-{subj}', 'func', func_name.format(subj, run_id))
+        func_path = join(func_dir, f'sub-{subj}', func_name.format(subj, run_id))
         func_img = load_img(func_path)
         functional_imgs.append(func_img)
 
         # load event
         event_path = join(event_dir, task, glm_type, f'sub-{subj}', ifold, events_name.format(subj, run_id))
-        event = load_ev_distance(event_path)
+        event = load_ev_separate(event_path)
 
         # load motion
         add_reg_names = ['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z',
@@ -118,9 +125,10 @@ def get_reg_index(design_matrix, target_name):
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1','M2_corr','decision_corr','decision_error','M2_corrxdistance','decision_corrxdistance']
+    contrast_name = ['M2_corrxcos', 'M2_corrxsin', 'decision_corrxcos', 'decision_corrxsin',
+                     'M2_corr', 'decision_corr']
     # base contrast
-    contrasts_set = dict()
+    contrasts_set = {}
     for contrast_id in contrast_name:
         contrast_index = get_reg_index(design_matrix, contrast_id)
         contrast_vector = np.zeros(design_matrix.shape[1])
@@ -128,8 +136,13 @@ def set_contrasts(design_matrix):
         contrasts_set[contrast_id] = contrast_vector
 
     # advanced contrast
-    contrasts_set['distance'] = contrasts_set['M2_corrxdistance'] + contrasts_set['decision_corrxdistance']
-    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    contrasts_set['cos'] = contrasts_set['M2_corrxcos'] + contrasts_set['decision_corrxcos']
+    contrasts_set['sin'] = contrasts_set['M2_corrxsin'] + contrasts_set['decision_corrxsin']
+
+    contrasts_set['m2_hexagon'] = np.vstack([contrasts_set['M2_corrxcos'], contrasts_set['M2_corrxsin']])
+    contrasts_set['decision_hexagon'] = np.vstack(
+        [contrasts_set['decision_corrxcos'], contrasts_set['decision_corrxsin']])
+    contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'], contrasts_set['sin']])
     return contrasts_set
 
 
@@ -172,19 +185,20 @@ def first_level_glm(datasink, run_imgs, design_matrices):
         z_map.to_filename(z_image_path)
 
 
-@memory.cache
 def run_glm(subj):
     run_list = [1, 2, 3, 4, 5, 6]
+    #run_list = [1, 2]
     ifold = 6
-    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'distance',
+    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'hexagon_separate_phases_correct_trials',
                'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'func_name': r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
+               'func_name': r'fsl/sub-{}_task-game1_run-{}_space-T1w_desc-preproc_bold.ica'
+                            r'/filtered_func_data_clean_space-MNI152NLin2009cAsym_res-2.nii.gz',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv'}
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_test/{}/{}/Setall/{}fold'.format(configs['task'],
-                                                                                         configs['glm_type'], ifold)
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_ICA/{}/{}/Setall/{}fold'.format(configs['task'],
+                                                                                       configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
 
@@ -197,6 +211,7 @@ def run_glm(subj):
         first_level_glm(datasink, functional_imgs, design_matrices)
 
 
+# %%
 if __name__ == "__main__":
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -204,8 +219,7 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects.remove('197')
 
-    subjects_chunk = list_to_chunk(subjects,4)
+    subjects_chunk = list_to_chunk(subjects, 6)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=80)(delayed(run_glm)(subj) for subj in chunk)
+        results_list = Parallel(n_jobs=30)(delayed(run_glm)(subj) for subj in chunk)

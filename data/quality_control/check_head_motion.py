@@ -63,6 +63,8 @@ for sub, age in zip(sub_list, sub_age):
             quality_para = read_quality_para(filepath,target='fmriprep')
             fd = quality_para['framewise_displacement']
         else:
+            if sub == 'sub-238':
+                print(filepath)
             print("The", sub, f"didn't have game1 run-{run_id}")
             fd = 999
             tsnr = 0
@@ -120,7 +122,7 @@ def plot_task_info(sub_quality_data, task):
     for sub in sub_list:
         sub_hm = sub_quality_data.query(f"(task=='{task}')&(Participant_ID=='{sub}')")
         good_run_num = (sub_hm['quality'] == 'good').sum()
-        if (task=='game1')and(good_run_num<4):
+        if (task=='game1')and(good_run_num < 4):
             print(sub)
         if ((task=='rest')or(task=='game2'))and(good_run_num<2):
             print(sub)

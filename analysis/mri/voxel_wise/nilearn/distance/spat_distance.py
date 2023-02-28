@@ -7,8 +7,7 @@ import os
 import numpy as np
 import pandas as pd
 from os.path import join
-from nilearn.image import math_img, load_img, resample_to_img, concat_imgs
-from nilearn.masking import apply_mask
+from nilearn.image import load_img, concat_imgs
 from nilearn.glm.first_level import FirstLevelModel
 from nilearn.glm.first_level import make_first_level_design_matrix
 
@@ -59,7 +58,7 @@ def prepare_data(subj, run_list, ifold, configs, concat_runs=False):
     design_matrices = []
     for i, run_id in enumerate(run_list):
         # load image
-        func_path = join(func_dir, f'sub-{subj}', 'func', func_name.format(subj, run_id))
+        func_path = join(func_dir, f'sub-{subj}', func_name.format(subj, run_id))
         func_img = load_img(func_path)
         functional_imgs.append(func_img)
 
@@ -143,7 +142,7 @@ def first_level_glm(datasink, run_imgs, design_matrices):
     mni_mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
     fmri_glm = FirstLevelModel(t_r=3.0, slice_time_ref=0.5, hrf_model='spm',
                                drift_model=None, high_pass=1 / 100, mask_img=mni_mask,
-                               smoothing_fwhm=None, verbose=1, n_jobs=1)
+                               smoothing_fwhm=8.0, verbose=1, n_jobs=1)
     fmri_glm = fmri_glm.fit(run_imgs, design_matrices=design_matrices)
 
     # define contrast
@@ -174,15 +173,17 @@ def first_level_glm(datasink, run_imgs, design_matrices):
 @memory.cache
 def run_glm(subj):
     run_list = [1, 2, 3, 4, 5, 6]
+    #run_list = [1, 2]
     ifold = 6
-    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'distance_whole_trials',
+    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'distance_spat',
                'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'func_name': r'sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_smooth8.nii',
+               'func_name': r'fsl/sub-{}_task-game1_run-{}_space-T1w_desc-preproc_bold.ica'
+                            r'/filtered_func_data_clean_space-MNI152NLin2009cAsym_res-2.nii.gz',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv'}
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_test/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_ICA/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                          configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
@@ -204,6 +205,6 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,7)
-    #for chunk in subjects_chunk:
-    #    results_list = Parallel(n_jobs=80)(delayed(run_glm)(subj) for subj in chunk)
+    subjects_chunk = list_to_chunk(subjects,2)
+    for chunk in subjects_chunk:
+        results_list = Parallel(n_jobs=30)(delayed(run_glm)(subj) for subj in chunk)

@@ -13,7 +13,7 @@ import pandas as pd
 import statsmodels.api as sm
 
 
-def samplingAngle(levels,ntrials,resample=False):
+def samplingAngle(levels,ntrials):
     img_id = range(1,(levels**2)+1)
     x = range(1,levels+1)
     y = range(1,levels+1)
@@ -35,8 +35,6 @@ def samplingAngle(levels,ntrials,resample=False):
         angles.append(angle)
         m1s.append((m1['dp'], m1['ap']))
         m2s.append((m2['dp'], m2['ap']))
-    if resample == True:
-        pass
     return angles,m1s,m2s
 
 
@@ -47,7 +45,7 @@ def genSimulateData(angles,omega=None,ampNoise=0.1):
     
     y_true = []
     for angle in angles:
-        noise =  ampNoise * np.random.rand()
+        noise = ampNoise * np.random.rand()
         y_true.append(1 + 1*np.cos(np.deg2rad(6*(angle - omega))) + noise)
     return y_true
 

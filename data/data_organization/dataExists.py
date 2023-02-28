@@ -7,6 +7,7 @@
 
 #%%
 import os
+from colorama import Fore
 # 检测原始文件夹下被试数据是否完整
 def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
     with open(os.path.join(data_dir, 'data_exist_state.txt'),'w') as f:
@@ -26,14 +27,23 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
                             if ddir in filters:
                                 ddir_path = os.path.join(sub_data_dir,mod,ddir)
                                 data_num = len(os.listdir(ddir_path))
-                                print('File number of ', ddir,":",data_num)
-                                f.write(f'File number of {ddir}: {data_num}')
+                                if data_num>0:
+                                    print(Fore.WHITE + 'File number of ', ddir,":",data_num)
+                                    f.write(f'File number of {ddir}: {data_num}')
+                                else:
+                                    print(Fore.RED + "{} is empty.".format(ddir))
+                                    f.write(f'Directory is empty!!!!!!!')
                                 f.write('\n')
                         else:
                             ddir_path = os.path.join(sub_data_dir,mod,ddir)
                             data_num = len(os.listdir(ddir_path))
-                            print('File number of ', ddir,":",data_num)
-                            f.write(f'File number of {ddir}: {data_num}')
+                            if data_num>0:
+                                print(Fore.WHITE + 'File number of ', ddir,":",data_num)
+                                f.write(f'File number of {ddir}: {data_num}')
+                            else:
+                                print(Fore.RED + "{} is empty.".format(ddir))
+                                f.write(f'Directory is empty!!!!!!!')
+
                             f.write('\n')
             else:
                 data_list = os.listdir(sub_data_dir)
@@ -47,7 +57,7 @@ def check_subj_data(data_dir,sub_list,filters=None,stand_form=True):
 
 
 data_dir = '/mnt/data/DCM/sourcedata'
-sub_list = ['sub_'+str(i).zfill(3) for i in range(232,238)]
+sub_list = ['sub_'+str(i).zfill(3) for i in range(238,250)]
 
 check_subj_data(data_dir, sub_list,['MEG','MRI','mixed_test','meg_task-1DInfer',
                                     'pilot','fmri_task-game1','fmri_task-game2-train',

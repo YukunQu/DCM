@@ -1,9 +1,5 @@
-import os
 import time
-import glob
 import pandas as pd
-from os.path import join as opj
-from nipype.interfaces import fsl
 from subprocess import Popen, PIPE
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 

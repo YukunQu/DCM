@@ -4,7 +4,7 @@ import glob
 from subprocess import Popen, PIPE
 
 
-def list_to_chunk(orignal_list,chunk_volume=10):
+def list_to_chunk(orignal_list, chunk_volume=10):
     chunk_list = []
     chunk = []
     for i, element in enumerate(orignal_list):
@@ -37,8 +37,7 @@ def run_feat_preprocess_parall(fsf_file_list):
     print(f"Run time cost {run_time}")
 
 
-
-if  __name__ == "__main__":
+if __name__ == "__main__":
 
     """
     # all fsf in fsf dir
@@ -57,9 +56,9 @@ if  __name__ == "__main__":
     fsf_dir = r'/mnt/workdir/DCM/BIDS/derivatives/FSL/1st_level/fsf/full_analysis'
     fsf_tempalte = 'sub-{}_run-0{}_full_analysis.fsf'
     for s in subject_list:
-        for run_id in range(1,7):
-            fsf_file_list.append(os.path.join(fsf_dir,fsf_tempalte.format(s,run_id)))
+        for run_id in range(1, 7):
+            fsf_file_list.append(os.path.join(fsf_dir, fsf_tempalte.format(s, run_id)))
 
-    fsf_file_chunk = list_to_chunk(fsf_file_list,30)
+    fsf_file_chunk = list_to_chunk(fsf_file_list, 30)
     for fsf_files in fsf_file_chunk:
         run_feat_preprocess_parall(fsf_files)

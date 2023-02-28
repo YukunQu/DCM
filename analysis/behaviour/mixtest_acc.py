@@ -1,9 +1,9 @@
 import os.path
 import pandas as pd
-#%%
+
 # read training accuracy from  mixed test files
 sourcedata_dir = r'/mnt/workdir/DCM/sourcedata'
-sub_list = [f'sub_{str(s).zfill(3)}' for s in range(203,206)]
+sub_list = [f'sub_{str(s).zfill(3)}' for s in range(238,250)]
 sub_list.reverse()
 sub_mix_acc = pd.DataFrame({})
 for sub in sub_list:
@@ -27,9 +27,35 @@ for sub in sub_list:
                     print(f"The file {f} of {sub} have bugs.")
     except:
         print(f"The {sub} doesn't have the directory.")
+
+
+#%%
+# split the mix_offline performance into the 2 columns: train_ap; train_dp
+data = pd.read_csv(r'/mnt/workdir/DCM/tmp/participants.tsv',sep='\t')
+data_part1 = data[:235]
+data_part2 = data[235:]
+mix_offline_acc = data_part2['mix_offline']
+
+train_ap = []
+train_dp = []
+i = 205
+for acc in mix_offline_acc:
+    print(i)
+    ap_acc,dp_acc = acc.split('/')
+    train_ap.append(float(ap_acc))
+    train_dp.append(float(dp_acc))
+    i+=1
+
+data_part2['train_ap'] = train_ap
+data_part2['train_dp'] = train_dp
+
+new_data = pd.concat([data_part1,data_part2])
+new_data.to_csv(r'/mnt/workdir/DCM/tmp/participants.tsv',sep='\t')
+
+
 #%%
 # check data for mixed test performance
-beha_total_score = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+beha_total_score = r'/mnt/workdir/DCM/tmp/participants.tsv'
 data = pd.read_csv(beha_total_score,sep='\t')
 
 equal_state = pd.DataFrame()
@@ -56,27 +82,3 @@ for index,sub_acc in sub_mix_acc.iterrows():
                                               'doc_ap':sub_record_ap_acc,'doc_dp':sub_record_dp_acc,
                                               'Age':age,'time':time},
                                              ignore_index=True)
-
-
-#%%
-# split the mix_offline performance into the 2 columns: train_ap; train_dp
-data = pd.read_csv(r'/mnt/workdir/DCM/tmp/participants.tsv',sep='\t')
-data_part1 = data[:76]
-data_part2 = data[76:]
-mix_offline_acc = data_part2['mix_offline']
-#%%
-train_ap = []
-train_dp = []
-i = 76
-for acc in mix_offline_acc:
-    print(i)
-    ap_acc,dp_acc = acc.split('/')
-    train_ap.append(float(ap_acc))
-    train_dp.append(float(dp_acc))
-    i+=1
-
-data_part2['train_ap'] = train_ap
-data_part2['train_dp'] = train_dp
-
-new_data = pd.concat([data_part1,data_part2])
-new_data.to_csv(r'/mnt/workdir/DCM/tmp/participants.tsv',sep='\t')

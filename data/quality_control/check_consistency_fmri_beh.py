@@ -6,14 +6,8 @@ import datetime
 import pandas as pd
 
 
-def check_consistency(task, run_list):
+def check_consistency(subject_list, task, run_list):
     # check the consistency of fmri files and behavioural files for game
-    # get subject list
-    participant_df = pd.read_csv(r'/mnt/workdir/DCM/BIDS/participants.tsv', sep='\t')
-    participant_df = participant_df.query(f"{task}_fmri>0")
-    subject_list = participant_df['Participant_ID']
-    #subject_list = ['sub-{}'.format(i) for i in range(180, 238)]
-    #    subject_list.remove('sub-209')
 
     bids_fmri_template = r'/mnt/workdir/DCM/BIDS/{}/func/{}'
 
@@ -69,12 +63,19 @@ def check_consistency(task, run_list):
                                               'fmri_time': fmri_time}, ignore_index=True)
 
     timeline_df['time_diff'] = (timeline_df['fmri_time'] - timeline_df['behavior_time']) / 60
-    error_run = timeline_df.query("(time_diff>7)or(time_diff<=0)")
+    error_run = timeline_df.query("(time_diff>6)or(time_diff<=0)")
     return timeline_df, error_run
 
 
 if __name__ == "__main__":
-    game1_timeline_df, game1_error_run = check_consistency('game1', range(1, 7))
-    game2_timeline_df, game2_error_run = check_consistency('game2', range(1, 3))
+    # get subject list
+    participant_df = pd.read_csv(r'/mnt/workdir/DCM/BIDS/participants.tsv', sep='\t')
+    game1_subs = participant_df.query(f"game1_fmri>0")['Participant_ID']
+    game2_subs = participant_df.query(f"game2_fmri>0")['Participant_ID']
+    subject_list = ['sub-{}'.format(i) for i in range(247, 250)]
 
-    """sub-010 and sub-011 game2 is a exception. Because their two runs  of game2 files are identical."""
+    game1_timeline_df, game1_error_run = check_consistency(subject_list,'game1', range(1, 7))
+    game2_timeline_df, game2_error_run = check_consistency(subject_list,'game2', range(1, 3))
+
+    """sub-010 and sub-011 game2 are exceptional cases. 
+    Because their two runs  of game2 files are identical."""
