@@ -1,9 +1,9 @@
 from misc.load_spm import SPMfile
-from analysis.mri.voxel_wise.nilearn.Ftest.game1_separate_phases_correct_trials import prepare_data
+from analysis.mri.voxel_wise.nilearn.Ftest.hexagon_spct import prepare_data
 import nilearn.plotting as plotting
 
 subj = '010'
-# load spm dm
+# load pyspm dm
 spm_mat = SPMfile(r'/mnt/data/DCM/result_backup/2022.11.27/game1/'
                   rf'separate_hexagon_2phases_correct_trials/Setall/6fold/sub-{subj}/SPM.mat')
 spm_dm = spm_mat.design_matrix
@@ -40,7 +40,7 @@ fig, axs = plt.subplots(4, 1, figsize=(15,10))
 
 # Plot the dataframe in each subplot
 for i, col in enumerate(spm_dm.iloc[:30,:4].columns):
-    spm_dm.iloc[:30,:4][col].plot(ax=axs[i],color='blue',label='spm',title=col)
+    spm_dm.iloc[:30,:4][col].plot(ax=axs[i],color='blue',label='pyspm',title=col)
 
 for i, col in enumerate(nilearn_dm.iloc[:30,:4].columns):
     nilearn_dm.iloc[:30,:4][col].plot(ax=axs[i],color='red',label='nilearn',title=col)

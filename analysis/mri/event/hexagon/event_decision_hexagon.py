@@ -9,6 +9,7 @@ class Game1EV_decision_hexagon(Game1EV):
     def __init__(self,behDataPath):
         Game1EV.__init__(self,behDataPath)
 
+
     def genM2ev(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime

@@ -1,9 +1,9 @@
-def conj_stat_maps(map1, map2, out_file=None,method='rigid',thr=1.69):
+def conj_stat_maps(map1, map2, out_file=None,thr=1.69):
     """
     Runs a conjunction on stat maps (returning a map with the min t-stat)
 
     Creates a conjunction of two statistical maps (typically the result of
-    EstimateContrast or Threshold from the spm interface).
+    EstimateContrast or Threshold from the pyspm interface).
 
     Args:
         map1 (str): filename of the first stat map in the conjunction
@@ -18,7 +18,7 @@ def conj_stat_maps(map1, map2, out_file=None,method='rigid',thr=1.69):
 
     """
 
-    # Imports all required packages so the func can be run as a nipype
+    # Imports all required packages so the func can be run as a pyspm
     # Function Node
     import nilearn.image as nli
     import os.path
@@ -26,16 +26,11 @@ def conj_stat_maps(map1, map2, out_file=None,method='rigid',thr=1.69):
     if (out_file is None):
         out_file = 'conj_map.nii'
 
-    if method == 'rigid':
-        conj_tmap = nli.math_img('np.minimum(img1*(img1>0), img2*(img2>0)) + ' + \
-                                 'np.maximum(img1*(img1<0), img2*(img2<0))',
-                                 img1=map1,
-                                 img2=map2)
-    elif method == 'threshold':
-        assert isinstance(thr,float)
-        conj_tmap = nli.math_img('(img1-{})+ (img2-{})'.format(thr,thr),
-                                 img1=map1,
-                                 img2=map2)
+
+    assert isinstance(thr,float)
+    conj_tmap = nli.math_img('(img1-{})+ (img2-{})'.format(thr,thr),
+                             img1=map1,
+                             img2=map2)
 
     conj_tmap.to_filename(out_file)
     return os.path.abspath(out_file)
@@ -44,7 +39,7 @@ if __name__ == "__main__":
     map1 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0011/spmT_0002.nii'
     map2 = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/acc/2ndLevel/_contrast_id_ZF_0011/spmT_0002.nii'
     outpath = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/separate_hexagon/Setall/group/covariates/conjuction/conjun_age_acc_thr.nii'
-    conj_stat_maps(map1,map2,outpath,'threshold',2.68)
+    conj_stat_maps(map1,map2,outpath)
 #%%
 """
 Left-tailed test

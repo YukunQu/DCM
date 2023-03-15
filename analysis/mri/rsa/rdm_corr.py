@@ -1,6 +1,8 @@
 import numpy as np
 from scipy.stats import pearsonr
 
+# calculate similarity between RDMs
+
 def upper_tri(RDM):
     """upper_tri returns the upper triangular index of an RDM
 

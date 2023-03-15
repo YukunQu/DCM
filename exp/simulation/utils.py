@@ -56,10 +56,10 @@ def gridCodeParamEsti(trainData,testData,ifold):
     x0 = np.ones(len(trainAngles))
     x1 = np.sin(np.deg2rad([ifold*a for a in trainAngles]))
     x2 = np.cos(np.deg2rad([ifold*a for a in trainAngles]))
-    X= np.stack((x0,x1,x2),axis=1)
+    X = np.stack((x0,x1,x2),axis=1)
     betaTrain = np.linalg.pinv(X).dot(trainData['activation'])
     omega_estimate = np.rad2deg(np.arctan2(betaTrain[1],betaTrain[2])/ifold)
-        
+
     # test the omega effect
     x = []
     testAngles = testData['angles']

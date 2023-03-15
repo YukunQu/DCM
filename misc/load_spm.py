@@ -50,3 +50,6 @@ class SPMfile:
         return df_full
 
 
+if __name__=="__main__":
+    spm_path = r'/mnt/data/DCM/result_backup/2023.1.2/game1/grid_rsa_8mm/Setall/6fold/sub-017/SPM.mat'
+    spm = SPMfile(spm_path)

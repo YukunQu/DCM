@@ -14,8 +14,6 @@ from nilearn.glm.first_level import make_first_level_design_matrix
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 from joblib import Parallel, delayed, Memory
 
-memory = Memory(cachedir='/tmp/joblib', verbose=0, bytes_limit=80 * 1024 ** 3)
-
 
 def load_ev_distance(event_path):
     event = pd.read_csv(event_path, sep='\t')
@@ -39,7 +37,7 @@ def load_ev_distance(event_path):
     return event_condition
 
 
-def prepare_data(subj, run_list, ifold, configs, concat_runs=False):
+def prepare_data(subj, ifold, configs, concat_runs=False):
     """prepare images and design matrixs from different run """
 
     tr = configs['TR']
@@ -48,6 +46,7 @@ def prepare_data(subj, run_list, ifold, configs, concat_runs=False):
 
     task = configs['task']
     glm_type = configs['glm_type']
+    run_list = configs['run_list']
 
     func_name = configs['func_name']
     events_name = configs['events_name']
@@ -58,7 +57,7 @@ def prepare_data(subj, run_list, ifold, configs, concat_runs=False):
     design_matrices = []
     for i, run_id in enumerate(run_list):
         # load image
-        func_path = join(func_dir, f'sub-{subj}', 'func', func_name.format(subj, run_id))
+        func_path = join(func_dir, f'sub-{subj}',  func_name.format(subj, run_id))
         func_img = load_img(func_path)
         functional_imgs.append(func_img)
 
@@ -118,19 +117,20 @@ def get_reg_index(design_matrix, target_name):
 
 def set_contrasts(design_matrix):
     contrast_name = ['M1','M2_corr','decision_corr','decision_error','M2_corrxdistance','decision_corrxdistance']
-    #contrast_name = ['M1','M2_corr','decision_corr','M2_corrxdistance','decision_corrxdistance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
         contrast_index = get_reg_index(design_matrix, contrast_id)
-        ## add some code to detect contrast_index is null
+        if len(contrast_index) == 0:
+            continue
         contrast_vector = np.zeros(design_matrix.shape[1])
         contrast_vector[contrast_index] = 1
         contrasts_set[contrast_id] = contrast_vector
 
     # advanced contrast
     contrasts_set['distance'] = contrasts_set['M2_corrxdistance'] + contrasts_set['decision_corrxdistance']
-    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    if 'decision_error' in contrasts_set.keys():
+        contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
@@ -142,7 +142,7 @@ def first_level_glm(datasink, run_imgs, design_matrices):
                 os.mkdir(os.path.join(datasink, dir))
 
     # fit first level glm to estimate mean orientation
-    mni_mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
+    mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
     fmri_glm = FirstLevelModel(t_r=3.0, slice_time_ref=0.5, hrf_model='spm',
                                drift_model=None, high_pass=1 / 100, mask_img=mni_mask,
                                smoothing_fwhm=8.0, verbose=1, n_jobs=1)
@@ -173,20 +173,29 @@ def first_level_glm(datasink, run_imgs, design_matrices):
         z_map.to_filename(z_image_path)
 
 
-@memory.cache
-def run_glm(subj):
-    run_list = [1, 2, 3, 4, 5, 6]
-    #run_list = [1, 2]
-    ifold = 6
-    configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'distance_spct',
-               'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-               'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-               'func_name': r'fsl/sub-{}_task-game1_run-{}_space-T1w_desc-preproc_bold.ica'
-                            r'/filtered_func_data_clean_space-MNI152NLin2009cAsym_res-2.nii.gz',
-               'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
-               'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv'}
+def run_glm(task,subj):
+    if task == 'game1':
+        ifold = 6
+        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'distance_spct',
+                   'run_list': [1, 2, 3, 4, 5, 6],
+                   'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
+                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+                   'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
+                   'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
+                   'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
+    elif task == 'game2':
+        ifold = 6
+        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'distance_spct',
+                   'run_list': [1, 2],
+                   'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
+                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+                   'func_name': 'func/sub-{}_task-game2_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
+                   'events_name': r'sub-{}_task-game2_run-{}_events.tsv',
+                   'regressor_name': r'sub-{}_task-game2_run-{}_desc-confounds_timeseries_trimmed.tsv'}
+    else:
+        raise Exception("The type of task is not supoort.")
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_ICA/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                          configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
@@ -196,17 +205,19 @@ def run_glm(subj):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj, run_list, ifold, configs, True)
+        functional_imgs, design_matrices = prepare_data(subj, ifold, configs, True)
         first_level_glm(datasink, functional_imgs, design_matrices)
 
 
 if __name__ == "__main__":
     # specify subjects
+    task = 'game2'
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri>=0.5')
+    data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects_chunk = list_to_chunk(subjects,5)
+    subjects = ['193']
+    subjects_chunk = list_to_chunk(subjects,2)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=20)(delayed(run_glm)(subj) for subj in chunk)
+        results_list = Parallel(n_jobs=12)(delayed(run_glm)(task,subj) for subj in chunk)

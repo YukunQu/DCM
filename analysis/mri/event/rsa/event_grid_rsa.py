@@ -1,13 +1,12 @@
 import os
 import numpy as np
 import pandas as pd
-from analysis.mri.event.game1_event import Game1EV
-from analysis.mri.event.game2_event import Game2EV
+from analysis.mri.event.hexagon.event_hexagon_spat import Game1EV_hexagon_spat,Game2EV_hexagon_spat
 
 
-class Game1_grid_rsa_m2(Game1EV):
+class Game1_grid_rsa_m2(Game1EV_hexagon_spat):
     def __init__(self, behDataPath):
-        Game1EV.__init__(self, behDataPath)
+        Game1EV_hexagon_spat.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
 
     def angle_ev(self):
@@ -16,7 +15,9 @@ class Game1_grid_rsa_m2(Game1EV):
             for index, row in self.behData.iterrows():
                 onset = row['pic2_render.started'] - self.starttime
                 duration = 2.5
-                trial_type = str(row['angles'])
+                angle = row['angles']
+                angle = round(angle % 360)
+                trial_type = str(angle)
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
@@ -24,7 +25,9 @@ class Game1_grid_rsa_m2(Game1EV):
             for index, row in self.behData.iterrows():
                 onset = row['pic2_render.started_raw'] - self.starttime
                 duration = 2.5
-                trial_type = str(row['angles'])
+                angle = row['angles']
+                angle = round(angle % 360)
+                trial_type = str(angle)
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
@@ -36,30 +39,34 @@ class Game1_grid_rsa_m2(Game1EV):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         angle_ev = self.angle_ev()
-        deev = self.genDeev_whole_trials()
+        deev = self.genDeev()
         response = self.response()
-        event_data = pd.concat([m1ev,angle_ev,deev,response], axis=0)
+        event_data = pd.concat([m1ev,angle_ev,deev], axis=0)
         return event_data
 
-    def correct_angle_ev(self,trial_valid):
+    def correct_angle_ev(self, trial_corr):
         angle_ev = pd.DataFrame(columns=['onset', 'duration', 'trial_type'])
         if self.dformat == 'trial_by_trial':
-            for (index, row),isValid in zip(self.behData.iterrows(), trial_valid):
+            for (index, row),isCorr in zip(self.behData.iterrows(), trial_corr):
                 onset = row['pic2_render.started'] - self.starttime
                 duration = 2.5
-                if isValid:
-                    trial_type = str(row['angles'])
+                if isCorr:
+                    angle = row['angles']
+                    angle = round(angle % 360)
+                    trial_type = 'angle'+str(angle)
                 else:
                     trial_type = 'M2_error'
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
         elif self.dformat == 'summary':
-            for (index, row),isValid in zip(self.behData.iterrows(), trial_valid):
+            for (index, row),isCorr in zip(self.behData.iterrows(), trial_corr):
                 onset = row['pic2_render.started_raw'] - self.starttime
                 duration = 2.5
-                if isValid:
-                    trial_type = str(row['angles'])
+                if isCorr:
+                    angle = row['angles']
+                    angle = round(angle % 360)
+                    trial_type = 'angle'+str(angle)
                 else:
                     trial_type = 'M2_error'
                 angle_ev = angle_ev.append(
@@ -73,16 +80,16 @@ class Game1_grid_rsa_m2(Game1EV):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
-        valid_angle_ev = self.correct_angle_ev(trial_corr)
-        deev = self.genDeev_whole_trials()
+        corr_angle_ev = self.correct_angle_ev(trial_corr)
+        deev = self.genDeev()
         response = self.response()
-        event_data = pd.concat([m1ev,valid_angle_ev,deev,response], axis=0)
+        event_data = pd.concat([m1ev,corr_angle_ev,deev], axis=0)
         return event_data
 
 
-class Game1_grid_rsa_decision(Game1EV):
+class Game1_grid_rsa_decision(Game1EV_hexagon_spat):
     def __init__(self, behDataPath):
-        Game1EV.__init__(self, behDataPath)
+        Game1EV_hexagon_spat.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
 
     def decision_angle_ev(self):
@@ -116,9 +123,9 @@ class Game1_grid_rsa_decision(Game1EV):
         return event_data
 
 
-class Game2_grid_rsa_m2(Game2EV):
+class Game2_grid_rsa_m2(Game2EV_hexagon_spat):
     def __init__(self, behDataPath):
-        Game2EV.__init__(self, behDataPath)
+        Game2EV_hexagon_spat.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
 
     def angle_ev(self):
@@ -247,5 +254,5 @@ def gen_gird_rsa_event(task):
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     gen_gird_rsa_event(task)

@@ -33,7 +33,7 @@ event2 = pd.DataFrame({'onset':onset1,'trial_type':trial_type,
 events = pd.concat([event1,event2],axis=0)
 frame_times= 0.5 * (np.arange(133))
 design_matrix = make_first_level_design_matrix(frame_times,events=events,
-                                               hrf_model='spm')
+                                               hrf_model='pyspm')
 box_car = design_matrix.loc[:100,'box_car']
 stick = design_matrix.loc[:100,'stick']
 

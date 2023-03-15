@@ -36,7 +36,7 @@ def simulate_grid_code_data(event_path, func_path, savepath, snr=0.8):
     n_scans = func.shape[-1]
     frame_times = np.arange(n_scans) * tr  # here are the corresponding frame times
     design_matrix = make_first_level_design_matrix(frame_times, hexagon_event, drift_model=None,
-                                                   drift_order=0, hrf_model='spm')
+                                                   drift_order=0, hrf_model='pyspm')
 
     """
     ax = plot_design_matrix(design_matrix)

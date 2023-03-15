@@ -16,38 +16,66 @@ pid = data['Participant_ID'].to_list()
 print(len(pid))
 
 # set camp
-cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/distance_spat/Setall/6fold/{}/zmap/M2xdistance_zmap.nii.gz'
+cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/cv_hexagon_spct/Setall/6fold/{}/zmap/alignPhi_zmap.nii.gz'
 
 # set roi
-roi = image.load_img(
-    r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/distance_spat/HC_ROI.nii.gz')
-# roi = image.load_img(r'/mnt/workdir/DCM/docs/Mask/Park_Grid_ROI/ECl_roi.nii')
-roi_thr_bin = image.binarize_img(roi, 0)
+roi = image.load_img(r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob_R.nii.gz')
+for thr in [20]:
+    roi_thr_bin = image.binarize_img(roi, thr)
 
-# extract mean activity
-subs_mean_mean_activity = []
-for sub_id in pid:
-    sub_cmap = cmap_template.format(sub_id)
-    mean_activity = np.mean(masking.apply_mask(sub_cmap, roi_thr_bin))
-    subs_mean_mean_activity.append(mean_activity)
+    # extract mean activity
+    subs_cmap_list = [cmap_template.format(sub_id) for sub_id in pid]
+    subs_mean_activity = np.mean(masking.apply_mask(subs_cmap_list, roi_thr_bin),axis=1)
 
-# %%  mean
-# statistical test
-t_statistic, p_value = ttest_1samp(subs_mean_mean_activity, 0)
-print('t:', t_statistic)
-print('p:', p_value)
-g = sns.barplot(data=subs_mean_mean_activity, errorbar='sd', width=0.2)  # plot
+    # %%  mean
+    # statistical test
+    #t_statistic, p_value = ttest_1samp(subs_mean_mean_activity, 0)
+    #print('t:', t_statistic)
+    #print('p:', p_value)
+    #g = sns.barplot(data=subs_mean_mean_activity, errorbar='sd', width=0.2)  # plot
 
-# %%  correlation
-covary_variable = data['Age'].to_list()
-r, p = pearsonr(subs_mean_mean_activity, covary_variable)
+    #   correlation
+    covary_variable = data['game2_test_acc'].to_list()
+    r, p = pearsonr(subs_mean_activity, covary_variable)
+    print('thr:',thr,'r:',round(r,5),'p:',round(p,5))
 
-# plot
-g2 = sns.jointplot(x=covary_variable, y=subs_mean_mean_activity,
-                  kind="reg", truncate=False,
-                  xlim=(6, 30),  # ylim=(0, 1.05),
-                  color="b", height=6)
+    # plot
+    g2 = sns.jointplot(x=covary_variable, y=subs_mean_activity,
+                      kind="reg", truncate=False,
+                      #xlim=(6, 26),  # ylim=(0, 1.05),
+                      color="b", height=6,order=2)
+    g2.fig.subplots_adjust(top=0.92)
+    g2.fig.suptitle('r:{}, p:{}'.format(round(r, 3), round(p, 3)), size=20)
 
+
+    import scipy.stats as stats
+    age = data['Age'].to_numpy()
+    acc = data['game2_test_acc'].to_numpy()
+    data['activity'] = subs_mean_activity
+    activity = data['activity'].to_numpy()
+
+    # Plot the partial correlation plot with age held constant
+    import statsmodels.api as sm
+    model = sm.OLS.from_formula("game2_test_acc ~ Age + activity",data=data)
+    results = model.fit()
+
+    fig = sm.graphics.plot_partregress("game2_test_acc","activity",["Age"],data=data,obs_labels=False)
+    fig.set_size_inches(6,5)
+    sns.set_theme(style="whitegrid")
+    fig.tight_layout()
+    fig.show()
+
+    import statsmodels.api as sm
+    X = data[['activity','Age']]
+    Y = data['game2_test_acc']
+
+    X = sm.add_constant(X)
+    model = sm.OLS(Y, X).fit()
+    predictions = model.predict(X)
+    model_summary = model.summary()
+    print(model_summary)
+
+#%%
 # move overall title up
 g2.set_axis_labels('Age', 'Z statistic', size=20)
 g2.fig.subplots_adjust(top=0.92)
@@ -60,14 +88,15 @@ else:
 #    dpi=300)
 
 #%%
-sns.lineplot(x=covary_variable,y=subs_mean_mean_activity)
+sns.lineplot(x=covary_variable, y=subs_mean_activity)
 
 # glm
 from statsmodels.formula.api import glm
 covary_variable = data['Age'].to_list()
 mean = np.mean(covary_variable)
 covary_variable_demean = [c-mean for c in covary_variable]
-data = pd.DataFrame({'Age':covary_variable_demean,'z':subs_mean_mean_activity})
+
+data = pd.DataFrame({'Age':covary_variable_demean,'z':subs_mean_activity})
 model = glm('z ~ Age',data=data).fit()
 print(model.summary())
 

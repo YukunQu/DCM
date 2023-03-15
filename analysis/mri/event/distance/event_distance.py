@@ -2,17 +2,16 @@ import os
 from os.path import join
 import numpy as np
 import pandas as pd
-from analysis.mri.event.hexagon.event_separate_phases_all_trials import Game1EV_spat, Game2EV_spat
-from analysis.mri.event.hexagon.event_separate_phases_correct_trials import Game1EV_spct, Game2EV_spct
+from analysis.mri.event.hexagon.event_hexagon_spat import Game1EV_hexagon_spat, Game2EV_hexagon_spat
+from analysis.mri.event.hexagon.event_hexagon_spct import Game1EV_hexagon_spct, Game2EV_hexagon_spct
 
 
-class Game1EV_spat_distance(Game1EV_spat):
+class Game1EV_distance_spat(Game1EV_hexagon_spat):
     """Game1 distance modulation on separate phases for all trials"""
-
     def __init__(self, behDataPath):
-        Game1EV_spat.__init__(self, behDataPath)
+        Game1EV_hexagon_spat.__init__(self, behDataPath)
 
-    def genpm_spat_distance(self):
+    def genpm_distance_spat(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -37,21 +36,21 @@ class Game1EV_spat_distance(Game1EV_spat):
         pmev = pmev.sort_values('onset', ignore_index=True)
         return pmev
 
-    def game1ev_spat_distance(self):
+    def game1ev_distance_spat(self):
         m1ev = self.genM1ev()
         m2ev = self.genM2ev()
         deev = self.genDeev()
-        pmod_distance = self.genpm_spat_distance()
+        pmod_distance = self.genpm_distance_spat()
         event_data = pd.concat([m1ev, m2ev, deev, pmod_distance], axis=0)
         return event_data
 
 
-class Game1EV_spct_distance(Game1EV_spct):
+class Game1EV_distance_spct(Game1EV_hexagon_spct):
     # A variant of event generator only care about the hexagonal effect on M2.
     def __init__(self, behDataPath):
-        Game1EV_spct.__init__(self, behDataPath)
+        Game1EV_hexagon_spct.__init__(self, behDataPath)
 
-    def genpm_spct_distance(self, trial_label):
+    def genpm_distance_spct(self, trial_label):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['pic2_render.started'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -88,42 +87,61 @@ class Game1EV_spct_distance(Game1EV_spct):
         pmev_corr = pmev_corr.sort_values('onset', ignore_index=True)
         return pmev_corr
 
-    def game1ev_spct_distance(self):
+    def game1ev_distance_spct(self):
         m1ev = self.genM1ev()
         trial_label, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
-        pmev_corr = self.genpm_spct_distance(trial_label)
+        pmev_corr = self.genpm_distance_spct(trial_label)
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 pmev_corr], axis=0)
         return event_data
 
 
-class Game1EV_hexagon_distance(Game1EV_spat):
-    # A variant of event generator only care about the hexagonal effect on M2.
+class Game1EV_hexagon_distance_spat(Game1EV_distance_spat):
     def __init__(self, behDataPath):
-        Game1EV_spat.__init__(self, behDataPath)
+        Game1EV_distance_spat.__init__(self, behDataPath)
 
-    def game1ev_hexagon_distance(self):
-        self.starttime = self.cal_start_time()
+    def game1ev_hexagon_distance_spat(self):
         m1ev = self.genM1ev()
-        trial_corr, accuracy = self.label_trial_corr()
-        m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
-        deev_corr, deev_error = self.genDeev(trial_corr)
-        pmod_sin, pmod_cos = self.genpm(m2ev_corr, ifold)
-        pmod_distance = self.genpm_distance(trial_corr)
-        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
-                                pmod_sin, pmod_cos, pmod_distance], axis=0)
+        m2ev = self.genM2ev()
+        deev = self.genDeev()
+        pmod_distance = self.genpm_distance_spat()
+        pmod_sin, pmod_cos = self.genpm(m2ev, ifold)
+        event_data = pd.concat([m1ev, m2ev, deev,pmod_sin, pmod_cos,pmod_distance], axis=0)
         return event_data
 
 
-class Game2EV_spat_distance(Game2EV_spat):
+class Game1EV_hexagon_distance_spct(Game1EV_distance_spct):
+    def __init__(self, behDataPath):
+        Game1EV_distance_spct.__init__(self, behDataPath)
+
+    def game1ev_hexagon_distance_spct(self):
+        # base regressors
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+
+        # paramertric modulation regressors
+        m2_pmod_sin, m2_pmod_cos = self.genpm(m2ev_corr, ifold)
+        decision_pmod_sin, decision_pmod_cos = self.genpm(deev_corr, ifold)
+        sin = pd.concat([m2_pmod_sin,decision_pmod_sin],axis=0).sort_values('onset', ignore_index=True)
+        cos = pd.concat([m2_pmod_cos,decision_pmod_cos],axis=0).sort_values('onset', ignore_index=True)
+
+        pmev_corr = self.genpm_distance_spct(trial_label)
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                sin, cos, pmev_corr], axis=0)
+        return event_data
+
+
+class Game2EV_distance_spat(Game2EV_hexagon_spat):
     """Game2 distance modulation for whole_trials"""
 
     def __init__(self, behDataPath):
-        Game2EV_spat.__init__(self, behDataPath)
+        Game2EV_hexagon_spat.__init__(self, behDataPath)
 
-    def genpm_spat_distance(self):
+    def genpm_distance_spat(self):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['testPic2.started'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -146,21 +164,21 @@ class Game2EV_spat_distance(Game2EV_spat):
             raise Exception("You need specify behavioral data format.")
         return pmev
 
-    def game2ev_spat_distance(self):
+    def game2ev_distance_spat(self):
         m1ev = self.genM1ev()
         m2ev = self.genM2ev()
         deev = self.genDeev()
-        pmod_distance = self.genpm_spat_distance()
+        pmod_distance = self.genpm_distance_spat()
 
         event_data = pd.concat([m1ev, m2ev, deev, pmod_distance], axis=0)
         return event_data
 
 
-class Game2EV_spct_distance(Game2EV_spct):
+class Game2EV_distance_spct(Game2EV_hexagon_spct):
     def __init__(self, behDataPath):
-        Game2EV_spct.__init__(self, behDataPath)
+        Game2EV_hexagon_spct.__init__(self, behDataPath)
 
-    def genpm_spct_distance(self, trial_label):
+    def genpm_distance_spct(self, trial_label):
         if self.dformat == 'trial_by_trial':
             onset = self.behData['testPic2.started'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -197,12 +215,12 @@ class Game2EV_spct_distance(Game2EV_spct):
         pmev_corr = pmev_corr.sort_values('onset', ignore_index=True)
         return pmev_corr
 
-    def game2ev_spct_distance(self):
+    def game2ev_distance_spct(self):
         m1ev = self.genM1ev()
         trial_label, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
-        pmod_distance = self.genpm_spct_distance(trial_label)
+        pmod_distance = self.genpm_distance_spct(trial_label)
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 pmod_distance], axis=0)
@@ -211,9 +229,9 @@ class Game2EV_spct_distance(Game2EV_spct):
 
 if __name__ == "__main__":
     # set configure
-    ifolds = [6]  # only 6 have meaning for distance
+    ifolds = [4,5,6,7,8]  # only 6 have meaning for distance
     task = 'game1'
-    glm_type = 'distance_spat'
+    glm_type = 'hexagon_distance_spct'
     template = {
         'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'+glm_type+'/sub-{}/{}fold',
         'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
@@ -234,7 +252,6 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = [s for s in subjects if int(s) > 237]
     for subj in subjects:
         subj = str(subj).zfill(3)
         print('----sub-{}----'.format(subj))
@@ -249,17 +266,23 @@ if __name__ == "__main__":
                 behDataPath = template['behav_path'].format(subj, subj, task, run_id)
                 if task == 'game1':
                     if glm_type == 'distance_spct':
-                        event = Game1EV_spct_distance(behDataPath)
-                        event_data = event.game1ev_spct_distance()
+                        event = Game1EV_distance_spct(behDataPath)
+                        event_data = event.game1ev_distance_spct()
                     elif glm_type == 'distance_spat':
-                        event = Game1EV_spat_distance(behDataPath)
-                        event_data = event.game1ev_spat_distance()
+                        event = Game1EV_distance_spat(behDataPath)
+                        event_data = event.game1ev_distance_spat()
+                    elif glm_type == 'hexagon_distance_spct':
+                        event = Game1EV_hexagon_distance_spct(behDataPath)
+                        event_data = event.game1ev_hexagon_distance_spct()
+                    elif glm_type == 'hexagon_distance_spat':
+                        event = Game1EV_hexagon_distance_spat(behDataPath)
+                        event_data = event.game1ev_hexagon_distance_spat()
                 else:
                     if glm_type == 'distance_spct':
-                        event = Game2EV_spct_distance(behDataPath)
-                        event_data = event.game2ev_spct_distance()
+                        event = Game2EV_distance_spct(behDataPath)
+                        event_data = event.game2ev_distance_spct()
                     elif glm_type == 'distance_spat':
-                        event = Game2EV_spat_distance(behDataPath)
-                        event_data = event.game2ev_spat_distance()
+                        event = Game2EV_distance_spat(behDataPath)
+                        event_data = event.game2ev_distance_spat()
                 tsv_save_path = join(save_dir, template['event_file'].format(subj, task, run_id))
                 event_data.to_csv(tsv_save_path, sep="\t", index=False)

@@ -42,7 +42,7 @@ def gen_design_matrix(event_path):
     tr = 3
     frame_times = np.arange(n_scans) * tr  # here are the corresponding frame times
     design_matrix = make_first_level_design_matrix(frame_times, event_condition, drift_model=None,
-                                                   drift_order=0, hrf_model='spm')
+                                                   drift_order=0, hrf_model='pyspm')
 
     return design_matrix
 

@@ -29,7 +29,7 @@ events = events[['onset','duration','angle']]
 events['trial_type'] = 'simulation'
 events['modulation'] = 1 + 1*np.cos(np.deg2rad(6*(events['angle'] - omega)))
 events = events.drop('angle',axis=1)
-design_matrix = make_first_level_design_matrix(frame_times, events, drift_model='polynomial', drift_order=0,hrf_model='spm')
+design_matrix = make_first_level_design_matrix(frame_times, events, drift_model='polynomial', drift_order=0,hrf_model='pyspm')
 simulation_data = np.array(design_matrix['simulation'])
 #%%
 # creat a brain activity image

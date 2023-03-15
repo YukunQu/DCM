@@ -13,7 +13,6 @@ from nilearn.glm.first_level import FirstLevelModel
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 
 from joblib import Parallel, delayed,Memory
-memory = Memory(cachedir='/tmp/joblib', verbose=0, bytes_limit=80 * 1024**3)
 from misc.load_spm import SPMfile
 
 def load_ev_separate(event_path):
@@ -125,7 +124,7 @@ def first_level_glm(datasink, run_imgs, design_matrices):
 
     # fit first level glm to estimate mean orientation
     mni_mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
-    fmri_glm = FirstLevelModel(t_r=3.0,slice_time_ref=0.5,hrf_model='spm',
+    fmri_glm = FirstLevelModel(t_r=3.0,slice_time_ref=0.5,hrf_model='pyspm',
                                drift_model=None,high_pass=1/100,mask_img=mni_mask,
                                smoothing_fwhm=None,verbose=1,n_jobs=1)
     fmri_glm = fmri_glm.fit(run_imgs, design_matrices=design_matrices)

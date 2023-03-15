@@ -1,3 +1,4 @@
+import os.path
 import subprocess
 import pandas as pd
 from misc.load_spm import SPMfile
@@ -54,28 +55,33 @@ def ftoz(fstats_map,df1,df2,zout):
 
 
 if __name__ == "__main__":
-    # zscore the 1st level result
-    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-    participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri>=0.5')  # look out
-    subjects = data['Participant_ID'].to_list()
-    spm_template = r'/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials' \
-                   r'/Setall/6fold/{}/SPM.mat'
-    fmap_template = r'/mnt/data/DCM/result_backup/2022.11.27/game1/separate_hexagon_2phases_correct_trials' \
-                    r'/Setall/6fold/{}/spmF_0011.nii'
-    zmap_tempalte = fmap_template.replace('spmF','test_zstats')
+        # zscore the 1st level result
 
-    for ifold in range(6,7):
-        for sub_id in subjects:
-            spm_file = SPMfile(spm_template.format(sub_id))
-            df2 = spm_file.get_dof()
+        # specify subjects
+        participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+        participants_data = pd.read_csv(participants_tsv, sep='\t')
+        data = participants_data.query('game1_fmri>=0.5')  # look out
+        subjects = data['Participant_ID'].to_list()
 
-            fmap = fmap_template.format(sub_id)
-            zmap = zmap_tempalte.format(sub_id)
-            ftoz(fmap,2,df2,zmap)
-            # convert to nii
-            img = nib.load(zmap.replace('nii','nii.gz'))
-            img.to_filename(zmap)
-            print(f'{sub_id}')
-        print("{}fold have been completed.".format(ifold))
+        # set data_root and glm
+        data_root = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game1/distance_spct/Setall/{}fold'
 
+        for ifold in range(6,7):
+            for sub_id in subjects:
+                sub_dir = os.path.join(data_root.format(ifold),sub_id)
+                # get df
+                spmf_path = os.path.join(sub_dir,'SPM.mat')
+                spm_file = SPMfile(spmf_path)
+                df2 = spm_file.get_dof()
+
+                con_list = os.listdir(sub_dir)
+                stats_map_list = [c for c in con_list if 'spm' in c]
+
+                for stats_map in stats_map_list:
+                    fmap = os.path.join(sub_dir, stats_map)
+                    zmap = fmap.replace('spm','zstats_')
+                    ftoz(fmap,2,df2,zmap)
+                    # convert to nii
+                    img = nib.load(zmap.replace('nii','nii.gz'))
+                    img.to_filename(zmap)
+                print("{}'s ftoz have been completed.".format(sub_id))
