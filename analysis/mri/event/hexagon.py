@@ -2,11 +2,72 @@ import os
 from os.path import join
 import numpy as np
 import pandas as pd
-from analysis.mri.event.game1_event import Game1EV
-from analysis.mri.event.game2_event import Game2EV
+from analysis.mri.event.base import Game1EV_base_spct,Game2EV_base_spct
 
 
-class Game1EV_hexagon_spat(Game1EV):
+class Game1EV_hexagon_spct(Game1EV_base_spct):
+    """ event separate phases correct trials"""
+    def __int__(self, behDataPath):
+        Game1EV_base_spct.__init__(self, behDataPath)
+
+    @staticmethod
+    def genpm(ev, ifold):
+        # ev is reference event of one trial type to provide angle of each trial
+        angle = ev['angle']
+        pmod_sin = ev.copy()
+        pmod_cos = ev.copy()
+        pmod_sin['trial_type'] = 'sin'
+        pmod_cos['trial_type'] = 'cos'
+        pmod_sin['modulation'] = np.round(np.sin(np.deg2rad(ifold * angle)),2)
+        pmod_cos['modulation'] = np.round(np.cos(np.deg2rad(ifold * angle)),2)
+        return pmod_sin, pmod_cos
+
+    def game1ev_hexagon_spct(self, ifold):
+        # base regressors
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+
+        # paramertric modulation regressors
+        m2_pmod_sin, m2_pmod_cos = self.genpm(m2ev_corr, ifold)
+        decision_pmod_sin, decision_pmod_cos = self.genpm(deev_corr, ifold)
+        sin = pd.concat([m2_pmod_sin,decision_pmod_sin],axis=0).sort_values('onset', ignore_index=True)
+        cos = pd.concat([m2_pmod_cos,decision_pmod_cos],axis=0).sort_values('onset', ignore_index=True)
+
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error,deev_corr, deev_error,
+                                sin, cos], axis=0)
+        return event_data
+
+
+class Game2EV_hexagon_spct(Game2EV_base_spct):
+    def __int__(self, behDataPath):
+        Game2EV_base_spct.__init__(self, behDataPath)
+
+    @staticmethod
+    def genpm(ev, ifold):
+        angle = ev['angle']
+        pmod_sin = ev.copy()
+        pmod_cos = ev.copy()
+        pmod_sin['trial_type'] = 'sin'
+        pmod_cos['trial_type'] = 'cos'
+        pmod_sin['modulation'] = np.sin(np.deg2rad(ifold * angle))
+        pmod_cos['modulation'] = np.cos(np.deg2rad(ifold * angle))
+        return pmod_sin, pmod_cos
+
+    def game2ev_hexagon_spct(self, ifold):
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+        pmod_sin, pmod_cos = self.genpm(m2ev_corr, ifold)
+
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                pmod_sin, pmod_cos], axis=0)
+        return event_data
+
+
+class Game1EV_hexagon_spat(Game1EV_base_spat):
     """ game1 event for separate phases all trials"""
     def __int__(self, behDataPath):
         Game1EV.__init__(self, behDataPath)
@@ -127,53 +188,3 @@ class Game2EV_hexagon_spat(Game2EV):
         pmod_sin, pmod_cos = self.genpm(m2ev, ifold)
         event_data = pd.concat([m1ev, m2ev, deev, pmod_sin, pmod_cos], axis=0)
         return event_data
-
-
-def gen_sub_event(task, subjects, ifolds=range(4, 9)):
-    if task == 'game1':
-        runs = range(1, 7)
-        template = {
-            'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-{}_run-{}.csv',
-            'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/hexagon_spat/sub-{}/{}fold',
-            'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
-    elif task == 'game2':
-        runs = range(1, 3)
-        template = {
-            'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
-            'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/hexagon_spat/sub-{}/{}fold',
-            'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
-    else:
-        raise Exception("The type of task is wrong.")
-
-    for subj in subjects:
-        subj = str(subj).zfill(3)
-        print('----sub-{}----'.format(subj))
-
-        for ifold in ifolds:
-            save_dir = template['save_dir'].format(task, subj, ifold)
-            if not os.path.exists(save_dir):
-                os.makedirs(save_dir)
-
-            for idx in runs:
-                run_id = str(idx)
-                behDataPath = template['behav_path'].format(subj, subj, task, run_id)
-                if task == 'game1':
-                    event = Game1EV_hexagon_spat(behDataPath)
-                    event_data = event.game1ev_hexagon_spat(ifold)
-                elif task == 'game2':
-                    event = Game2EV_hexagon_spat(behDataPath)
-                    event_data = event.game2ev_hexagon_spat(ifold)
-                else:
-                    raise Exception("The type of task is wrong.")
-                tsv_save_path = join(save_dir, template['event_file'].format(subj, task, run_id))
-                event_data.to_csv(tsv_save_path, sep="\t", index=False)
-
-
-if __name__ == "__main__":
-    task = 'game2'
-    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
-    participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query(f'{task}_fmri>=0.5')
-    pid = data['Participant_ID'].to_list()
-    subjects = [p.split('-')[-1] for p in pid]
-    gen_sub_event(task, subjects)

@@ -58,7 +58,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     # configure
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = 'cv_test_hexagon_spct'
+    glm_type = 'cv_hexagon_spct'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
@@ -83,7 +83,6 @@ if __name__ == "__main__":
                                           'distance', 'correct_error'],
                         'hexagon_spat': ['M1', 'M2', 'decision', 'm2_hexagon', 'decision_hexagon', 'hexagon'],
                         'hexagon_spct': ['M1', 'M2_corr', 'decision_corr', 'hexagon', 'correct_error','sin','cos'],
-                        'cv_hexagon_spct': ['M1', 'M2_corr', 'decision_corr', 'alignPhi'],
                         'hexagon_wpct':['M1','infer_corr','infer_error','hexagon','correct_error'],
                         'hexagon_distance_spat': ['M1', 'M2', 'decision', 'm2_hexagon', 'decision_hexagon', 'hexagon',
                                                   'M2xdistance', 'decisionxdistance', 'distance'],
@@ -100,6 +99,9 @@ if __name__ == "__main__":
                         'cv_test_hexagon_distance_spct_ECthr3.1':['M1', 'M2_corr', 'M2_error','decision_corr','decision_error',
                                                          'correct_error','alignPhi_even', 'alignPhi_odd','alignPhi',
                                                          'M2_corrxdistance','decision_corrxdistance','distance'],
+                        'cv_hexagon_spct': ['M1', 'M2_corr', 'decision_corr','alignPhi','correct_error'],
+                        'cv_hexagon_distance_spct': ['M1', 'M2_corr', 'decision_corr', 'correct_error','alignPhi',
+                                                     'M2_corrxdistance','decision_corrxdistance','distance'],
                         'grid_rsa_corr_trials':['rsa_ztransf_img2_coarse_4fold','rsa_ztransf_img2_coarse_5fold',
                                                 'rsa_ztransf_img2_coarse_6fold',
                                                 'rsa_ztransf_img2_coarse_7fold','rsa_ztransf_img2_coarse_8fold'],
@@ -119,7 +121,7 @@ if __name__ == "__main__":
                         for contrast_id in contrast_1st)
 
     # mean effect of high performance subjects
-    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.8)')  # look out
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game2_test_acc>0.80)and(game1_acc>0.80)')  # look out
     hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
     print("high performance subjects:",len(hp_sub))
     datasink = os.path.join(data_root, 'hp_all')
@@ -129,7 +131,7 @@ if __name__ == "__main__":
                         for contrast_id in contrast_1st)
 
     # mean effect of high performance adults
-    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.8)and(Age>=18)')  # look out
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game2_test_acc>0.80)and(Age>=18)and(game1_acc>0.80)')  # look out
     hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
     print("high performance adults:",len(hp_sub))
     datasink = os.path.join(data_root, 'hp_adult')
@@ -137,6 +139,7 @@ if __name__ == "__main__":
         os.mkdir(datasink)
     Parallel(n_jobs=13)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
+
 
     # The age effect for subjects(8-17)
     data_juv = data.query("Age<18")
