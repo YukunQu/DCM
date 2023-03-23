@@ -12,6 +12,7 @@ def defROI_by_coord():
     savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/distance_spat/Setall/6fold/group_zmap/PCC_ROI.nii.gz'
     makeSphereMask_coords(stats_map, savepath, coords, radius)
 
+
 def defROI_by_group_thr():
     """Generate Group ROI accoording to the peak point in mask"""
     stats_map = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_separate_phases_correct_trials/Setall/6fold/group_sm8/mean/hexagon_tmap.nii.gz'
@@ -71,7 +72,7 @@ from nilearn.plotting import plot_stat_map
 from nilearn.plotting import plot_roi
 
 # load statistical map and mask
-stats_map = image.load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/'
+stats_map = image.load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/'
                            r'Setall/6fold/group/mean/hexagon_zmap.nii.gz')
 mask = image.load_img(r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz')
 if not np.array_equal(mask.affine,stats_map.affine):
@@ -95,4 +96,4 @@ bin_tmap_thr_masked = np.logical_and(mask_data.astype(bool), bin_tmap_thr)
 # plot roi and save
 bin_tmap_thr_peak_spere_img = image.new_img_like(stats_map, bin_tmap_thr_masked.astype(int))
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0, 0, 0))
-bin_tmap_thr_peak_spere_img.to_filename("/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz")
+bin_tmap_thr_peak_spere_img.to_filename("/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/EC_thr3.1.nii.gz")

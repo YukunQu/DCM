@@ -58,7 +58,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -70,10 +70,11 @@ if __name__ == "__main__":
 
     # configure
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = 'cv_hexagon_spct'
+    glm_type = 'cv_test_hexagon_spct'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
+    #templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/rsa', '{}.nii.gz')
 
     contrast_configs = {'base_spct':['M1', 'M2_corr', 'decision_corr','decision_error', 'correct_error'],
                         'distance_spat': ['M1', 'M2', 'decision', 'M2xdistance', 'decisionxdistance', 'distance'],
@@ -89,69 +90,91 @@ if __name__ == "__main__":
                         'hexagon_distance_spct': ['M1', 'M2_corr', 'decision_corr', 'decision_error',
                                                   'hexagon','correct_error',
                                                   'M2xdistance', 'decisionxdistance', 'distance'],
+                        'cv_train_hexagon_spct':['M1', 'M2_corr','decision_corr',
+                                                 'odd_hexagon', 'even_hexagon', 'hexagon', 'correct_error'],
                         'cv_train_hexagon_distance_spct':['M1', 'M2_corr','decision_corr',
                                                           'odd_hexagon', 'even_hexagon', 'hexagon', 'correct_error',
                                                           'M2_corrxdistance', 'decision_corrxdistance', 'distance'],
+                        'cv_test_hexagon_spct':['M1', 'M2_corr', 'M2_error','decision_corr','decision_error',
+                                                'correct_error','alignPhi_even', 'alignPhi_odd','alignPhi'],
                         'cv_test_hexagon_distance_spct_ECthr3.1':['M1', 'M2_corr', 'M2_error','decision_corr','decision_error',
                                                          'correct_error','alignPhi_even', 'alignPhi_odd','alignPhi',
-                                                         'M2_corrxdistance','decision_corrxdistance','distance']
+                                                         'M2_corrxdistance','decision_corrxdistance','distance'],
+                        'grid_rsa_corr_trials':['rsa_ztransf_img2_coarse_4fold','rsa_ztransf_img2_coarse_5fold',
+                                                'rsa_ztransf_img2_coarse_6fold',
+                                                'rsa_ztransf_img2_coarse_7fold','rsa_ztransf_img2_coarse_8fold'],
                         }
     contrast_1st = contrast_configs[glm_type]
+
+    # create output directory
     data_root = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'group')
     if not os.path.exists(data_root):
         os.mkdir(data_root)
 
-    """
-    # run 2nd level GLM
+    # mean effect of all subjects
     datasink = os.path.join(data_root, 'mean')
     if not os.path.exists(datasink):
         os.mkdir(datasink)
     Parallel(n_jobs=13)(delayed(run_2nd_ttest)(sub_list, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
-    """
-    # high performance subjects
-    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.8)and(Age>=18)')  # look out
-    hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
-    print(len(hp_sub))
-    datasink = os.path.join(data_root, 'hp')
-    if not os.path.exists(datasink):
-        os.mkdir(datasink)
-    Parallel(n_jobs=13)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
-                        for contrast_id in contrast_1st)
 
-    """
+    # mean effect of high performance subjects
     hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.8)')  # look out
     hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
-    print(len(hp_sub))
+    print("high performance subjects:",len(hp_sub))
     datasink = os.path.join(data_root, 'hp_all')
     if not os.path.exists(datasink):
         os.mkdir(datasink)
     Parallel(n_jobs=13)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
 
-    # age 8 - 18
-    data_juv = data.query("Age<=18")
+    # mean effect of high performance adults
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.8)and(Age>=18)')  # look out
+    hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
+    print("high performance adults:",len(hp_sub))
+    datasink = os.path.join(data_root, 'hp_adult')
+    if not os.path.exists(datasink):
+        os.mkdir(datasink)
+    Parallel(n_jobs=13)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
+                        for contrast_id in contrast_1st)
+
+    # The age effect for subjects(8-17)
+    data_juv = data.query("Age<18")
     juv_pid = data_juv['Participant_ID'].to_list()
     juv_sub_list = [p.split('-')[-1] for p in juv_pid]
-    print("subjects number of covariate-age:", len(juv_sub_list))
+    print("subjects number of covariate-age(8-17):", len(juv_sub_list))
     age = data_juv['Age'].to_list()
     covariates = {'Age': age}
-    datasink = os.path.join(data_root, 'age_to18')
+    datasink = os.path.join(data_root, 'age_to17')
     if not os.path.exists(datasink):
         os.mkdir(datasink)
     Parallel(n_jobs=13)(delayed(run_2nd_covariate)(juv_sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
-    # age 8 - 28
+    # The age effect for subjects(18-25)
+    data_adult = data.query("(Age>=18)and(Age<=25)")
+    adult_pid = data_adult['Participant_ID'].to_list()
+    adult_sub_list = [p.split('-')[-1] for p in adult_pid]
+    age = data_adult['Age'].to_list()
+    covariates = {'Age': age}
+    print("subjects number of covariate-age(18-25):", len(adult_sub_list))
+    datasink = os.path.join(data_root, 'age_18to25')
+    if not os.path.exists(datasink):
+        os.mkdir(datasink)
+    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
+                        for contrast_id in contrast_1st)
+
+    # The age effect for all subjects(8-25)
     age = data['Age'].to_list()
     covariates = {'Age': age}
+    print("subjects number of covariate-age(8-25):", len(sub_list))
     datasink = os.path.join(data_root, 'age_all')
     if not os.path.exists(datasink):
         os.mkdir(datasink)
     Parallel(n_jobs=13)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
-    # acc
+    # The accuracy effect for all subjects(8-25)
     if task == 'game1':
         accuracy = data['game1_acc'].to_list()
     elif task == 'game2':
@@ -164,21 +187,3 @@ if __name__ == "__main__":
         os.mkdir(datasink)
     Parallel(n_jobs=13)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
-    
-    """
-    # model age and acc at same time
-    if task == 'game1':
-        accuracy = data['game1_acc'].to_list()
-    elif task == 'game2':
-        accuracy = data['game2_test_acc'].to_list()
-    else:
-        raise Exception("Task name is error!")
-    covariates = {'acc':accuracy}
-    age = data['Age'].to_list()
-    covariates['Age'] = age
-    datasink = os.path.join(data_root,'age_acc')
-    if not os.path.exists(datasink): 
-        os.mkdir(datasink)
-    Parallel(n_jobs=10)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
-                        for contrast_id in contrast_1st)
-                        

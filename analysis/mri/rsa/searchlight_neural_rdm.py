@@ -1,18 +1,15 @@
 import os.path
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.colors
-
 import pandas as pd
 import nibabel as nib
-import seaborn as sns
-from nilearn import plotting
+from nilearn.image import binarize_img
 from nipype.interfaces.base import Bunch
+from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 from rsatoolbox.util.searchlight import get_volume_searchlight, get_searchlight_RDMs
+from joblib import Parallel, delayed
 import concurrent.futures
 
-
-def sub_angles(ev_files):
+def get_sub_angles_spm(ev_files):
     runs_info = []
     for ev_file in ev_files:
         onsets = []
@@ -42,28 +39,58 @@ def sub_angles(ev_files):
     return sub_angles_set
 
 
+def get_sub_angles_nilearn(ev_files):
+    """
+    get angle regressors name from event files
+    :param ev_files: a list of event files path
+    :return:
+    """
+    regressors_name = []
+    for ev_file in ev_files:
+        ev_info = pd.read_csv(ev_file, sep='\t')
+        regressors_name.extend(ev_info['trial_type'].to_list())
+    angle_con_names = list(set(regressors_name))
+
+    # remove other regressors.
+    for non_angle_reg in ['M1','M2_error','decision']:
+        if non_angle_reg in angle_con_names:
+            angle_con_names.remove(non_angle_reg)
+        else:
+            print(ev_files,"don't have",non_angle_reg)
+
+    # sort angle as value
+    angle_names = [int(acn.replace('angle','')) for acn in angle_con_names]
+    angle_names.sort()
+    angle_con_names = ['angle'+str(a) for a in angle_names]
+    return angle_con_names
+
+
 def cal_neural_rdm(sub_id):
-    # set this path to wherever you saved the folder containing the img-files
-    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_corr_trials/Setall/6fold/{}'
-    ev_file_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game2/grid_rsa_corr_trials/{}/6fold/{}_task-game2_run-{}_events.tsv'
-    # get subject's contrast_names
+    """
+    using searchilight calculate neural RDM for different angles
+    :param sub_id:
+    :return:
+    """
+    # get subject's contrast_names(angles)
     ev_files = []
+    ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
+                  r'game2/grid_rsa_corr_trials/{}/6fold/{}_task-game2_run-{}_events.tsv'
     runs = range(1,3)
     for i in runs:  # look out
-        ev_files.append(ev_file_tempalte.format(sub_id,sub_id,i))
-    sub_angles_set = sub_angles(ev_files)
+        ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
+    con_names = get_sub_angles_nilearn(ev_files)
 
-    con_id_list = list(range(1,len(sub_angles_set)+1))
     # get subject's cmap
-    image_paths = [os.path.join(cmap_folder.format(sub_id),
-                                'con_{}.nii'.format(str(con_id).zfill(4)))
-                   for con_id in con_id_list]
+    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
+                  'game2/grid_rsa_corr_trials/Setall/6fold/{}'
+    image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
+                   for con_id in con_names]
 
     # load one image to get the dimensions and make the mask
-    tmp_img = nib.load(image_paths[0])
-    # we infer the mask by looking at non-nan voxels
-    mask = ~np.isnan(tmp_img.get_fdata())
-    x, y, z = tmp_img.get_fdata().shape
+    mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    mask_img = nib.load(mni_mask)
+    mask = mask_img.get_fdata()
+    x, y, z = mask.shape
 
     # loop over all images
     data = np.zeros((len(image_paths), x, y, z))
@@ -80,7 +107,10 @@ def cal_neural_rdm(sub_id):
     data_2d = np.nan_to_num(data_2d)
 
     SL_RDM = get_searchlight_RDMs(data_2d, centers, neighbors, image_value, method='correlation')
-    savepath = os.path.join(cmap_folder.format(sub_id),'{}-neural_RDM.hdf5'.format(sub_id))
+    savepath = os.path.join(cmap_folder.format(sub_id),'rsa')
+    if not os.path.exists(savepath):
+        os.mkdir(savepath)
+    savepath = os.path.join(savepath,'{}-neural_RDM.hdf5'.format(sub_id))
     SL_RDM.save(savepath,'hdf5',overwrite=True)
     print("The {}'s rdm have been done.".format(sub_id))
     return "The {}'s rdm have been done.".format(sub_id)
@@ -89,8 +119,9 @@ def cal_neural_rdm(sub_id):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri>0.5')  # look out
+    data = participants_data.query('game2_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
-    with concurrent.futures.ProcessPoolExecutor(max_workers=15) as executor:
-        results = [executor.submit(cal_neural_rdm,sub_id) for sub_id in subjects]
+    subjects_chunk = list_to_chunk(subjects,70)
+    for chunk in subjects_chunk:
+        results_list = Parallel(n_jobs=70,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)

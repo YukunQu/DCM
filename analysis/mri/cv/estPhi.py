@@ -96,7 +96,7 @@ def estimate_game1_cv_phi(workdir):
 
 def estimate_game1_whole_trials_phi(workdir):
     # set fold
-    folds = [str(i)+'fold' for i in range(4,9)]
+    folds = [str(i)+'fold' for i in range(6,7)]
 
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -139,5 +139,6 @@ def estimate_game1_whole_trials_phi(workdir):
 
 
 if __name__ == "__main__":
-    workingdir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct'
+    workingdir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct'
+    #estimate_game1_cv_phi(workingdir)
     estimate_game1_whole_trials_phi(workingdir)

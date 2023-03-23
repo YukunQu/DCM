@@ -253,4 +253,5 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects_list = [p.split('-')[-1] for p in pid]
+    subjects_list = ['209','250']
     gen_sub_event(task, subjects_list)

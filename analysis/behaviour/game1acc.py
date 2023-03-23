@@ -84,7 +84,7 @@ def game1_acc(subject, trial_check=True):
 
 if __name__ == "__main__":
     subjects = range(238,250)
-
+    subjects = [209,250]
     subjects = [(str(s).zfill(3)) for s in subjects]
     subject_acc = {}
     for subject in subjects:

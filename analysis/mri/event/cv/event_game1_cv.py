@@ -294,10 +294,11 @@ def gen_event_game1_cv_test():
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_distance_spct/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_spct/sub-{}/{}fold'  # look out
 
     # set Phi estimated from specific ROI
-    phis_file = r'/mnt/workdir/DCM/result/CV/Phi/estPhi_ROI-EC_circmean.csv'  # look out
+    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/' \
+                r'estPhi_ROI-EC_circmean_cv.csv'  # look out
     phis_data = pd.read_csv(phis_file)
 
     # set folds and runs for cross validation

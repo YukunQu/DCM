@@ -21,6 +21,8 @@ def set_rsa_contrasts(design_matrix):
     contrasts_set = {}
     for contrast_id in contrast_name:
         contrast_index = get_reg_index(design_matrix, contrast_id)
+        if len(contrast_index) == 0:
+            continue
         contrast_vector = np.zeros(design_matrix.shape[1])
         contrast_vector[contrast_index] = 1
         contrasts_set[contrast_id] = contrast_vector
@@ -49,6 +51,7 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
+    subjects = ['209','250']
 
     if task == 'game1':
         configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'grid_rsa_corr_trials',

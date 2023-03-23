@@ -76,6 +76,7 @@ def rename_game2_behav_data(subjects):
 
 if __name__ == "__main__":
     subject_list = [str(i).zfill(3) for i in range(238, 250)]
+    subject_list = ['209','250']
     rename_game1_behav_data(subject_list)
     print("------------------------------")
     rename_game2_behav_data(subject_list)

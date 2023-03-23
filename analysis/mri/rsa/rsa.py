@@ -9,8 +9,10 @@ from rsatoolbox.rdm.rdms import load_rdm
 from rsatoolbox.inference import eval_fixed
 from rsatoolbox.model import ModelFixed
 from rsatoolbox.util.searchlight import  evaluate_models_searchlight
+
 from nilearn.image import new_img_like
 import concurrent.futures
+from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 
 
 def upper_tri(RDM):
@@ -28,26 +30,18 @@ def upper_tri(RDM):
     return RDM[r, c]
 
 
-def RDMcolormapObject(direction=1):
-    """
-    Returns a matplotlib color map object for RSA and brain plotting
-    """
-    if direction == 0:
-        cs = ['yellow', 'red', 'gray', 'turquoise', 'blue']
-    elif direction == 1:
-        cs = ['blue', 'turquoise', 'gray', 'red', 'yellow']
-    else:
-        raise ValueError('Direction needs to be 0 or 1')
-    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", cs)
-    return cmap
-
-
 def calc_rs_map(sub_id, ifold):
+    """
+    calculate correaltion between neural RDM and model RDM
+    :param sub_id:
+    :param ifold:
+    :return:
+    """
     # set path
-    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_corr_trials/Setall/6fold'
-    neural_RDM_path = os.path.join(default_dir,'{}/{}-neural_RDM.hdf5'.format(sub_id,sub_id))
-    gird_RDM_path = os.path.join(default_dir,'{}/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
-    rsmap_savepath = os.path.join(default_dir,'{}/rs-corr_img_coarse_{}fold.nii'.format(sub_id,ifold))
+    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/grid_rsa_corr_trials/Setall/6fold'
+    neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_RDM.hdf5'.format(sub_id,sub_id))
+    gird_RDM_path = os.path.join(default_dir,'{}/rsa/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
+    rsmap_savepath = os.path.join(default_dir,'{}/rsa/rsa_img_coarse_{}fold.nii.gz'.format(sub_id,ifold))
 
     #  load neural RDM for each voxel
     neural_RDM = load_rdm(neural_RDM_path)
@@ -62,42 +56,29 @@ def calc_rs_map(sub_id, ifold):
     eval_score = [np.float64(e.evaluations) for e in eval_results]
 
     # Create an 3D array, with the size of mask, and
-    tmp_img = nib.load(os.path.join(default_dir,'{}/con_0001.nii'.format(sub_id)))
-    # we infer the mask by looking at non-nan voxels
-    mask = ~np.isnan(tmp_img.get_fdata())
+    mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    mask_img = nib.load(mni_mask)
+    mask = mask_img.get_fdata()
     x, y, z = mask.shape
+
     RDM_brain = np.zeros([x*y*z])
     RDM_brain[list(neural_RDM.rdm_descriptors['voxel_index'])] = eval_score
     RDM_brain = RDM_brain.reshape([x, y, z])
 
-    corr_img = new_img_like(tmp_img, RDM_brain)
+    corr_img = new_img_like(mask_img, RDM_brain)
     corr_img.to_filename(rsmap_savepath)
     print("The calculation of {}-{} have been done.".format(ifold,sub_id))
-
-def list_to_chunk(orignal_list,chunk_volume=30):
-    chunk_list = []
-    chunk = []
-    for i, element in enumerate(orignal_list):
-        chunk.append(element)
-        if len(chunk) == chunk_volume:
-            chunk_list.append(chunk)
-            chunk = []
-        elif i == (len(orignal_list) - 1):
-            chunk_list.append(chunk)
-        else:
-            continue
-    return chunk_list
 
 
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri>0.5')  # look out
+    data = participants_data.query('game2_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
-    subjects_chunk = list_to_chunk(subjects)
+    subjects_chunk = list_to_chunk(subjects,99)
 
     for ifold in [4,5,6,7,8]:
         print('-------------{} fold start.-------------------' .format(ifold))
         for sub_chunk in subjects_chunk:
-            with concurrent.futures.ProcessPoolExecutor(max_workers=15) as executor:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=99) as executor:
                 results = [executor.submit(calc_rs_map,sub_id,ifold) for sub_id in sub_chunk]

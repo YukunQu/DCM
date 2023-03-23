@@ -55,9 +55,11 @@ if __name__ == "__main__":
     # load subject file and check it
     data_dir = r'/mnt/data/DCM/sourcedata'
     #sub_list = ['sub_' + str(i).zfill(3) for i in range(214, 247)]
+
     # sub_list.remove('sub_209')
     sub_list = os.listdir(data_dir)
     sub_list = [s for s in sub_list if 'sub' in s]
+    sub_list = ['sub_209','sub_247','sub_248','sub_209','sub_250']
 
     log = check_subs_meg(sub_list, data_dir)
     for info in log:
@@ -74,5 +76,3 @@ if __name__ == "__main__":
             loc_zky+=1
         else:
             no_data+=1
-
-

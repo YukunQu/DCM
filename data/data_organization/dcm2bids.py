@@ -20,7 +20,7 @@ def dcm2bids_helper(subjects):
         subprocess.call(command, shell=True)
 
 
-subjects = ['247']
+subjects = ['209','250']
 dcm2bids_helper(subjects)
 
 # %%
@@ -47,13 +47,10 @@ subjects_list = data['Participant_ID'].to_list()
 subjects_list.sort()
 subjects_list = [s.split("-")[-1] for s in subjects_list]
 
-subjects_list = ['010','011','012','015','016','017','027',
-                 '047','056','087','089','117','123','124',
-                 '125','136','147','166','173','197']
-subjects_list.reverse()
+subjects_list = ['209','250']
 
-#%%
-config_type = 'DWI'  # key parameter
+
+config_type = 'individual'  # key parameter
 if config_type == 'CS':
     config_ibp = r'/mnt/workdir/DCM/config/config_CS.json'  # 中科院扫描的配置文件
     dcm2bids(subjects_list, config_ibp)

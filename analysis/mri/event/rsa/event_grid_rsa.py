@@ -134,7 +134,9 @@ class Game2_grid_rsa_m2(Game2EV_hexagon_spat):
             for index, row in self.behData.iterrows():
                 onset = row['testPic2.started'] - self.starttime
                 duration = 2.5
-                trial_type = str(row['angles'])
+                angle = row['angles']
+                angle = round(angle % 360)
+                trial_type = str(angle)
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
@@ -142,7 +144,9 @@ class Game2_grid_rsa_m2(Game2EV_hexagon_spat):
             for index, row in self.behData.iterrows():
                 onset = row['testPic2.started_raw'] - self.starttime
                 duration = 2.5
-                trial_type = str(row['angles'])
+                angle = row['angles']
+                angle = round(angle % 360)
+                trial_type = str(angle)
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
@@ -154,30 +158,34 @@ class Game2_grid_rsa_m2(Game2EV_hexagon_spat):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         angle_ev = self.angle_ev()
-        deev = self.genDeev_whole_trials()
-        response = self.response()
-        event_data = pd.concat([m1ev,angle_ev,deev,response], axis=0)
+        deev = self.genDeev()
+        #response = self.response()
+        event_data = pd.concat([m1ev,angle_ev,deev], axis=0)
         return event_data
 
-    def correct_angle_ev(self,trial_valid):
+    def correct_angle_ev(self, trial_corr):
         angle_ev = pd.DataFrame(columns=['onset', 'duration', 'trial_type'])
         if self.dformat == 'trial_by_trial':
-            for (index, row),isValid in zip(self.behData.iterrows(), trial_valid):
+            for (index, row),isCorr in zip(self.behData.iterrows(), trial_corr):
                 onset = row['testPic2.started'] - self.starttime
                 duration = 2.5
-                if isValid:
-                    trial_type = str(row['angles'])
+                if isCorr:
+                    angle = row['angles']
+                    angle = round(angle % 360)
+                    trial_type = 'angle'+str(angle)
                 else:
                     trial_type = 'M2_error'
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
         elif self.dformat == 'summary':
-            for (index, row),isValid in zip(self.behData.iterrows(), trial_valid):
+            for (index, row),isCorr in zip(self.behData.iterrows(), trial_corr):
                 onset = row['testPic2.started_raw'] - self.starttime
                 duration = 2.5
-                if isValid:
-                    trial_type = str(row['angles'])
+                if isCorr:
+                    angle = row['angles']
+                    angle = round(angle % 360)
+                    trial_type = 'angle'+str(angle)
                 else:
                     trial_type = 'M2_error'
                 angle_ev = angle_ev.append(
@@ -191,9 +199,9 @@ class Game2_grid_rsa_m2(Game2EV_hexagon_spat):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
-        valid_angle_ev = self.correct_angle_ev(trial_corr)
-        deev = self.genDeev_whole_trials()
-        event_data = pd.concat([m1ev,valid_angle_ev,deev], axis=0)
+        corr_angle_ev = self.correct_angle_ev(trial_corr)
+        deev = self.genDeev()
+        event_data = pd.concat([m1ev,corr_angle_ev,deev], axis=0)
         return event_data
 
 
@@ -216,7 +224,7 @@ def gen_gird_rsa_event(task):
         ifolds = range(6, 7)
         runs = range(1, 7)
     elif task == 'game2':
-        data = participants_data.query("game2_fmri>0.5")
+        data = participants_data.query("game2_fmri>=0.5")
         pid = data['Participant_ID'].to_list()
         subject_list = [p.split('-')[-1] for p in pid]
 

@@ -73,6 +73,7 @@ if __name__ == "__main__":
     game1_subs = participant_df.query(f"game1_fmri>0")['Participant_ID']
     game2_subs = participant_df.query(f"game2_fmri>0")['Participant_ID']
     subject_list = ['sub-{}'.format(i) for i in range(247, 250)]
+    subject_list = ['sub-209','sub-250']
 
     game1_timeline_df, game1_error_run = check_consistency(subject_list,'game1', range(1, 7))
     game2_timeline_df, game2_error_run = check_consistency(subject_list,'game2', range(1, 3))

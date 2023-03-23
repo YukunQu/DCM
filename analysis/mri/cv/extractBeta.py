@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 from nilearn.masking import apply_mask
-from nilearn.image import load_img, resample_to_img
+from nilearn.image import load_img, resample_to_img,threshold_img,binarize_img
 
 
 def extractStats(stat_map,subjects,roi):
@@ -22,7 +22,7 @@ def extractStats(stat_map,subjects,roi):
         ifold = str(i) + 'fold'
         print(f"________{ifold} start____________")
         for sub in subjects:
-                stats_map = stat_map.format(ifold, sub)
+                stats_map = stat_map.format(sub,ifold)
                 print(stats_map)
                 stats_img = load_img(stats_map)
                 if not np.array_equal(stats_img.affine,roi.affine):
@@ -43,18 +43,20 @@ if __name__ == "__main__":
     subjects = data['Participant_ID'].to_list()
 
     # set roi
-    roi_path = r'/mnt/workdir/DCM/result/ROI/Ftest/EC_thr3.7_anat50.nii.gz'
+    roi_path = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz'
     roi_img = load_img(roi_path)
+    roi_img = threshold_img(roi_img,5)
+    roi_img = binarize_img(roi_img)
 
     # set path template:
-    stats_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_test_hexagon_distance_spct_ECthr3.1/' \
-                     r'Setall/{}/{}/zmap/alignPhi_zmap.nii.gz'
+    #stats_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/{}/{}/zmap/alignPhi_zmap.nii.gz'
+    stats_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_img_coarse_{}.nii.gz'
 
     # set savepath
-    savedir = r'/mnt/workdir/DCM/result/Specificity_to_6/nilearn_cv'
+    savedir = r'/mnt/workdir/DCM/result/Specificity_to_6/RSA'
     if not os.path.exists(savedir):
         os.mkdir(savedir)
-    save_path = r'/mnt/workdir/DCM/result/Specificity_to_6/nilearn_cv/sub_stats-z_roi-ec3.7_trial-all.csv'
+    save_path = r'/mnt/workdir/DCM/result/Specificity_to_6/RSA/sub_stats-z_roi-ec_trial-all_withoutZtransform.csv'
 
     sub_stats_results = extractStats(stats_template,subjects,roi_img)
     sub_stats_results['trial_type'] = 'all'

@@ -68,6 +68,7 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects_list = [p.split('-')[-1] for p in pid]
+    subjects_list = ['209','250']
     subjects_list.sort()
     print("Total subject numbers:", len(subjects_list))
 
@@ -99,4 +100,4 @@ if __name__ == "__main__":
     results_list = Parallel(n_jobs=70)(delayed(cut_redundant_data)(bfile, fmrif,cfile)
                                        for bfile, fmrif,cfile in zip(behavior_file_list, fmri_file_list, confound_list))
     results_list = np.array(results_list)
-    #np.savetxt(rf"/mnt/workdir/DCM/result/crop_data/redundant_time_{task}.txt", results_list, fmt='%d')
+    np.savetxt(rf"/mnt/workdir/DCM/result/crop_data/redundant_time__new+{task}.txt", results_list, fmt='%d')

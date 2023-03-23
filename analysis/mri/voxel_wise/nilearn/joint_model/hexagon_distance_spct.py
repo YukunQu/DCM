@@ -95,6 +95,7 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
+    subjects = ['209','250']
 
     subjects_chunk = list_to_chunk(subjects,60)
     for ifold in range(6,7):

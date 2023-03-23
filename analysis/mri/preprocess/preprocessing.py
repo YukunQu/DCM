@@ -27,7 +27,7 @@ for f in pid:
 subject_list = [p.split('-')[-1] for p in unexist_subjects]
 subject_list.sort()
 
-subject_list = ['153']
+subject_list = ['209 250']
 # split the subjects into subject units. Each unit includes only five subjects to prevent memory overflow.
 sub_list = []
 sub_set_num = 0
@@ -47,7 +47,7 @@ for i,sub in enumerate(subject_list):
 #%%
 # command_surfer = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 100'
 # command_volume = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 T1w --no-tty -w {} --use-syn-sdc --nthreads 80 --fs-no-reconall'
-command_volume_fmapless = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w func --no-tty -w {} --nthreads 30 --fs-no-reconall --use-syn-sdc'
+command_volume_fmapless = 'fmriprep-docker {} {} participant --participant-label {} --fs-license-file {} --output-spaces MNI152NLin2009cAsym:res-2 MNI152NLin2009cAsym:res-native T1w func --no-tty -w {} --nthreads 50 --fs-no-reconall --use-syn-sdc'
 
 starttime = time.time()
 for subj in sub_list:
