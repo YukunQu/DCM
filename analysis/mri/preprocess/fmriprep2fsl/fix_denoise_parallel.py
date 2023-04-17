@@ -34,16 +34,15 @@ if __name__ == "__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri>=0.5')  # look out
     subject_list = data['Participant_ID'].to_list()
-    subject_list = ['sub-130']
     # Get all the paths!
     preprocessed_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep'
     preprocessed_dirs_list = []
     for subj_id in subject_list:
         preprocessed_dirs_list.extend(glob.glob(opj(preprocessed_dir,
                                                     f'{subj_id}/fsl/'
-                                                    f'{subj_id}_task-game1_run-*_space-T1w_desc-preproc_bold.ica')))
+                                                    f'{subj_id}_task-*_run-*_space-T1w_desc-preproc_bold_trimmed.ica')))
     preprocessed_dirs_list.sort()
 
-    preprocessed_dirs_chunk = list_to_chunk(preprocessed_dirs_list,30)
+    preprocessed_dirs_chunk = list_to_chunk(preprocessed_dirs_list,80)
     for preprocessed_dirs in preprocessed_dirs_chunk:
         run_fix_preprocess_parallel(preprocessed_dirs, train_weight, thr)

@@ -10,10 +10,12 @@ import os
 from os.path import join
 import numpy as np
 import pandas as pd
-from analysis.mri.event.distance import Game1EV_hexagon_distance_spct,Game1EV_hexagon_distance_spat
+from analysis.mri.event.joint import Game1EV_hexagon_distance_spct,Game1EV_hexagon_distance_spat
+from analysis.mri.event.hexagon import GAME2EV_hexagon_spct
+from analysis.mri.event.value import GAME1EV_value_spct
 
 
-class Game1_cv_spat(Game1EV_hexagon_distance_spat):
+class Game1EV_cv_spat(Game1EV_hexagon_distance_spat):
     def __init__(self, behDataPath):
         Game1EV_hexagon_distance_spat.__init__(self, behDataPath)
 
@@ -112,9 +114,10 @@ class Game1_cv_spat(Game1EV_hexagon_distance_spat):
         return deev_odd, deev_even, deev_error
 
 
-class Game1_cv_spct(Game1EV_hexagon_distance_spct):
+class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
     def __init__(self, behDataPath):
         Game1EV_hexagon_distance_spct.__init__(self, behDataPath)
+        GAME1EV_value_spct.__init__(self, behDataPath)
 
     @staticmethod
     def split_event(ev,trial_corr):
@@ -176,7 +179,8 @@ class Game1_cv_spct(Game1EV_hexagon_distance_spct):
             raise Exception("The variable 'trial type' only support odd and 'even'")
         return pmod_alignPhi
 
-    def game1_cv_train(self, ifold):
+
+    def game1ev_cv_train(self, ifold):
         # generatea M1, M2, Decision's event
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
@@ -202,17 +206,15 @@ class Game1_cv_spct(Game1EV_hexagon_distance_spct):
         # generate pmod of distance
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
-        distance_pm = m2ev_distance['modulation']
-        deev_distance = deev_corr.copy()
-        deev_distance['modulation'] = distance_pm
-        deev_distance['trial_type'] = deev_distance['trial_type'] + 'xdistance'
+
+        value = self.genpm_value_spct(trial_corr)
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 sin_odd,cos_odd,sin_even,cos_even,
-                                m2ev_distance,deev_distance],axis=0)
+                                m2ev_distance,value],axis=0)
         return event_data
 
-    def game1_cv_test(self, ifold, odd_phi, even_phi):
+    def game1ev_cv_test(self, ifold, odd_phi, even_phi):
         # generatea M1, M2, Decision's event
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
@@ -238,13 +240,38 @@ class Game1_cv_spct(Game1EV_hexagon_distance_spct):
         # generate pmod of distance
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
+
+        value = self.genpm_value_spct(trial_corr)
+
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                alignPhi_odd,alignPhi_even,m2ev_distance,value],axis=0)
+        return event_data
+
+    def game1ev_cv_test2(self, ifold, phi, run_type):
+        # generate test event accooding to run_type:odd and even
+
+        # generatea M1, M2, Decision's event
+        m1ev = self.genM1ev()
+        trial_corr, accuracy = self.label_trial_corr()
+        # split trial into correct trial and error trial
+        m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
+        deev_corr, deev_error = self.genDeev(trial_corr)
+
+        # generate pmod
+        m2_alignPhi = self.genpm_test(m2ev_corr, ifold, phi, run_type)
+        decision_alignPhi = self.genpm_test(deev_corr, ifold,phi, run_type)
+        alignPhi = pd.concat([m2_alignPhi,decision_alignPhi],axis=0).sort_values('onset', ignore_index=True)
+
+        # generate pmod of distance
+        m2ev_distance = self.genpm_distance_spct(trial_corr)
+        m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
         distance_pm = m2ev_distance['modulation']
         deev_distance = deev_corr.copy()
         deev_distance['modulation'] = distance_pm
         deev_distance['trial_type'] = deev_distance['trial_type'] + 'xdistance'
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
-                                alignPhi_odd,alignPhi_even,
+                                alignPhi,
                                 m2ev_distance,deev_distance],axis=0)
         return event_data
 
@@ -259,7 +286,7 @@ def gen_event_game1_cv_train():
 
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_train_hexagon_distance_spct/sub-{}/{}fold'
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_train_hexagon_distance_value_spct/sub-{}/{}fold'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
 
     # set folds and runs for cross validation
@@ -272,8 +299,8 @@ def gen_event_game1_cv_train():
             for run_id in runs:
                 # generate event
                 behDataPath = behav_path.format(sub, sub, run_id)
-                game1_cv = Game1_cv_spct(behDataPath)
-                event = game1_cv.game1_cv_train(ifold)
+                game1_cv = Game1EV_cv_spct(behDataPath)
+                event = game1_cv.game1ev_cv_train(ifold)
                 # save
                 out_dir = save_dir.format(sub, ifold)
                 if not os.path.exists(out_dir):
@@ -293,15 +320,15 @@ def gen_event_game1_cv_test():
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_spct/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_distance_value_spct/sub-{}/{}fold'  # look out
 
     # set Phi estimated from specific ROI
-    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/' \
+    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_distance_value_spct/' \
                 r'estPhi_ROI-EC_circmean_cv.csv'  # look out
     phis_data = pd.read_csv(phis_file)
 
     # set folds and runs for cross validation
-    ifolds = range(4, 9)
+    ifolds = range(6, 7)
     runs = range(1, 7)
 
     for ifold in ifolds:
@@ -311,8 +338,8 @@ def gen_event_game1_cv_test():
             even_phi = phis_data.query(f'(sub_id=="sub-{sub}")and(ifold=="{ifold}fold")and(trial_type=="even")')['Phi_mean'].values[0]
             for run_id in runs:
                 behDataPath = behav_path.format(sub, sub, run_id)
-                game1_cv = Game1_cv_spct(behDataPath)
-                event = game1_cv.game1_cv_test(ifold, odd_phi, even_phi)  # look out
+                game1_cv = Game1EV_cv_spct(behDataPath)
+                event = game1_cv.game1ev_cv_test(ifold, odd_phi, even_phi)  # look out
                 # save
                 out_dir = save_dir.format(sub, ifold)
                 if not os.path.exists(out_dir):
@@ -321,11 +348,9 @@ def gen_event_game1_cv_test():
                 event.to_csv(tsv_save_path, sep="\t", index=False)
 
 
-
-
-class Game2_cv_hexagon_spct(Game2EV_hexagon_spct):
+class Game2_cv_hexagon_spct(GAME2EV_hexagon_spct):
     def __init__(self, behDataPath):
-        Game2EV_hexagon_spct.__init__(self, behDataPath)
+        GAME2EV_hexagon_spct.__init__(self, behDataPath)
 
     def genpm_alignPhi(self, ev, ifold, phi):
         # generate parametric modulation for test GLM
@@ -411,12 +436,12 @@ class Game2_cv_hexagon_distance_spct(Game2_cv_hexagon_spct):
         m2ev_distance = self.genpm_distance_spct(trial_label)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
         distance_pm = m2ev_distance['modulation']
-        deev_distance = deev_corr.copy()
-        deev_distance['modulation'] = distance_pm
-        deev_distance['trial_type'] = deev_distance['trial_type'] + 'xdistance'
+        #deev_distance = deev_corr.copy()
+        #deev_distance['modulation'] = distance_pm
+        #deev_distance['trial_type'] = deev_distance['trial_type'] + 'xdistance'
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
-                                alignPhi,m2ev_distance,deev_distance], axis=0)
+                                alignPhi,m2ev_distance], axis=0)
         return event_data
 
 
@@ -467,3 +492,4 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects_list = [p.split('-')[-1] for p in pid]
     gen_sub_event(subjects_list)
+    #gen_event_game1_cv_test()

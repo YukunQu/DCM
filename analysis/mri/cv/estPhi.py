@@ -52,7 +52,7 @@ def estPhi(sin_beta_map, cos_beta_map, mask, ifold='6fold', method='circmean'):
 
 def estimate_game1_cv_phi(workdir):
     # set fold
-    folds = [str(i)+'fold' for i in range(4,9)]
+    folds = [str(i)+'fold' for i in range(6,7)]
 
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'

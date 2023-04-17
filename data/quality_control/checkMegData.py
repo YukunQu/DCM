@@ -3,6 +3,7 @@
 
 import os
 import mne
+import pandas as pd
 
 
 def check_meg(data_fname):
@@ -54,12 +55,13 @@ def check_subs_meg(sub_list, data_dir):
 if __name__ == "__main__":
     # load subject file and check it
     data_dir = r'/mnt/data/DCM/sourcedata'
-    #sub_list = ['sub_' + str(i).zfill(3) for i in range(214, 247)]
 
-    # sub_list.remove('sub_209')
-    sub_list = os.listdir(data_dir)
-    sub_list = [s for s in sub_list if 'sub' in s]
-    sub_list = ['sub_209','sub_247','sub_248','sub_209','sub_250']
+    # specify subjects
+    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+    participants_data = pd.read_csv(participants_tsv, sep='\t')
+    data = participants_data.query('game1_fmri>=0.5')
+    pid = data['Participant_ID'].to_list()
+    sub_list = ['sub_'+p.split('-')[-1] for p in pid]
 
     log = check_subs_meg(sub_list, data_dir)
     for info in log:

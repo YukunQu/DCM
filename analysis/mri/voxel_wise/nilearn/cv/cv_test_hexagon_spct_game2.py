@@ -61,9 +61,8 @@ if __name__ == "__main__":
     data = participants_data.query(f'game2_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = ['209','250']
 
     subjects_chunk = list_to_chunk(subjects,70)
-    for ifold in range(4,9):
+    for ifold in range(6,7):
         for chunk in subjects_chunk:
             results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj,ifold) for subj in chunk)

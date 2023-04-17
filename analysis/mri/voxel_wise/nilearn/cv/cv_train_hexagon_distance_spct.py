@@ -7,15 +7,51 @@ import os
 import numpy as np
 import pandas as pd
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
-from analysis.mri.voxel_wise.nilearn.firstLevel_analysis import prepare_data,get_reg_index,first_level_glm
+from analysis.mri.voxel_wise.nilearn.firstLevel_analysis import load_ev,prepare_data,get_reg_index,first_level_glm
 from joblib import Parallel, delayed
 
 
-def load_ev(event_path):
-    # load behavioral file and generate event
-    event = pd.read_csv(event_path, sep='\t')
-    event_condition = event[['onset', 'duration', 'trial_type', 'modulation']]
-    return event_condition
+def set_contrasts(design_matrix):
+    # set contrast contain hexagonal effect and distance effect
+    contrast_name = ['M1', 'M2_corr',  'M2_error', 'decision_corr', 'decision_error',
+                     'cos_odd', 'sin_odd', 'M2_corrxdistance',]
+    # base contrast
+    contrasts_set = {}
+    for contrast_id in contrast_name:
+        contrast_index = get_reg_index(design_matrix, contrast_id)
+        contrast_vector = np.zeros(design_matrix.shape[1])
+        contrast_vector[contrast_index] = 1
+        contrasts_set[contrast_id] = contrast_vector
+
+    # advanced contrast
+    # odd trials' hexagonal modulation
+    contrasts_set['odd_hexagon'] = np.vstack([contrasts_set['cos_odd'],
+                                              contrasts_set['sin_odd']])
+    # correct contrast to error
+    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    return contrasts_set
+
+
+def set_contrasts_even(design_matrix):
+    # set contrast contain hexagonal effect and distance effect
+    contrast_name = ['M1', 'M2_corr',  'M2_error', 'decision_corr', 'decision_error',
+                     'cos_even', 'sin_even', 'M2_corrxdistance']
+    # base contrast
+    contrasts_set = {}
+    for contrast_id in contrast_name:
+        contrast_index = get_reg_index(design_matrix, contrast_id)
+        contrast_vector = np.zeros(design_matrix.shape[1])
+        contrast_vector[contrast_index] = 1
+        contrasts_set[contrast_id] = contrast_vector
+
+    # advanced contrast
+    # even trials' hexagonal modulation
+    contrasts_set['even_hexagon'] = np.vstack([contrasts_set['cos_even'],
+                                               contrasts_set['sin_even']])
+
+    # correct contrast to error
+    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    return contrasts_set
 
 
 def set_contrasts(design_matrix):
@@ -54,7 +90,7 @@ def set_contrasts(design_matrix):
 
 def run_glm(task,subj,ifold):
     if task == 'game1':
-        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'cv_train_hexagon_distance_spct',
+        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'cv_train_hexagon_distance_spct_odd',
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -94,9 +130,8 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = ['209','250']
 
-    subjects_chunk = list_to_chunk(subjects,5)
-    for ifold in range(4,9):
+    subjects_chunk = list_to_chunk(subjects,30)
+    for ifold in range(6,7):
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=5)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

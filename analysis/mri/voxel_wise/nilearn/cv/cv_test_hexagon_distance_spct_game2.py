@@ -14,7 +14,7 @@ from joblib import Parallel, delayed
 def set_contrasts(design_matrix):
     # set contrast contain hexagonal effect and distance effect
     contrast_name = ['M1', 'M2_corr', 'M2_error','decision_corr','decision_error',
-                     'alignPhi','M2_corrxdistance','decision_corrxdistance']
+                     'alignPhi','M2_corrxdistance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -25,11 +25,9 @@ def set_contrasts(design_matrix):
         contrast_vector[contrast_index] = 1
         contrasts_set[contrast_id] = contrast_vector
 
-    # distance effect
-    contrasts_set['distance'] = contrasts_set['M2_corrxdistance'] + contrasts_set['decision_corrxdistance']
     # advanced contrast
-    if 'decision_error' in contrasts_set.keys():
-        contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    #if 'decision_error' in contrasts_set.keys():
+        #contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 

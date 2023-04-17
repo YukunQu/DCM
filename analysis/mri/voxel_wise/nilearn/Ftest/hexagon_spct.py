@@ -12,7 +12,7 @@ from joblib import Parallel, delayed
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1', 'M2_corr', 'M2_error','decision_corr', 'decision_error','sin', 'cos']
+    contrast_name = ['M1', 'M2_corr', 'M2_error','decision_corr','sin', 'cos']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -26,8 +26,6 @@ def set_contrasts(design_matrix):
     # advanced contrast
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'],
                                           contrasts_set['sin']])
-    if 'decision_error' in contrasts_set.keys():
-        contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
@@ -66,14 +64,13 @@ def run_glm(task,subj,ifold):
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = ['209','250']
 
     subjects_chunk = list_to_chunk(subjects,70)
     for ifold in [6]:

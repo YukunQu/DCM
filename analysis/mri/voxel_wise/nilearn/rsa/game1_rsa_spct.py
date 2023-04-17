@@ -51,7 +51,6 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = ['209','250']
 
     if task == 'game1':
         configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'grid_rsa_corr_trials',
@@ -75,6 +74,6 @@ if __name__ == "__main__":
         raise Exception("The type of task is not supoort.")
 
     ifold = 6
-    subjects_chunk = list_to_chunk(subjects,70)
+    subjects_chunk = list_to_chunk(subjects,50)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj,configs,ifold) for subj in chunk)
+        results_list = Parallel(n_jobs=50)(delayed(run_glm)(subj,configs,ifold) for subj in chunk)

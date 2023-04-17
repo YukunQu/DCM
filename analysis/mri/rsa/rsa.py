@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from rsatoolbox.rdm.rdms import load_rdm
 from rsatoolbox.inference import eval_fixed
 from rsatoolbox.model import ModelFixed
-from rsatoolbox.util.searchlight import  evaluate_models_searchlight
+from rsatoolbox.util.searchlight import evaluate_models_searchlight
 
 from nilearn.image import new_img_like
 import concurrent.futures
@@ -38,10 +38,10 @@ def calc_rs_map(sub_id, ifold):
     :return:
     """
     # set path
-    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/grid_rsa_corr_trials/Setall/6fold'
-    neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_RDM.hdf5'.format(sub_id,sub_id))
+    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold'
+    neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_RDM_cmap.hdf5'.format(sub_id,sub_id))
     gird_RDM_path = os.path.join(default_dir,'{}/rsa/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
-    rsmap_savepath = os.path.join(default_dir,'{}/rsa/rsa_img_coarse_{}fold.nii.gz'.format(sub_id,ifold))
+    rsmap_savepath = os.path.join(default_dir,'{}/rsa/rsa_cmap_img_coarse_{}fold.nii.gz'.format(sub_id,ifold))
 
     #  load neural RDM for each voxel
     neural_RDM = load_rdm(neural_RDM_path)
@@ -73,12 +73,12 @@ def calc_rs_map(sub_id, ifold):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri>=0.5')  # look out
+    data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
-    subjects_chunk = list_to_chunk(subjects,99)
+    subjects_chunk = list_to_chunk(subjects,70)
 
-    for ifold in [4,5,6,7,8]:
+    for ifold in [6]:
         print('-------------{} fold start.-------------------' .format(ifold))
         for sub_chunk in subjects_chunk:
-            with concurrent.futures.ProcessPoolExecutor(max_workers=99) as executor:
+            with concurrent.futures.ProcessPoolExecutor(max_workers=70) as executor:
                 results = [executor.submit(calc_rs_map,sub_id,ifold) for sub_id in sub_chunk]

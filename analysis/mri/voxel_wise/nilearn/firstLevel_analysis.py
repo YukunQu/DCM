@@ -13,7 +13,7 @@ def load_ev(event_path):
     return event_condition
 
 
-def prepare_data(subj,ifold,configs,load_ev,concat_runs=True):
+def prepare_data(subj,ifold,configs,load_ev,concat_runs=True,despiking=True):
     """
     prepare functional images and design matrixs
     :param subj: sub_id
@@ -22,6 +22,7 @@ def prepare_data(subj,ifold,configs,load_ev,concat_runs=True):
                                            func_name,events_name,regressor_file
     :param load_ev: load event file and generate parametric modulation
     :param concat_runs: concatenate all runs into a big one.
+    :param despiking: volume censoring to remove volumes with high motion
     :return:funcitonal list;design matirx
     """
     tr = configs['TR']
@@ -57,6 +58,18 @@ def prepare_data(subj,ifold,configs,load_ev,concat_runs=True):
         motion = confound_factors[add_reg_names]
         motion = motion.fillna(0.0)
 
+        # remove bad time
+        if despiking:
+            fd = confound_factors['framewise_displacement']
+            outlier_time = fd[fd > 0.5].index
+            outlier_reg = {}
+            for index,ot in enumerate(outlier_time):
+                otreg = np.zeros(fd.shape[0])
+                otreg[ot] = 1
+                outlier_reg['outlier{}'.format(index+1)] = otreg
+            outlier_reg = pd.DataFrame(outlier_reg)
+            motion = pd.concat([motion,outlier_reg],axis=1)
+
         # creat design matrix
         n_scans = func_img.shape[-1]
         frame_times = np.arange(n_scans) * tr
@@ -81,7 +94,7 @@ def prepare_data(subj,ifold,configs,load_ev,concat_runs=True):
             new_design_matrices.append(dm)
         design_matrices = pd.concat(new_design_matrices, axis=0, ignore_index=True)
         design_matrices = design_matrices.fillna(0.0)
-    design_matrices.to_csv(r"/mnt/workdir/DCM/tmp/orth2.csv")
+    #design_matrices.to_csv(r"/mnt/workdir/DCM/tmp/orth2.csv")
     return functional_imgs, design_matrices
 
 
@@ -117,7 +130,7 @@ def first_level_glm(datasink, run_imgs, design_matrices,set_contrasts):
     # fit first level glm to estimate mean orientation
     mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
     fmri_glm = FirstLevelModel(t_r=3.0, slice_time_ref=0.5, hrf_model='spm',
-                               drift_model=None, high_pass= 1 / 100, mask_img=mni_mask,
+                               drift_model=None, high_pass=1/ 100, mask_img=mni_mask,
                                smoothing_fwhm=8, verbose=1, n_jobs=1)
     fmri_glm = fmri_glm.fit(run_imgs, design_matrices=design_matrices)
 

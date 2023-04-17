@@ -55,6 +55,18 @@ def plot_angle_acc(corr_angles,error_angles):
     ax.set_yticklabels([0.5,0.7,0.9])
     plt.show()
 
+#%%
+# example for trial sample
+pid = ['sub-180']
+run_template = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/hexagon_spat/{}/6fold/{}_task-game1_run-{}_events.tsv'
+trials_angle = []
+for sub_id in pid:
+    for run_id in range(1,7):
+        run_path = run_template.format(sub_id,sub_id,run_id)
+        run_file = pd.read_csv(run_path,sep='\t')
+        run_angles = run_file.query('trial_type=="M2"')['angle'].to_list()
+        trials_angle.extend(run_angles)
+plotAngleRadar(trials_angle)
 
 #%%
 """

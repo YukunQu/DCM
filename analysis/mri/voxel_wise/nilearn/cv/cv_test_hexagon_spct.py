@@ -7,24 +7,14 @@ import os
 import numpy as np
 import pandas as pd
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
-from analysis.mri.voxel_wise.nilearn.firstLevel_analysis import prepare_data,get_reg_index,first_level_glm
+from analysis.mri.voxel_wise.nilearn.firstLevel_analysis import load_ev,prepare_data,get_reg_index,first_level_glm
 from joblib import Parallel, delayed
-
-
-def load_ev(event_path):
-    # load behavioral file and generate event without distance
-    event = pd.read_csv(event_path, sep='\t')
-    regressors_name = ['M1', 'M2_corr', 'M2_error','decision_corr','decision_error',
-                       'alignPhi_even', 'alignPhi_odd']
-    event = event[event['trial_type'].isin(regressors_name)]
-    event_condition = event[['onset', 'duration', 'trial_type', 'modulation']]
-    return event_condition
 
 
 def set_contrasts(design_matrix):
     # set contrast contain hexagonal effect and distance effect
-    contrast_name = ['M1', 'M2_corr', 'M2_error','decision_corr','decision_error',
-                     'alignPhi_even', 'alignPhi_odd']
+    contrast_name = ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
+                     'alignPhi_odd','alignPhi_even']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -75,7 +65,7 @@ if __name__ == "__main__":
     subjects = [p.split('-')[-1] for p in pid]
 
     subjects_chunk = list_to_chunk(subjects, 70)
-    for ifold in range(4, 9):
+    for ifold in range(6, 7):
         # creat dataroot
         dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                            configs['glm_type'], ifold)

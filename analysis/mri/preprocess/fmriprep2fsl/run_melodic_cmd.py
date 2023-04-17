@@ -37,7 +37,7 @@ if __name__ == "__main__":
     sub_set = []
     for i, sub in enumerate(subject_list):
         sub_set.append(sub)
-        if len(sub_set) == 5:
+        if len(sub_set) == 12:
             sub_list.append(sub_set)
             sub_set = []
         elif i == (len(subject_list) - 1):
@@ -46,7 +46,7 @@ if __name__ == "__main__":
             continue
 
     fmriprep_dir = '/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep'
-    func_template = '{}_task-game1_run-*_space-T1w_desc-preproc_bold.ica/filtered_func_data.nii.gz'
+    func_template = '{}_task-*_run-*_space-T1w_desc-preproc_bold_trimmed.ica/filtered_func_data.nii.gz'
     for subject_chunk in sub_list:
         func_list = []
         for subj_id in subject_chunk:

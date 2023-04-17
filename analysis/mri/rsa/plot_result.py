@@ -27,11 +27,11 @@ plt.show()
 import pandas as pd
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
-data = participants_data.query('game2_fmri>0.5')
+data = participants_data.query('game1_fmri>=0.5')
 subjects = data['Participant_ID'].to_list()
 subs_eval_score = []
 for sub_id in subjects:
-    RDM_brain = f'/mnt/workdir/DCM/BIDS/derivatives/Nipype/game2/grid_rsa_8mm/Setall/6fold/{sub_id}/rs-corr_img_coarse.nii'
+    RDM_brain = f'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{sub_id}/rsa/rsa_img_fine_6fold.nii.gz'
     mask = r'/mnt/data/Template/tpl-MNI152NLin2009cAsym/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'
     eval_score = apply_mask(RDM_brain,mask)
     subs_eval_score.extend(eval_score)

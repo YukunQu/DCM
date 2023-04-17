@@ -7,7 +7,7 @@ from os.path import join as opj
 # copy data to new directory selectively
 def copy_mri_data(sub_id,mri_modes=('fmap','dwi')):
     original_dir = r'/mnt/workdir/DCM/BIDS'
-    output_dir = '/media/dell/HP P500/Developmental_MEG_Data/MRI'
+    output_dir = '/mnt/data/DCM/tmp/sub_t1'
 
     sourMriDir = opj(original_dir, sub_id)
     targMriDir = opj(output_dir, sub_id.replace('-', '-'))
@@ -30,7 +30,7 @@ def copy_mri_data(sub_id,mri_modes=('fmap','dwi')):
             try:
                 shutil.copytree(source_file_path, target_file_path)
             except:
-                print("The ", sub_id, "didn't have", mode)
+                print("The ", sub_id, "didn't have", mode, "or the file already copyed.")
                 continue
         elif mode == 'func':
             file_list = os.listdir(opj(sourMriDir, 'func'))
@@ -56,10 +56,7 @@ if __name__ == "__main__":
     # copy meg data
     data = participants_data.query('game1_fmri>=0.5')
     subject_list = data['Participant_ID'].to_list()
-    subject_list = [s.replace('-', '-') for s in subject_list]
-    subject_list = [84,86,87,90,91,94,95,98,110,112,118,124,131,137,152,173,180,182,191,238,240,
-                    65,66,80,128,129,138,145,202,222,235,237,241,242,243,244,245,246,247,248,249]
-    subject_list = [231]
-    subject_list = ['sub-'+str(s).zfill(3) for s in subject_list]
+
+    #subject_list = ['sub-'+str(s).zfill(3) for s in subject_list]
     for sub in subject_list:
         copy_mri_data(sub,mri_modes=['anat'])

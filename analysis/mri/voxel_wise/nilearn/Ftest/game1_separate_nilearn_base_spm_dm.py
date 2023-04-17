@@ -154,7 +154,6 @@ def first_level_glm(datasink, run_imgs, design_matrices):
         z_map.to_filename(z_image_path)
 
 
-@memory.cache
 def run_glm(subj):
     run_list = [1,2,3,4,5,6]
     ifold = 6

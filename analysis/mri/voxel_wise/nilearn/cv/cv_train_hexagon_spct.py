@@ -87,8 +87,8 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects, 103)
-    for ifold in range(4, 9):
+    subjects_chunk = list_to_chunk(subjects, 70)
+    for ifold in [6]:
         # creat dataroot
         dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                            configs['glm_type'], ifold)
@@ -98,4 +98,4 @@ if __name__ == "__main__":
         configs['ifold'] = ifold
         configs['dataroot'] = dataroot
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=103)(delayed(run_glm)(subj, configs) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj, configs) for subj in chunk)

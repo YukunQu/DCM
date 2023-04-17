@@ -49,14 +49,14 @@ def cut_redundant_data(beh_file, fmri_file, confound_file):
     fmri_data_trimmed = image.new_img_like(fmri_data, data_cutted, copy_header=True)
 
     # trim confound file
-    confound_df = pd.read_csv(confound_file,sep='\t')
-    confound_df_trim = confound_df.iloc[:max_tr,:].copy()
+    #confound_df = pd.read_csv(confound_file,sep='\t')
+    #confound_df_trim = confound_df.iloc[:max_tr,:].copy()
 
     # save the trimmed functional image
     fmri_trimmed_savepath = fmri_file.replace('desc-preproc_bold', 'desc-preproc_bold_trimmed')
     fmri_data_trimmed.to_filename(fmri_trimmed_savepath)
-    cfile_trimmed_save = confound_file.replace('confounds_timeseries.tsv','confounds_timeseries_trimmed.tsv')
-    confound_df_trim.to_csv(cfile_trimmed_save,sep='\t',index=False)
+    #cfile_trimmed_save = confound_file.replace('confounds_timeseries.tsv','confounds_timeseries_trimmed.tsv')
+    #confound_df_trim.to_csv(cfile_trimmed_save,sep='\t',index=False)
     return redundant_time
 
 
@@ -68,7 +68,6 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects_list = [p.split('-')[-1] for p in pid]
-    subjects_list = ['209','250']
     subjects_list.sort()
     print("Total subject numbers:", len(subjects_list))
 
@@ -80,16 +79,20 @@ if __name__ == "__main__":
             for run_id in range(1, 7):
                 behavior_file_list.append(
                     rf'/mnt/workdir/DCM/sourcedata/sub_{sub_id}/Behaviour/fmri_task-game1/sub-{sub_id}_task-game1_run-{run_id}.csv')
+                #fmri_file_list.append(
+                #    rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz')
                 fmri_file_list.append(
-                    rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game1_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz')
+                    rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game1_run-{run_id}_space-T1w_desc-preproc_bold.nii.gz')
                 confound_list.append(
                     rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
         elif task == 'game2':
             for run_id in range(1, 3):
                 behavior_file_list.append(
                     rf'/mnt/workdir/DCM/sourcedata/sub_{sub_id}/Behaviour/fmri_task-game2-test/sub-{sub_id}_task-game2_run-{run_id}.csv')
+                #fmri_file_list.append(
+                #    rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game2_run-{run_id}_space-T1w_desc-preproc_bold.nii.gz')
                 fmri_file_list.append(
-                    rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game2_run-{run_id}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz')
+                    rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game2_run-{run_id}_space-T1w_desc-preproc_bold.nii.gz')
                 confound_list.append(
                     rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/sub-{sub_id}/func/sub-{sub_id}_task-game2_run-{run_id}_desc-confounds_timeseries.tsv')
         else:

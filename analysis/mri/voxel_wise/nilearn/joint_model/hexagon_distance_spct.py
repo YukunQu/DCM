@@ -60,6 +60,7 @@ def run_glm(task,subj,ifold):
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
+                   #'func_name': 'fsl/sub-{}_task-game1_run-{}_space-T1w_desc-preproc_bold_trimmed.ica/filtered_func_data_clean_space-MNI152NLin2009cAsym_res-2.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     elif task == 'game2':
@@ -95,9 +96,8 @@ if __name__ == "__main__":
     data = participants_data.query(f'{task}_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
-    subjects = ['209','250']
 
-    subjects_chunk = list_to_chunk(subjects,60)
+    subjects_chunk = list_to_chunk(subjects,70)
     for ifold in range(6,7):
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=60)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

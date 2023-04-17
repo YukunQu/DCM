@@ -16,14 +16,14 @@ pid = data['Participant_ID'].to_list()
 print(len(pid))
 
 # set camp
-cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/cv_hexagon_spct/Setall/6fold/{}/zmap/alignPhi_zmap.nii.gz'
+cmap_template = r'/mnt/data/DCM/result_backup/2023.3.24/Nilearn_jmodel/game2/cv_hexagon_distance_spct/Setall/6fold/{}/zmap/alignPhi_zmap.nii.gz'
 
 # set roi
 roi = image.load_img(r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz')
-#roi = image.load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
-for thr in [0,5,10,20,25,30]:
+#roi = image.load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct/EC_thr3.1.nii.gz')
+#for thr in [0,5,10,20]:
+for thr in [10]:
     roi_thr_bin = image.binarize_img(roi, thr)
-
     # extract mean activity
     subs_cmap_list = [cmap_template.format(sub_id) for sub_id in pid]
     subs_mean_activity = np.mean(masking.apply_mask(subs_cmap_list, roi_thr_bin),axis=1)
@@ -36,17 +36,17 @@ for thr in [0,5,10,20,25,30]:
     #g = sns.barplot(data=subs_mean_mean_activity, errorbar='sd', width=0.2)  # plot
 
     #   correlation
-    # covary_variable = data['Age'].to_list()
-    # r, p = pearsonr(subs_mean_activity, covary_variable)
-    # print('thr:',thr,'r:',round(r,5),'p:',round(p,5))
-    #
-    # # plot
-    # g2 = sns.jointplot(x=covary_variable, y=subs_mean_activity,
-    #                   kind="reg", truncate=False,
-    #                   #xlim=(6, 26),  # ylim=(0, 1.05),
-    #                   color="b", height=6,order=2)
-    # g2.fig.subplots_adjust(top=0.92)
-    # g2.fig.suptitle('r:{}, p:{}'.format(round(r, 3), round(p, 3)), size=20)
+    covary_variable = data['Age'].to_list()
+    r, p = pearsonr(subs_mean_activity, covary_variable)
+    print('thr:',thr,'r:',round(r,5),'p:',round(p,5))
+
+    # plot
+    g2 = sns.jointplot(x=covary_variable, y=subs_mean_activity,
+                      kind="reg", truncate=False,
+                      #xlim=(6, 26),  # ylim=(0, 1.05),
+                      color="b", height=6,order=1)
+    g2.fig.subplots_adjust(top=0.92)
+    g2.fig.suptitle('r:{}, p:{}'.format(round(r, 3), round(p, 3)), size=20)
 
 
     import scipy.stats as stats
@@ -58,14 +58,14 @@ for thr in [0,5,10,20,25,30]:
 
     # Plot the partial correlation plot with age held constant
     import statsmodels.api as sm
-    #model = sm.OLS.from_formula("Inference_using_new_knowledge ~ Age + Consistence_effect_of_hexagonal_modulation",data=data)
-    #results = model.fit()
+    model = sm.OLS.from_formula("Inference_using_new_knowledge ~ Age + Consistence_effect_of_hexagonal_modulation",data=data)
+    results = model.fit()
 
-    #fig = sm.graphics.plot_partregress("Inference_using_new_knowledge", "Consistence_effect_of_hexagonal_modulation",["Age"],data=data,obs_labels=False)
-    #fig.set_size_inches(6,5)
-    #sns.set_theme(style="whitegrid")
-    #fig.tight_layout()
-    #fig.show()
+    fig = sm.graphics.plot_partregress("Inference_using_new_knowledge", "Consistence_effect_of_hexagonal_modulation",["Age"],data=data,obs_labels=False)
+    fig.set_size_inches(7,5)
+    sns.set_theme(style="whitegrid")
+    fig.tight_layout()
+    fig.show()
 
     X = data[['Consistence_effect_of_hexagonal_modulation','Age']]
     Y = data['Inference_using_new_knowledge']

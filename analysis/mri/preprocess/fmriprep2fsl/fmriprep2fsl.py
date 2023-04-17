@@ -14,16 +14,14 @@ from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 def fmriprep2fsl(sub):
     """
     convert fmriprep files into a FSL format dictory for ICA and denoise
-    :param sub:
-    :param subd:a subject directory of fmripre format
-    :param outd:output path of FSL format dictory
+    :param sub:subject id
     """
     subd = rf'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/{sub}'
     outd = os.path.join(subd, 'fsl')
     if not os.path.exists(outd):
         os.mkdir(outd)
     sub_id = subd.split('/')[-1]
-    func_template = os.path.join(subd, 'func', 'sub-*_task-*_run-*_space-T1w_desc-preproc_bold.nii.gz')
+    func_template = os.path.join(subd, 'func', 'sub-*_task-game*_run-*_space-T1w_desc-preproc_bold_trimmed.nii.gz')
     func_list = glob.glob(func_template)
     func_list.sort()
     for func_file in func_list:
@@ -48,7 +46,7 @@ def fmriprep2fsl(sub):
         call(hpf_cmd, shell=True)
 
         # covert example_func.nii.gz
-        example_func_file = func_file.replace('_desc-preproc_bold.nii.gz', '_boldref.nii.gz')
+        example_func_file = func_file.replace('_desc-preproc_bold_trimmed.nii.gz', '_boldref.nii.gz')
         reg_dir = os.path.join(out_func_dir, 'reg')
         if not os.path.exists(reg_dir):
             os.mkdir(reg_dir)
@@ -58,7 +56,7 @@ def fmriprep2fsl(sub):
         # covert T1w images and T1w mask
         mask_file = glob.glob(os.path.join(subd, 'anat', f'{sub_id}_desc-brain_mask.nii.gz'))[0]
         mask_outpath = os.path.join(out_func_dir, 'mask.nii.gz')
-        resampled_mask = resample_to_img(mask_file, func_file, 'nearest')  # resample mask to func image
+        resampled_mask = resample_to_img(mask_file, func_file, 'nearest')   #resample mask to func image
         resampled_mask.to_filename(mask_outpath)
         di = maths.DilateImage(in_file=mask_outpath,
                                operation="mean",
@@ -67,13 +65,14 @@ def fmriprep2fsl(sub):
                                out_file=mask_outpath)
         di.run()
 
-        #
+        # copy T1w
         anat_file = glob.glob(os.path.join(subd, 'anat', f'{sub_id}_desc-preproc_T1w.nii.gz'))[0]
         anat_outpath = os.path.join(out_func_dir, 'reg', 'highres.nii.gz')
         mask_img(anat_file, mask_file, anat_outpath)  # using fmriprep's brain mask to do skull stripping
 
         # motion parameters
-        confound_file = func_file.replace('_space-T1w_desc-preproc_bold.nii.gz', '_desc-confounds_timeseries.tsv')
+        confound_file = func_file.replace('_space-T1w_desc-preproc_bold_trimmed.nii.gz',
+                                          '_desc-confounds_timeseries_trimmed.tsv')
         motions_df = pd.read_csv(confound_file, sep='\t')
         motion_columns = ['rot_x', 'rot_y', 'rot_z', 'trans_x', 'trans_y', 'trans_z']
         motions = motions_df[motion_columns].to_numpy()
@@ -95,7 +94,7 @@ if __name__ == "__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query('game1_fmri>=0.5')  # look out
     subject_list = data['Participant_ID'].to_list()
-    subject_list = ['sub-130']
-    subjects_chunk = list_to_chunk(subject_list,6)
+
+    subjects_chunk = list_to_chunk(subject_list,100)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=60)(delayed(fmriprep2fsl)(sub_id) for sub_id in chunk)
+        results_list = Parallel(n_jobs=100)(delayed(fmriprep2fsl)(sub_id) for sub_id in chunk)

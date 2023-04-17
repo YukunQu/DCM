@@ -7,7 +7,7 @@ from nipype.interfaces.base import Bunch
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 from rsatoolbox.util.searchlight import get_volume_searchlight, get_searchlight_RDMs
 from joblib import Parallel, delayed
-import concurrent.futures
+
 
 def get_sub_angles_spm(ev_files):
     runs_info = []
@@ -74,15 +74,15 @@ def cal_neural_rdm(sub_id):
     # get subject's contrast_names(angles)
     ev_files = []
     ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                  r'game2/grid_rsa_corr_trials/{}/6fold/{}_task-game2_run-{}_events.tsv'
-    runs = range(1,3)
-    for i in runs:  # look out
+                  r'game1/grid_rsa_corr_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
+    runs = range(1,7)  # look out
+    for i in runs:
         ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
     con_names = get_sub_angles_nilearn(ev_files)
 
     # get subject's cmap
     cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
-                  'game2/grid_rsa_corr_trials/Setall/6fold/{}'
+                  'game1/grid_rsa_corr_trials/Setall/6fold/{}'
     image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
                    for con_id in con_names]
 
@@ -110,7 +110,7 @@ def cal_neural_rdm(sub_id):
     savepath = os.path.join(cmap_folder.format(sub_id),'rsa')
     if not os.path.exists(savepath):
         os.mkdir(savepath)
-    savepath = os.path.join(savepath,'{}-neural_RDM.hdf5'.format(sub_id))
+    savepath = os.path.join(savepath,'{}-neural_RDM_cmap.hdf5'.format(sub_id))
     SL_RDM.save(savepath,'hdf5',overwrite=True)
     print("The {}'s rdm have been done.".format(sub_id))
     return "The {}'s rdm have been done.".format(sub_id)
@@ -119,9 +119,9 @@ def cal_neural_rdm(sub_id):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri>=0.5')  # look out
+    data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
-    subjects_chunk = list_to_chunk(subjects,70)
+    subjects_chunk = list_to_chunk(subjects,50)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=70,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)
+        results_list = Parallel(n_jobs=50,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)

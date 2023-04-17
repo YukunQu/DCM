@@ -21,20 +21,20 @@ def load_ev_spat(event_path):
     # generate parametric modulation for M2
     m2xcos = event.query("trial_type == 'M2'").copy()
     m2xcos.loc[:, 'modulation'] = cos_mod
-    m2xcos['trial_type'] = 'M2xcos'
+    m2xcos['trial_type'] = 'cos'
 
     m2xsin = event.query("trial_type == 'M2'").copy()
     m2xsin.loc[:, 'modulation'] = sin_mod
-    m2xsin['trial_type'] = 'M2xsin'
+    m2xsin['trial_type'] = 'sin'
 
     # generate parametric modulation for decision
     decisionxcos = event.query("trial_type == 'decision'").copy()
     decisionxcos.loc[:, 'modulation'] = cos_mod
-    decisionxcos['trial_type'] = 'decisionxcos'
+    decisionxcos['trial_type'] = 'cos'
 
     decisionxsin = event.query("trial_type == 'decision'").copy()
     decisionxsin.loc[:, 'modulation'] = sin_mod
-    decisionxsin['trial_type'] = 'decisionxsin'
+    decisionxsin['trial_type'] = 'sin'
 
     event_condition = event_condition.append([m2xcos,m2xsin,decisionxcos,decisionxsin])
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
@@ -42,7 +42,7 @@ def load_ev_spat(event_path):
 
 
 def set_contrasts_spat(design_matrix):
-    contrast_name = ['M1','M2','decision','M2xcos', 'M2xsin', 'decisionxcos', 'decisionxsin']
+    contrast_name = ['M1','M2','decision','cos', 'sin']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -52,11 +52,6 @@ def set_contrasts_spat(design_matrix):
         contrasts_set[contrast_id] = contrast_vector
 
     # advanced contrast
-    contrasts_set['cos'] = contrasts_set['M2xcos'] + contrasts_set['decisionxcos']
-    contrasts_set['sin'] = contrasts_set['M2xsin'] + contrasts_set['decisionxsin']
-
-    contrasts_set['m2_hexagon'] = np.vstack([contrasts_set['M2xcos'], contrasts_set['M2xsin']])
-    contrasts_set['decision_hexagon'] = np.vstack([contrasts_set['decisionxcos'], contrasts_set['decisionxsin']])
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'], contrasts_set['sin']])
     return contrasts_set
 
@@ -68,7 +63,8 @@ def run_glm(task,subj):
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-                   'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
+                   #'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
+                   'func_name': 'fsl/sub-{}_task-game1_run-{}_space-T1w_desc-preproc_bold_trimmed.ica/filtered_func_data_clean_space-MNI152NLin2009cAsym_res-2.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     elif task == 'game2':
@@ -98,7 +94,7 @@ def run_glm(task,subj):
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -106,6 +102,6 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,2)
+    subjects_chunk = list_to_chunk(subjects,70)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=12)(delayed(run_glm)(task,subj) for subj in chunk)
+        results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj) for subj in chunk)

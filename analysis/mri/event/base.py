@@ -441,3 +441,113 @@ class Game2EV_base_spct(Game2EV):
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error], axis=0)
         return event_data
+
+
+class Game1EV_base_spat(Game1EV):
+    # event of base GLM
+    def __init__(self,behDataPath):
+        Game1EV.__init__(self,behDataPath)
+
+    def genM2ev(self):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        m2ev = m2ev.sort_values('onset', ignore_index=True)
+        return m2ev
+
+    def genDeev(self):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        deev = deev.sort_values('onset', ignore_index=True)
+        return deev
+
+    def game1ev_base_spat(self):
+        m1ev = self.genM1ev()
+        m2ev = self.genM2ev()
+        deev = self.genDeev()
+
+        event_data = pd.concat([m1ev, m2ev, deev], axis=0)
+        return event_data
+
+
+class Game2EV_base_spat(Game2EV):
+    """ game2 event for separate phases all trials"""
+    def __int__(self, behDataPath):
+        Game2EV.__init__(self, behDataPath)
+
+    def genM2ev(self):
+        # generate M2 trials event
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['testPic2.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['testPic2.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        m2ev = m2ev.sort_values('onset', ignore_index=True)
+        return m2ev
+
+    def genDeev(self):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+        deev = deev.sort_values('onset', ignore_index=True)
+        return deev
+
+    def game2ev_hexagon_spat(self, ifold):
+        m1ev = self.genM1ev()
+        m2ev = self.genM2ev()
+        deev = self.genDeev()
+        event_data = pd.concat([m1ev, m2ev, deev], axis=0)
+        return event_data

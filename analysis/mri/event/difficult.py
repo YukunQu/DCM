@@ -227,14 +227,12 @@ class Game1EV2(object):
     def game1ev(self,ifold):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
-        pbev = self.pressButton()
         trial_corr,accuracy = self.label_trial_corr()
         m2ev_corr,m2ev_error = self.genM2ev(trial_corr)
         deev_corr, deev_error = self.genDeev(trial_corr)
-
         pmod_sin, pmod_cos = self.genpm(m2ev_corr,ifold)
         difficult = self.difficult(deev_corr,trial_corr)
 
-        event_data = pd.concat([m1ev,m2ev_corr,m2ev_error,deev_corr,deev_error,pbev,
+        event_data = pd.concat([m1ev,m2ev_corr,m2ev_error,deev_corr,deev_error,
                                 pmod_sin,pmod_cos,difficult],axis=0)
         return event_data

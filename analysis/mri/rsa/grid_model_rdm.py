@@ -58,7 +58,7 @@ def calc_rdm_angular_distance(angles_set,deg=True,ifold=6,scale='fine'):
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     if task == 'game1':
         runs = range(1,7)
         ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
@@ -98,5 +98,4 @@ if __name__ == "__main__":
                 plt.title("Mdoel RDM of {}fold".format(ifold),size=30)
                 plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
                          rotation_mode="anchor")
-
         print("{}'s grid rdm is generated.".format(sub_id))
