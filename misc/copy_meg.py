@@ -5,8 +5,9 @@ import pandas as pd
 
 def copy_files(src_base_dir, dest_base_dir, sub_list, keyword=False):
     for sub in sub_list:
-        src_dir = os.path.join(src_base_dir, sub, "NeuroData/MEG")
-        dest_dir = os.path.join(dest_base_dir, sub, "NeuroData/MEG")
+        print(sub,"started!")
+        src_dir = os.path.join(src_base_dir, sub, "NeuroData/MRI")
+        dest_dir = os.path.join(dest_base_dir, sub, "anat")
 
         if not os.path.exists(src_dir):
             print(f"Source directory does not exist: {src_dir}")
@@ -26,12 +27,15 @@ def copy_files(src_base_dir, dest_base_dir, sub_list, keyword=False):
                         shutil.copytree(src_file_path, dest_file_path)
 
 
-src_base_dir = "/mnt/data/DCM/sourcedata"
-dest_base_dir = "/mnt/data/DCM/tmp/ToLuoYao/MEG/Elketa"
-keyword = "ds"
+src_base_dir = "/mnt/workdir/DCM/sourcedata"
+dest_base_dir = "/mnt/data/DCM/tmp/ToLuoYao/MRI"
+keyword = "csv"
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
-data = participants_data.query(f'(meg_neuro==0.5)or(meg_neuro==0.2)')
+data = participants_data.query(f'(meg_neuro==1)or(meg_neuro==0.3)')
 sub_list = [s.replace("-",'_') for s in data['Participant_ID'].tolist()]
 
-copy_files(src_base_dir, dest_base_dir, sub_list)
+already_sub = os.listdir(dest_base_dir)
+sub_list = [s for s in sub_list if s not in already_sub]
+
+copy_files(src_base_dir, dest_base_dir, sub_list, keyword)

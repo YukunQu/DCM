@@ -1,5 +1,5 @@
 from misc.load_spm import SPMfile
-from analysis.mri.voxel_wise.nilearn.Ftest.hexagon_spct import prepare_data
+from analysis.mri.voxel_wise.nilearn.hexagon.hexagon_spct import prepare_data
 import nilearn.plotting as plotting
 
 subj = '010'

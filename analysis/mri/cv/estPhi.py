@@ -44,7 +44,7 @@ def estPhi(sin_beta_map, cos_beta_map, mask, ifold='6fold', method='circmean'):
         population_vector = np.array(population_vector)/ifold
         # weighted average
         mean_orientation = np.sum(population_vector * weight)
-        std_orientation = np.std(population_vector * weight)# weighted average should
+        std_orientation = np.std(population_vector * weight)  # weighted average should
     else:
         raise Exception("The specify method is wrong.")
     return mean_orientation,std_orientation
@@ -66,7 +66,11 @@ def estimate_game1_cv_phi(workdir):
     sin_cmap_template = pjoin(workdir,'Setall/{}/{}/cmap/sin_{}_cmap.nii.gz')
 
     # set ROI
-    roi = pjoin(workdir,'EC_thr3.1.nii.gz')
+    from nilearn import image
+    #roi = pjoin(workdir,'EC_thr3.1.nii.gz')
+    roi1 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/lh.entorhinal.nii.gz')
+    roi2 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/rh.entorhinal.nii.gz')
+    roi = image.math_img('img1+img2',img1=roi1,img2=roi2)
     mask = load_img(roi)
 
     # set method
@@ -139,6 +143,6 @@ def estimate_game1_whole_trials_phi(workdir):
 
 
 if __name__ == "__main__":
-    workingdir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct'
-    #estimate_game1_cv_phi(workingdir)
-    estimate_game1_whole_trials_phi(workingdir)
+    workingdir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct'
+    estimate_game1_cv_phi(workingdir)
+    #estimate_game1_whole_trials_phi(workingdir)

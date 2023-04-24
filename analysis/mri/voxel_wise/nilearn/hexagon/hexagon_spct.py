@@ -12,7 +12,7 @@ from joblib import Parallel, delayed
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1', 'M2_corr', 'M2_error','decision_corr','sin', 'cos']
+    contrast_name = ['M1', 'M2_corr','M2_error','decision_corr','decision_error','sin', 'cos']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -26,6 +26,9 @@ def set_contrasts(design_matrix):
     # advanced contrast
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'],
                                           contrasts_set['sin']])
+    if 'decision_error' in contrasts_set.keys():
+        contrasts_set['correct_error_m2'] = contrasts_set['M2_corr'] - contrasts_set['M2_error']
+        contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
@@ -39,7 +42,7 @@ def run_glm(task,subj,ifold):
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     elif task == 'game2':
-        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'hexagon_spct',
+        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'hexagon_center_spct',
                    'run_list': [1, 2],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -49,7 +52,7 @@ def run_glm(task,subj,ifold):
     else:
         raise Exception("The type of task is not supoort.")
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_center/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                        configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
@@ -59,7 +62,7 @@ def run_glm(task,subj,ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,True)
+        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,concat_runs=True,despiking=False)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 

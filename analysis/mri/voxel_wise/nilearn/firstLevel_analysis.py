@@ -128,7 +128,7 @@ def first_level_glm(datasink, run_imgs, design_matrices,set_contrasts):
                 os.mkdir(os.path.join(datasink, dir))
 
     # fit first level glm to estimate mean orientation
-    mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    mni_mask = r'/mnt/workdir/DCM/Docs/Mask/res-02_desc-brain_mask.nii'
     fmri_glm = FirstLevelModel(t_r=3.0, slice_time_ref=0.5, hrf_model='spm',
                                drift_model=None, high_pass=1/ 100, mask_img=mni_mask,
                                smoothing_fwhm=8, verbose=1, n_jobs=1)

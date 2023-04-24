@@ -14,51 +14,8 @@ from joblib import Parallel, delayed
 def set_contrasts(design_matrix):
     # set contrast contain hexagonal effect and distance effect
     contrast_name = ['M1', 'M2_corr',  'M2_error', 'decision_corr', 'decision_error',
-                     'cos_odd', 'sin_odd', 'M2_corrxdistance',]
-    # base contrast
-    contrasts_set = {}
-    for contrast_id in contrast_name:
-        contrast_index = get_reg_index(design_matrix, contrast_id)
-        contrast_vector = np.zeros(design_matrix.shape[1])
-        contrast_vector[contrast_index] = 1
-        contrasts_set[contrast_id] = contrast_vector
-
-    # advanced contrast
-    # odd trials' hexagonal modulation
-    contrasts_set['odd_hexagon'] = np.vstack([contrasts_set['cos_odd'],
-                                              contrasts_set['sin_odd']])
-    # correct contrast to error
-    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
-    return contrasts_set
-
-
-def set_contrasts_even(design_matrix):
-    # set contrast contain hexagonal effect and distance effect
-    contrast_name = ['M1', 'M2_corr',  'M2_error', 'decision_corr', 'decision_error',
-                     'cos_even', 'sin_even', 'M2_corrxdistance']
-    # base contrast
-    contrasts_set = {}
-    for contrast_id in contrast_name:
-        contrast_index = get_reg_index(design_matrix, contrast_id)
-        contrast_vector = np.zeros(design_matrix.shape[1])
-        contrast_vector[contrast_index] = 1
-        contrasts_set[contrast_id] = contrast_vector
-
-    # advanced contrast
-    # even trials' hexagonal modulation
-    contrasts_set['even_hexagon'] = np.vstack([contrasts_set['cos_even'],
-                                               contrasts_set['sin_even']])
-
-    # correct contrast to error
-    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
-    return contrasts_set
-
-
-def set_contrasts(design_matrix):
-    # set contrast contain hexagonal effect and distance effect
-    contrast_name = ['M1', 'M2_corr',  'M2_error', 'decision_corr', 'decision_error',
                      'cos_even', 'cos_odd', 'sin_even', 'sin_odd',
-                     'M2_corrxdistance','decision_corrxdistance']
+                     'M2_corrxdistance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -81,8 +38,6 @@ def set_contrasts(design_matrix):
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'],
                                           contrasts_set['sin']])
 
-    # distance effect
-    contrasts_set['distance'] = contrasts_set['M2_corrxdistance'] + contrasts_set['decision_corrxdistance']
     # correct contrast to error
     contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
@@ -90,21 +45,13 @@ def set_contrasts(design_matrix):
 
 def run_glm(task,subj,ifold):
     if task == 'game1':
-        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'cv_train_hexagon_distance_spct_odd',
+        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'cv_train_hexagon_distance_spct',
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
-    elif task == 'game2':
-        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'hexagon_distance_spct',
-                   'run_list': [1, 2],
-                   'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-                   'func_name': 'func/sub-{}_task-game2_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
-                   'events_name': r'sub-{}_task-game2_run-{}_events.tsv',
-                   'regressor_name': r'sub-{}_task-game2_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     else:
         raise Exception("The type of task is not supoort.")
 
@@ -131,7 +78,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,30)
+    subjects_chunk = list_to_chunk(subjects,70)
     for ifold in range(6,7):
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

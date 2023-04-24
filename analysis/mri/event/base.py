@@ -4,7 +4,7 @@ import pandas as pd
 from os.path import join
 
 
-class Game1EV(object):
+class GAME1EV(object):
     """The father class of Game1"""
     def __init__(self, behDataPath):
         self.dformat = None
@@ -129,7 +129,7 @@ class Game1EV(object):
         return pbev
 
 
-class Game2EV(object):
+class GAME2EV(object):
     """The father class of Game2"""
     def __init__(self, behDataPath):
         self.dformat = None
@@ -254,10 +254,10 @@ class Game2EV(object):
         return pbev
 
 
-class Game1EV_base_spct(Game1EV):
+class GAME1EV_base_spct(GAME1EV):
     # event of base GLM
     def __init__(self,behDataPath):
-        Game1EV.__init__(self,behDataPath)
+        GAME1EV.__init__(self,behDataPath)
 
     def genM2ev(self, trial_label):
         if self.dformat == 'trial_by_trial':
@@ -344,14 +344,14 @@ class Game1EV_base_spct(Game1EV):
         trial_label, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
-
+        # concat all events
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error], axis=0)
         return event_data
 
 
-class Game2EV_base_spct(Game2EV):
+class GAME2EV_base_spct(GAME2EV):
     def __int__(self, behDataPath):
-        Game2EV.__init__(self, behDataPath)
+        GAME2EV.__init__(self, behDataPath)
 
     def genM2ev(self, trial_label):
         if self.dformat == 'trial_by_trial':
@@ -438,15 +438,15 @@ class Game2EV_base_spct(Game2EV):
         trial_label, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
-
+        # concat all events
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error], axis=0)
         return event_data
 
 
-class Game1EV_base_spat(Game1EV):
+class GAME1EV_base_spat(GAME1EV):
     # event of base GLM
     def __init__(self,behDataPath):
-        Game1EV.__init__(self,behDataPath)
+        GAME1EV.__init__(self,behDataPath)
 
     def genM2ev(self):
         if self.dformat == 'trial_by_trial':
@@ -498,10 +498,10 @@ class Game1EV_base_spat(Game1EV):
         return event_data
 
 
-class Game2EV_base_spat(Game2EV):
+class GAME2EV_base_spat(GAME2EV):
     """ game2 event for separate phases all trials"""
     def __int__(self, behDataPath):
-        Game2EV.__init__(self, behDataPath)
+        GAME2EV.__init__(self, behDataPath)
 
     def genM2ev(self):
         # generate M2 trials event

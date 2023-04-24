@@ -34,21 +34,26 @@ def check_subs_meg(sub_list, data_dir):
             ndata_list = os.listdir(ndata_dir)
         fileNum = 0
         readFileNum = 0
+        print(ndata_list)
         for f in ndata_list:
             if '.fif' in f:
                 fileNum += 1
                 data_fname = os.path.join(ndata_dir, f)
                 feedb = check_meg(data_fname)
                 readFileNum += feedb
+                machine = 'eketa'
             elif '.ds' in f:
                 fileNum += 1
                 data_fname = os.path.join(ndata_dir, f)
                 feedb = check_meg(data_fname)
                 readFileNum += feedb
-        if '.fif' in f:
-            info_list.append('{} have {}/{} fif file can be read!'.format(sub, readFileNum, fileNum))
-        elif '.ds' in f:
-            info_list.append('{} have {}/{} ctf file can be read!'.format(sub, readFileNum, fileNum))
+                machine = 'ctf'
+        if machine=='eketa':
+                info_list.append('{} have {}/{} fif file can be read!'.format(sub, readFileNum, fileNum))
+        elif machine=='ctf':
+                info_list.append('{} have {}/{} ctf file can be read!'.format(sub, readFileNum, fileNum))
+        else:
+            raise Exception("The machine is not right.")
     return info_list
 
 
@@ -59,9 +64,9 @@ if __name__ == "__main__":
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game1_fmri>=0.5')
+    data = participants_data#.query('game1_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
-    sub_list = ['sub_'+p.split('-')[-1] for p in pid]
+    sub_list = ['sub_'+p.split('-')[-1] for p in pid if int(p.split('-')[-1])>230]
 
     log = check_subs_meg(sub_list, data_dir)
     for info in log:

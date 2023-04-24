@@ -24,11 +24,11 @@ def load_ev(event_path):
     m2xdistance['trial_type'] = 'M2xdistance'
 
     # generate parametric modulation for decision
-    decisionxdistance = event.query("trial_type == 'decision_corr'").copy()
-    decisionxdistance.loc[:, 'modulation'] = distance_mod
-    decisionxdistance['trial_type'] = 'decisionxdistance'
+    #decisionxdistance = event.query("trial_type == 'decision_corr'").copy()
+    #decisionxdistance.loc[:, 'modulation'] = distance_mod
+    #decisionxdistance['trial_type'] = 'decisionxdistance'
 
-    event_condition = event_condition.append([m2xdistance,decisionxdistance])
+    event_condition = event_condition.append([m2xdistance])
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
     return event_condition
 
@@ -37,7 +37,7 @@ def set_contrasts(design_matrix):
     # set contrast contain hexagonal effect and distance effect
     contrast_name = ['M1','M2_corr','M2_error','decision_corr','decision_error',
                      'cos', 'sin',
-                     'M2xdistance','decisionxdistance']
+                     'M2xdistance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -48,7 +48,7 @@ def set_contrasts(design_matrix):
 
     # advanced contrast
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'], contrasts_set['sin']])
-    contrasts_set['distance'] = contrasts_set['M2xdistance'] + contrasts_set['decisionxdistance']
+    #contrasts_set['distance'] = contrasts_set['M2xdistance'] + contrasts_set['decisionxdistance']
     contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 

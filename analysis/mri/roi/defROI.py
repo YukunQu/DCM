@@ -64,6 +64,7 @@ def threshold_binary_img(source_img, thr):
 
 # %%
 # Computing a Region of Interest (ROI) mask by nilearn
+import os
 import numpy as np
 from nilearn.maskers import NiftiMasker
 from nilearn import image
@@ -72,9 +73,9 @@ from nilearn.plotting import plot_stat_map
 from nilearn.plotting import plot_roi
 
 # load statistical map and mask
-stats_map = image.load_img(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct/'
-                           r'Setall/6fold/group_203/mean/hexagon_zmap.nii.gz')
-mask = image.load_img(r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz')
+target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_distance_spct'
+stats_map = image.load_img(os.path.join(target_dir,'Setall/6fold/group_203/mean/hexagon_zmap.nii.gz'))
+mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
 if not np.array_equal(mask.affine,stats_map.affine):
     raise Exception("The mask and statistical map have different affine matrix.")
 
@@ -96,4 +97,4 @@ bin_tmap_thr_masked = np.logical_and(mask_data.astype(bool), bin_tmap_thr)
 # plot roi and save
 bin_tmap_thr_peak_spere_img = image.new_img_like(stats_map, bin_tmap_thr_masked.astype(int))
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0, 0, 0))
-bin_tmap_thr_peak_spere_img.to_filename("/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct/EC_thr3.1.nii.gz")
+bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"EC_thr3.1.nii.gz"))

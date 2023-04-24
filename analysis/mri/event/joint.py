@@ -2,7 +2,7 @@ import os
 from os.path import join
 import pandas as pd
 from analysis.mri.event.hexagon import GAME1EV_hexagon_spct,GAME1EV_hexagon_spat
-from analysis.mri.event.distance import GAME1EV_distance_spct,Game1EV_distance_spat,GAME1EV_2distance_spct
+from analysis.mri.event.distance import GAME1EV_distance_spct,GAME1EV_distance_spat,GAME1EV_2distance_spct
 from analysis.mri.event.value import GAME1EV_value_spct
 
 
@@ -33,10 +33,10 @@ class Game1EV_hexagon_distance_spct(GAME1EV_hexagon_spct,GAME1EV_distance_spct):
         return event_data
 
 
-class Game1EV_hexagon_distance_spat(GAME1EV_hexagon_spat,Game1EV_distance_spat):
+class Game1EV_hexagon_distance_spat(GAME1EV_hexagon_spat,GAME1EV_distance_spat):
     def __init__(self, behDataPath):
         GAME1EV_hexagon_spat.__init__(self, behDataPath)
-        Game1EV_distance_spat.__init__(self, behDataPath)
+        GAME1EV_distance_spat.__init__(self, behDataPath)
 
     def game1ev_hexagon_distance_spat(self,ifold):
         m1ev = self.genM1ev()

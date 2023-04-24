@@ -1,14 +1,15 @@
 import os
 import pandas as pd
 from os.path import join
-from analysis.mri.event.hexagon import GAME1EV_hexagon_spat
-from analysis.mri.event.distance import GAME1EV_2distance_spct,GAME2EV_2distance_spct,GAME2EV_distance_spct
-from analysis.mri.event.value import GAME1EV_value_spct
+from analysis.mri.event.base import GAME1EV_base_spct,GAME2EV_base_spct
+from analysis.mri.event.hexagon import GAME1EV_hexagon_spct,GAME2EV_hexagon_spct,GAME2EV_hexagon_center_spct
+from analysis.mri.event.distance import GAME1EV_2distance_spct,GAME1EV_distance_spat,GAME2EV_2distance_spct,GAME2EV_distance_spct,GAME2EV_distance_center_spct
+from analysis.mri.event.value import GAME1EV_value_spct,GAME2EV_value_spct
 
 
 ifolds = [6]
 task = 'game2'
-glm_type = 'distance_spct'
+glm_type = 'distance_center_spct'
 template = {'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'+glm_type+'/sub-{}/{}fold',
             'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
 if task == 'game1':

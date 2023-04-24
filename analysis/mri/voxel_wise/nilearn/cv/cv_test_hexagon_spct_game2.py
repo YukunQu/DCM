@@ -32,7 +32,7 @@ def set_contrasts(design_matrix):
 
 
 def run_glm(subj,ifold):
-    configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'cv_hexagon_spct',
+    configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'cv_hexagon_center_spct',
                'run_list': [1, 2],
                'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -40,7 +40,7 @@ def run_glm(subj,ifold):
                'events_name': r'sub-{}_task-game2_run-{}_events.tsv',
                'regressor_name': r'sub-{}_task-game2_run-{}_desc-confounds_timeseries_trimmed.tsv'}
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_center/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                        configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)

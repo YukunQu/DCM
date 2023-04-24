@@ -57,8 +57,8 @@ def set_contrasts(design_matrix):
     # advanced contrast
     contrasts_set['eudc'] = contrasts_set['m2xeucd'] + contrasts_set['decisionxeucd']
     contrasts_set['manhd'] = contrasts_set['m2xmanhd'] + contrasts_set['decisionxmanhd']
-    # if 'decision_error' in contrasts_set.keys():
-    #     contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    if 'decision_error' in contrasts_set.keys():
+        contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
@@ -92,7 +92,7 @@ def run_glm(task,subj,ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev_2distance,True)
+        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev_2distance,concat_runs=True,despiking=True)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 
@@ -106,6 +106,6 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,70)
+    subjects_chunk = list_to_chunk(subjects,30)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+        results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

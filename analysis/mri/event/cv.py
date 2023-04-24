@@ -244,7 +244,7 @@ class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
         value = self.genpm_value_spct(trial_corr)
 
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
-                                alignPhi_odd,alignPhi_even,m2ev_distance,value],axis=0)
+                                alignPhi_odd,alignPhi_even],axis=0)
         return event_data
 
     def game1ev_cv_test2(self, ifold, phi, run_type):
@@ -320,10 +320,10 @@ def gen_event_game1_cv_test():
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_distance_value_spct/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_spct/sub-{}/{}fold'  # look out
 
     # set Phi estimated from specific ROI
-    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_distance_value_spct/' \
+    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/' \
                 r'estPhi_ROI-EC_circmean_cv.csv'  # look out
     phis_data = pd.read_csv(phis_file)
 
@@ -362,6 +362,49 @@ class Game2_cv_hexagon_spct(GAME2EV_hexagon_spct):
 
 
     def game2ev_cv_hexagon_spct(self, ifold, phi):
+        # base regressors
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+
+        # paramertric modulation regressors
+        m2_alignPhi = self.genpm_alignPhi(m2ev_corr, ifold, phi)
+        decision_alignPhi = self.genpm_alignPhi(deev_corr,ifold, phi)
+        alignPhi = pd.concat([m2_alignPhi,decision_alignPhi],axis=0).sort_values('onset', ignore_index=True)
+
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                alignPhi], axis=0)
+        return event_data
+
+
+class Game2_cv_hexagon_center_spct(GAME2EV_hexagon_spct):
+    def __init__(self, behDataPath):
+        GAME2EV_hexagon_spct.__init__(self, behDataPath)
+
+    def update_behData(self):
+        # update the value in pic1_ap,pic1_dp,pic2_ap,pic2_dp(replace all 2.5 and 3.5 to 3)
+        for column in ['pic1_ap', 'pic1_dp', 'pic2_ap', 'pic2_dp']:
+            self.behData[column] = self.behData[column].replace(2.5, 3)
+            self.behData[column] = self.behData[column].replace(3.5, 3)
+        # update the ap_diff and dp_diff
+        self.behData['ap_diff'] = self.behData['pic2_ap'] - self.behData['pic1_ap']
+        self.behData['dp_diff'] = self.behData['pic2_dp'] - self.behData['pic1_dp']
+        angle = np.rad2deg(np.arctan2(self.behData['ap_diff'], self.behData['dp_diff']))
+        # update the angle
+        self.behData['angles'] = angle
+
+    def genpm_alignPhi(self, ev, ifold, phi):
+        # generate parametric modulation for test GLM
+        angle = ev['angle']
+        pmod_alignPhi = ev.copy()
+        pmod_alignPhi['modulation'] = np.round(np.cos(np.deg2rad(ifold * (angle - phi))), 2)
+        pmod_alignPhi['trial_type'] = 'alignPhi'
+        return pmod_alignPhi
+
+    def game2ev_cv_hexagon_cneter_spct(self, ifold, phi):
+        # update the behData
+        self.update_behData()
         # base regressors
         m1ev = self.genM1ev()
         trial_label, accuracy = self.label_trial_corr()
@@ -456,12 +499,12 @@ def gen_sub_event(subjects):
     parameters = {'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/'
                                 r'fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
                   'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'
-                              r'cv_hexagon_distance_spct/sub-{}/{}fold',      # look out
+                              r'cv_hexagon_center_spct/sub-{}/{}fold',      # look out
                   'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
 
     # set Phi estimated from specific ROI
-    glm_type = 'hexagon_distance_spct'
-    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct/estPhi_ROI-EC_circmean_trial-all.csv'  # look out
+    glm_type = 'hexagon_center_spct'
+    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/estPhi_ROI-EC_circmean_trial-all.csv'  # look out
     phis_data = pd.read_csv(phis_file)
 
     for ifold in ifolds:
@@ -477,6 +520,9 @@ def gen_sub_event(subjects):
                 elif glm_type == 'hexagon_distance_spct':
                     event = Game2_cv_hexagon_distance_spct(behDataPath)
                     event_data = event.game2ev_hexagon_distance_spct(ifold,phi) # lookout
+                elif glm_type == 'hexagon_center_spct':
+                    event = Game2_cv_hexagon_center_spct(behDataPath)
+                    event_data = event.game2ev_cv_hexagon_cneter_spct(ifold,phi) # lookout
                 # save
                 save_dir = parameters['save_dir'].format(task,subj, ifold)
                 if not os.path.exists(save_dir):

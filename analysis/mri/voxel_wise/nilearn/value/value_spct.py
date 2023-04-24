@@ -34,7 +34,7 @@ def run_glm(task,subj,ifold):
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     elif task == 'game2':
-        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'distance_spct',
+        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'value_spct',
                    'run_list': [1, 2],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -54,12 +54,12 @@ def run_glm(task,subj,ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,True)
+        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,concat_runs=True,despiking=True)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     ifold = 6
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -68,6 +68,6 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,70)
+    subjects_chunk = list_to_chunk(subjects,30)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+        results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
