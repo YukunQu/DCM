@@ -1,13 +1,52 @@
 import os
 import numpy as np
 import pandas as pd
-from analysis.mri.event.hexagon.event_hexagon_spat import Game1EV_hexagon_spat,Game2EV_hexagon_spat
+from analysis.mri.event.hexagon import GAME1EV_hexagon_spat,Game2EV_hexagon_spat
 
 
-class Game1_grid_rsa_m2(Game1EV_hexagon_spat):
+class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
     def __init__(self, behDataPath):
-        Game1EV_hexagon_spat.__init__(self, behDataPath)
+        GAME1EV_hexagon_spat.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
+
+    def genM2ev_corr(self, trial_label):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        assert len(m2ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        m2ev_corr = m2ev.iloc[correct_trials_index].copy()
+        m2ev_error = m2ev.iloc[error_trials_index].copy()
+        m2ev_corr['trial_type'] = 'M2_corr'
+        m2ev_error['trial_type'] = 'M2_error'
+
+        m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
+        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
+        return m2ev_corr,m2ev_error
 
     def angle_ev(self):
         angle_ev = pd.DataFrame(columns=['onset', 'duration', 'trial_type'])
@@ -81,15 +120,15 @@ class Game1_grid_rsa_m2(Game1EV_hexagon_spat):
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
         corr_angle_ev = self.correct_angle_ev(trial_corr)
+        m2ev_corr,_ = self.genM2ev_corr(trial_corr)
         deev = self.genDeev()
-        response = self.response()
-        event_data = pd.concat([m1ev,corr_angle_ev,deev], axis=0)
+        event_data = pd.concat([m1ev,m2ev_corr,corr_angle_ev,deev], axis=0)
         return event_data
 
 
-class Game1_grid_rsa_decision(Game1EV_hexagon_spat):
+class Game1_grid_rsa_decision(GAME1EV_hexagon_spat):
     def __init__(self, behDataPath):
-        Game1EV_hexagon_spat.__init__(self, behDataPath)
+        GAME1EV_hexagon_spat.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
 
     def decision_angle_ev(self):
@@ -117,7 +156,7 @@ class Game1_grid_rsa_decision(Game1EV_hexagon_spat):
     def decision_grid_rsa_ev(self):
         self.starttime = self.cal_start_time()
         m1ev = self.genM1ev()
-        m2ev = self.genM2ev_whole_trials()
+        m2ev = self.genM2ev()
         angle_ev = self.decision_angle_ev()
         event_data = pd.concat([m1ev,m2ev,angle_ev], axis=0)
         return event_data
@@ -217,7 +256,7 @@ def gen_gird_rsa_event(task):
 
         # define the template of behavioral file
         behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
-        save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/grid_rsa_corr_trials/sub-{}/{}fold'
+        save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/grid_rsa_corr_trials_demean/sub-{}/{}fold'
         event_file = 'sub-{}_task-game1_run-{}_events.tsv'
 
         # set folds and runs for cross validation
@@ -235,7 +274,7 @@ def gen_gird_rsa_event(task):
 
         # set folds and runs for cross validation
         ifolds = range(6, 7)
-        runs = range(1, 3)
+        runs = range(1,7)
     else:
         raise Exception("The task is wrong.")
 

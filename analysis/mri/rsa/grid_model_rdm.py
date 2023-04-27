@@ -63,7 +63,7 @@ if __name__ == "__main__":
         runs = range(1,7)
         ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
                       r'game1/grid_rsa_corr_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'
-        savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
+        savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/' \
                    'game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_{}fold.npy'
     elif task == 'game2':
         runs = range(1,3)

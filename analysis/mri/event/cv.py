@@ -12,10 +12,9 @@ import numpy as np
 import pandas as pd
 from analysis.mri.event.joint import Game1EV_hexagon_distance_spct,Game1EV_hexagon_distance_spat
 from analysis.mri.event.hexagon import GAME2EV_hexagon_spct
-from analysis.mri.event.value import GAME1EV_value_spct
 
 
-class Game1EV_cv_spat(Game1EV_hexagon_distance_spat):
+class GAME1EV_cv_spat(Game1EV_hexagon_distance_spat):
     def __init__(self, behDataPath):
         Game1EV_hexagon_distance_spat.__init__(self, behDataPath)
 
@@ -114,10 +113,9 @@ class Game1EV_cv_spat(Game1EV_hexagon_distance_spat):
         return deev_odd, deev_even, deev_error
 
 
-class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
+class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
     def __init__(self, behDataPath):
         Game1EV_hexagon_distance_spct.__init__(self, behDataPath)
-        GAME1EV_value_spct.__init__(self, behDataPath)
 
     @staticmethod
     def split_event(ev,trial_corr):
@@ -179,7 +177,6 @@ class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
             raise Exception("The variable 'trial type' only support odd and 'even'")
         return pmod_alignPhi
 
-
     def game1ev_cv_train(self, ifold):
         # generatea M1, M2, Decision's event
         m1ev = self.genM1ev()
@@ -207,11 +204,9 @@ class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
 
-        value = self.genpm_value_spct(trial_corr)
-
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 sin_odd,cos_odd,sin_even,cos_even,
-                                m2ev_distance,value],axis=0)
+                                m2ev_distance],axis=0)
         return event_data
 
     def game1ev_cv_test(self, ifold, odd_phi, even_phi):
@@ -241,15 +236,30 @@ class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
 
-        value = self.genpm_value_spct(trial_corr)
-
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 alignPhi_odd,alignPhi_even],axis=0)
         return event_data
 
-    def game1ev_cv_test2(self, ifold, phi, run_type):
-        # generate test event accooding to run_type:odd and even
+    def genpm_test_align(self, ev, phi, trial_type):
+        # generate parametric modulation for test GLM
+        pmod_alignPhi = ev.copy()
+        angle = ev['angle']
+        # split angles into 12 bins
+        alignedD_360 = [(a-phi) % 360 for a in angle]
+        anglebinNum = [round(a/30)+1 for a in alignedD_360]
+        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
+        anglebinNum = [str(a) for a in anglebinNum]
 
+        pmod_alignPhi['trial_type'] = anglebinNum
+        if trial_type == 'odd':
+            pmod_alignPhi['trial_type'] = 'odd_' + pmod_alignPhi['trial_type']
+        elif trial_type == 'even':
+            pmod_alignPhi['trial_type'] = 'even_' + pmod_alignPhi['trial_type']
+        else:
+            raise Exception("The variable 'trial type' only support odd and 'even'")
+        return pmod_alignPhi
+
+    def game1ev_cv_test_align(self, odd_phi, even_phi):
         # generatea M1, M2, Decision's event
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
@@ -257,24 +267,30 @@ class Game1EV_cv_spct(Game1EV_hexagon_distance_spct,GAME1EV_value_spct):
         m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
         deev_corr, deev_error = self.genDeev(trial_corr)
 
-        # generate pmod
-        m2_alignPhi = self.genpm_test(m2ev_corr, ifold, phi, run_type)
-        decision_alignPhi = self.genpm_test(deev_corr, ifold,phi, run_type)
-        alignPhi = pd.concat([m2_alignPhi,decision_alignPhi],axis=0).sort_values('onset', ignore_index=True)
+        # split correct trials into odd trials and even trials
+        m2ev_odd,m2ev_even = self.split_event(m2ev_corr,trial_corr)
+        deev_odd,deev_even = self.split_event(deev_corr,trial_corr)
+
+        # generate pmod of odd trials and even trials
+        # odd trials
+        m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, even_phi, 'odd')
+        m2_alignPhi_odd['trial_type'] = 'm2_' + m2_alignPhi_odd['trial_type']
+        #decision_alignPhi_odd = self.genpm_test_align(deev_odd, even_phi, 'odd')
+        #decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
+
+        # even trials
+        m2_alignPhi_even = self.genpm_test_align(m2ev_even,odd_phi,'even')
+        m2_alignPhi_even['trial_type'] = 'm2_'+m2_alignPhi_even['trial_type']
+        #decision_alignPhi_even = self.genpm_test_align(deev_even, odd_phi,'even')
+        #decision_alignPhi_even['trial_type'] = 'decision_' + decision_alignPhi_even['trial_type']
 
         # generate pmod of distance
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
-        distance_pm = m2ev_distance['modulation']
-        deev_distance = deev_corr.copy()
-        deev_distance['modulation'] = distance_pm
-        deev_distance['trial_type'] = deev_distance['trial_type'] + 'xdistance'
 
-        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
-                                alignPhi,
-                                m2ev_distance,deev_distance],axis=0)
+        event_data = pd.concat([m1ev,m2ev_error,deev_corr,deev_error,
+                                m2_alignPhi_odd,m2_alignPhi_even],axis=0)
         return event_data
-
 
 def gen_event_game1_cv_train():
     # define subject list
@@ -299,7 +315,7 @@ def gen_event_game1_cv_train():
             for run_id in runs:
                 # generate event
                 behDataPath = behav_path.format(sub, sub, run_id)
-                game1_cv = Game1EV_cv_spct(behDataPath)
+                game1_cv = GAME1EV_cv_spct(behDataPath)
                 event = game1_cv.game1ev_cv_train(ifold)
                 # save
                 out_dir = save_dir.format(sub, ifold)
@@ -320,7 +336,7 @@ def gen_event_game1_cv_test():
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_spct/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_align_spct/sub-{}/{}fold'  # look out
 
     # set Phi estimated from specific ROI
     phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/' \
@@ -338,8 +354,8 @@ def gen_event_game1_cv_test():
             even_phi = phis_data.query(f'(sub_id=="sub-{sub}")and(ifold=="{ifold}fold")and(trial_type=="even")')['Phi_mean'].values[0]
             for run_id in runs:
                 behDataPath = behav_path.format(sub, sub, run_id)
-                game1_cv = Game1EV_cv_spct(behDataPath)
-                event = game1_cv.game1ev_cv_test(ifold, odd_phi, even_phi)  # look out
+                game1_cv = GAME1EV_cv_spct(behDataPath)
+                event = game1_cv.game1ev_cv_test_align(odd_phi, even_phi)  # look out
                 # save
                 out_dir = save_dir.format(sub, ifold)
                 if not os.path.exists(out_dir):
@@ -534,8 +550,8 @@ def gen_sub_event(subjects):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query(f'game2_fmri>=0.5')
+    data = participants_data.query(f'game1_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects_list = [p.split('-')[-1] for p in pid]
-    gen_sub_event(subjects_list)
-    #gen_event_game1_cv_test()
+    #gen_sub_event(subjects_list)
+    gen_event_game1_cv_test()

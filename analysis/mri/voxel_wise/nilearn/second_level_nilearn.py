@@ -58,7 +58,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -69,8 +69,8 @@ if __name__ == "__main__":
     print("total subjects:{}".format(len(sub_list)))
 
     # configure
-    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = 'cv_hexagon_spct'
+    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa'
+    glm_type = 'cv_test_align_spct'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
@@ -85,7 +85,13 @@ if __name__ == "__main__":
                         'cv_test_hexagon_spct': ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
                                                  'alignPhi_odd','alignPhi_even','alignPhi'],
                         'cv_hexagon_spct': ['M1', 'M2_corr', 'decision_corr','alignPhi'],
-
+                        'cv_test_align_spct': ['m2','decision',
+                                               'decision_align_even','decision_align_odd','decision_misalign_even','decision_misalign_odd',
+                                               'align_odd','align_even','align',
+                                               'm2_align_even','m2_align_odd','m2_misalign_even','m2_misalign_odd',
+                                               'misalign_odd','misalign_even','misalign',
+                                               'm2_alignPhi_odd','decision_alignPhi_odd','alignPhi_odd',
+                                               'm2_alignPhi_even','decision_alignPhi_even','alignPhi_even','alignPhi'],
                         'distance_spct': ['M1', 'M2_corr', 'decision_corr','correct_error','M2_corrxdistance'],
                         '2distance_spct': ['M1', 'M2_corr', 'decision_corr',
                                            'm2xeucd','decisionxeucd','m2xmanhd','decisionxmanhd'],
@@ -94,7 +100,8 @@ if __name__ == "__main__":
                         'distance_value_spct':['M1', 'M2_corr', 'decision_corr','correct_error','value','distance'],
                         '2distance_value_spct':['M1', 'M2_corr', 'decision_corr','correct_error','value','eucd','manhd'],
 
-                        'grid_rsa_corr_trials':['rsa_ztransf_img_coarse_6fold'],
+                        'grid_rsa_corr_trials':['rsa_img_coarse_6fold',
+                                                'rsa_ztransf_img_coarse_6fold'],
 
                         'base_diff':['M1', 'M2_corr', 'decision_corr', 'correct_error'],
                         'hexagon_diff':['M1', 'M2_corr', 'decision_corr', 'correct_error','hexagon'],
@@ -111,22 +118,22 @@ if __name__ == "__main__":
     contrast_1st = contrast_configs[glm_type]
 
     # create output directory
-    data_root = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'group_193')
+    data_root = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'group_203_mah_rho')
     os.makedirs(data_root,exist_ok=True)
 
     # mean effect of all subjects
     datasink = os.path.join(data_root, 'mean')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_ttest)(sub_list, contrast_id, templates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_ttest)(sub_list, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
 
     # mean effect of high performance subjects
-    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.80)and(game2_test_acc>0.8)')  # look out
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.80)')  # look out
     hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
     print("high performance subjects:",len(hp_sub))
     datasink = os.path.join(data_root, 'hp_all')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
 
     # mean effect of adult subjects
@@ -135,7 +142,7 @@ if __name__ == "__main__":
     print("adult subjects:",len(adult_sub))
     datasink = os.path.join(data_root, 'adult')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_ttest)(adult_sub, contrast_id, templates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_ttest)(adult_sub, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
 
     # The accuracy effect for all subjects(8-25)
@@ -148,7 +155,7 @@ if __name__ == "__main__":
     covariates = {'acc': accuracy}
     datasink = os.path.join(data_root, 'acc')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
     # The age effect for all subjects(8-25)
@@ -157,7 +164,7 @@ if __name__ == "__main__":
     print("The subjects number of covariate-age(8-25):", len(sub_list))
     datasink = os.path.join(data_root, 'age_all')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
     # The age and accuracy effect for subjects(8-25)
@@ -165,7 +172,7 @@ if __name__ == "__main__":
     print("subjects number of age-acc effect:", len(sub_list))
     datasink = os.path.join(data_root, 'age_acc')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
     # # The age effect for subjects(8-17)
@@ -177,15 +184,7 @@ if __name__ == "__main__":
     covariates = {'Age': age}
     datasink = os.path.join(data_root, 'age_to17')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(juv_sub_list, contrast_id, templates, covariates, datasink)
-                        for contrast_id in contrast_1st)
-
-    # The covariate effect between the behavioral difference and neural difference
-    datasink = os.path.join(data_root, 'behav_diff')
-    acc_diff = data['game2_test_acc'] - data['game1_acc'].to_list()
-    covariates = {'acc_diff': acc_diff}
-    os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(juv_sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
     # The age effect for subjects(18-25)
@@ -197,7 +196,16 @@ if __name__ == "__main__":
     print("subjects number of covariate-age(18-25):", len(adult_sub_list))
     datasink = os.path.join(data_root, 'age_18to25')
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
+                        for contrast_id in contrast_1st)
+
+    """
+    # The covariate effect between the behavioral difference and neural difference
+    datasink = os.path.join(data_root, 'behav_diff')
+    acc_diff = data['game2_test_acc'] - data['game1_acc'].to_list()
+    covariates = {'acc_diff': acc_diff}
+    os.makedirs(datasink,exist_ok=True)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
     # The covariate effect between the behavioral difference and neural difference for adult subjects
@@ -205,5 +213,6 @@ if __name__ == "__main__":
     acc_diff = data_adult['game2_test_acc'] - data_adult['game1_acc'].to_list()
     covariates = {'acc_diff': acc_diff}
     os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=13)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
+    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
+    """

@@ -81,13 +81,13 @@ def cal_neural_rdm(sub_id):
     con_names = get_sub_angles_nilearn(ev_files)
 
     # get subject's cmap
-    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
+    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/' \
                   'game1/grid_rsa_corr_trials/Setall/6fold/{}'
-    image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
+    image_paths = [os.path.join(cmap_folder.format(sub_id),'zmap/{}_zmap.nii.gz'.format(con_id))
                    for con_id in con_names]
 
     # load one image to get the dimensions and make the mask
-    mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    mni_mask = r'/mnt/workdir/DCM/Docs/Mask/res-02_desc-brain_mask.nii'
     mask_img = nib.load(mni_mask)
     mask = mask_img.get_fdata()
     x, y, z = mask.shape
@@ -110,7 +110,7 @@ def cal_neural_rdm(sub_id):
     savepath = os.path.join(cmap_folder.format(sub_id),'rsa')
     if not os.path.exists(savepath):
         os.mkdir(savepath)
-    savepath = os.path.join(savepath,'{}-neural_RDM_cmap.hdf5'.format(sub_id))
+    savepath = os.path.join(savepath,'{}-neural_RDM.hdf5'.format(sub_id))
     SL_RDM.save(savepath,'hdf5',overwrite=True)
     print("The {}'s rdm have been done.".format(sub_id))
     return "The {}'s rdm have been done.".format(sub_id)
@@ -122,6 +122,6 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
-    subjects_chunk = list_to_chunk(subjects,50)
+    subjects_chunk = list_to_chunk(subjects,10)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=50,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)
+        results_list = Parallel(n_jobs=10,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)

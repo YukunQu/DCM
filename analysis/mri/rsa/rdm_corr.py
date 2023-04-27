@@ -24,14 +24,14 @@ if __name__ == "__main__":
     fold_r = [[],[],[],[],[]]
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query('game2_fmri>=0.5')  # look out
+    data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
     for sub_id in subjects:
-        rdm_6fold = np.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/grid_rsa_corr_trials/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_6fold.npy'.format(sub_id,sub_id))
+        rdm_6fold = np.load(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_6fold.npy'.format(sub_id,sub_id))
         rdm2_tri = upper_tri(rdm_6fold)
         for index,i in enumerate(range(4,9)):
-            rdm_ifold = np.load(rf'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/grid_rsa_corr_trials/Setall/6fold/{sub_id}/rsa/{sub_id}_grid_RDM_coarse_{i}fold.npy')
+            rdm_ifold = np.load(rf'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/game1/grid_rsa_corr_trials/Setall/6fold/{sub_id}/rsa/{sub_id}_grid_RDM_coarse_{i}fold.npy')
             rdm1_tri = upper_tri(rdm_ifold)
             r,p = pearsonr(rdm1_tri,rdm2_tri)
             fold_r[index].append(p)

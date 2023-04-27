@@ -26,7 +26,6 @@ def alignVSmisalign(testAngles,ytrue_test,omega_estimate):
     anglebinNum = [round(a/30)+1 for a in alignedD_360]
     anglebinNum = [1 if a==13 else a for a in anglebinNum]
     
-    
     label = []
     for binNum in anglebinNum:
         if binNum in range(1,13,2):
@@ -35,8 +34,13 @@ def alignVSmisalign(testAngles,ytrue_test,omega_estimate):
             label.append('misalign')
     data = pd.DataFrame({'BinNumber':anglebinNum,'Activation':ytrue_test,
                          'label':label})
-    sns.catplot(data=data,kind='bar',x='BinNumber',
-                y='Activation',hue='label')
+    data = data.sort_values(by='BinNumber')
+    sns.barplot(data=data,x='BinNumber',
+                y='Activation',hue='label',
+                # use two color label the 12 bars
+                palette=['salmon','grey','salmon','grey','salmon','grey',
+                         'salmon','grey','salmon','grey','salmon','grey'],
+                )
     plt.tight_layout()
     plt.show()
     

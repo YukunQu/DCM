@@ -38,10 +38,10 @@ def calc_rs_map(sub_id, ifold):
     :return:
     """
     # set path
-    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold'
-    neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_RDM_cmap.hdf5'.format(sub_id,sub_id))
+    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/game1/grid_rsa_corr_trials/Setall/6fold'
+    neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_RDM.hdf5'.format(sub_id,sub_id))
     gird_RDM_path = os.path.join(default_dir,'{}/rsa/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
-    rsmap_savepath = os.path.join(default_dir,'{}/rsa/rsa_cmap_img_coarse_{}fold.nii.gz'.format(sub_id,ifold))
+    rsmap_savepath = os.path.join(default_dir,'{}/rsa/rsa_img_coarse_{}fold.nii.gz'.format(sub_id,ifold))
 
     #  load neural RDM for each voxel
     neural_RDM = load_rdm(neural_RDM_path)
@@ -56,7 +56,7 @@ def calc_rs_map(sub_id, ifold):
     eval_score = [np.float64(e.evaluations) for e in eval_results]
 
     # Create an 3D array, with the size of mask, and
-    mni_mask = r'/mnt/workdir/DCM/docs/Mask/res-02_desc-brain_mask.nii'
+    mni_mask = r'/mnt/workdir/DCM/Docs/Mask/res-02_desc-brain_mask.nii'
     mask_img = nib.load(mni_mask)
     mask = mask_img.get_fdata()
     x, y, z = mask.shape

@@ -25,7 +25,6 @@ def set_rsa_contrasts(design_matrix):
             continue
         contrast_vector = np.zeros(design_matrix.shape[1])
         contrast_vector[contrast_index] = 1
-        contrasts_set[contrast_id] = contrast_vector
     return contrasts_set
 
 
@@ -39,7 +38,7 @@ def run_glm(subj,configs,ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,True)
+        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,True,False)
         first_level_glm(datasink, functional_imgs, design_matrices, set_rsa_contrasts)
 
 
@@ -60,7 +59,7 @@ if __name__ == "__main__":
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv',
-                   'out_rootdir':'/mnt/workdir/DCM/BIDS/derivatives/Nilearn'}
+                   'out_rootdir':'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa'}
     elif task == 'game2':
         configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'grid_rsa_corr_trials',
                    'run_list': [1, 2],
@@ -74,6 +73,6 @@ if __name__ == "__main__":
         raise Exception("The type of task is not supoort.")
 
     ifold = 6
-    subjects_chunk = list_to_chunk(subjects,50)
+    subjects_chunk = list_to_chunk(subjects,30)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=50)(delayed(run_glm)(subj,configs,ifold) for subj in chunk)
+        results_list = Parallel(n_jobs=30)(delayed(run_glm)(subj,configs,ifold) for subj in chunk)

@@ -16,7 +16,7 @@ levels = 5
 ntrials = 252
 nsub=20
 ampNoise = 1
-#%%
+
 # grid-like coding simulation #
 # sampling the angles
 angles,m1s,m2s = utils.samplingAngle(levels,ntrials)
