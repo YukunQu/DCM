@@ -27,32 +27,39 @@ def set_contrasts(design_matrix):
         contrasts_set[contrast_id] = contrast_vector
 
     # advanced contrast
-    # all trials' hexagonal modulation
-    contrasts_set['m2'] = contrasts_set['m2_align_odd'] + contrasts_set['m2_misalign_odd'] + \
-                          contrasts_set['m2_align_even'] + contrasts_set['m2_misalign_even']
+    # add odd trial and even trial together
+    for binNum in range(1,13):
+        contrasts_set['m2_' + str(binNum)] = contrasts_set['m2_odd_' + str(binNum)] + \
+                                             contrasts_set['m2_even_' + str(binNum)]
 
-    contrasts_set['decision'] = contrasts_set['decision_align_odd'] + contrasts_set['decision_misalign_odd'] + \
-                                contrasts_set['decision_align_even'] + contrasts_set['decision_misalign_even']
+    # add alignment effect
+    align_odd = np.zeros(design_matrix.shape[1])
+    align_even = np.zeros(design_matrix.shape[1])
+    align = np.zeros(design_matrix.shape[1])
+    for binNum in range(1,13,2):
+        align_odd = align_odd + contrasts_set['m2_odd_' + str(binNum)]
+        align_even = align_even + contrasts_set['m2_even_' + str(binNum)]
+        align = align_odd + align_even
+    contrasts_set['align_odd'] = align_odd
+    contrasts_set['align_even'] = align_even
+    contrasts_set['align'] = align
 
-    # get contrast align
-    contrasts_set['align_odd'] = contrasts_set['m2_align_odd'] + contrasts_set['decision_align_odd']
-    contrasts_set['align_even'] = contrasts_set['m2_align_even'] + contrasts_set['decision_align_even']
-    contrasts_set['align'] = contrasts_set['align_odd'] + contrasts_set['align_even']
+    # add misalignment effect
+    misalign_odd = np.zeros(design_matrix.shape[1])
+    misalign_even = np.zeros(design_matrix.shape[1])
+    misalign = np.zeros(design_matrix.shape[1])
+    for binNum in range(2,13,2):
+        misalign_odd = misalign_odd + contrasts_set['m2_odd_' + str(binNum)]
+        misalign_even = misalign_even + contrasts_set['m2_even_' + str(binNum)]
+        misalign = misalign_odd + misalign_even
+    contrasts_set['misalign_odd'] = misalign_odd
+    contrasts_set['misalign_even'] = misalign_even
+    contrasts_set['misalign'] = misalign
 
-    # ge contrast misalign
-    contrasts_set['misalign_odd'] = contrasts_set['m2_misalign_odd'] + contrasts_set['decision_misalign_odd']
-    contrasts_set['misalign_even'] = contrasts_set['m2_misalign_even'] + contrasts_set['decision_misalign_even']
-    contrasts_set['misalign'] = contrasts_set['misalign_odd'] + contrasts_set['misalign_even']
-
-    # get contrast alignPhi
-    contrasts_set['m2_alignPhi_odd'] = contrasts_set['m2_align_odd'] - contrasts_set['m2_misalign_odd']
-    contrasts_set['decision_alignPhi_odd'] = contrasts_set['decision_align_odd'] - contrasts_set['decision_misalign_odd']
-    contrasts_set['alignPhi_odd'] = contrasts_set['m2_alignPhi_odd'] + contrasts_set['decision_alignPhi_odd']
-
-    contrasts_set['m2_alignPhi_even'] = contrasts_set['m2_align_even'] - contrasts_set['m2_misalign_even']
-    contrasts_set['decision_alignPhi_even'] = contrasts_set['decision_align_even'] - contrasts_set['decision_misalign_even']
-    contrasts_set['alignPhi_even'] = contrasts_set['m2_alignPhi_even'] + contrasts_set['decision_alignPhi_even']
-    contrasts_set['alignPhi'] = contrasts_set['alignPhi_odd'] + contrasts_set['alignPhi_even']
+    # add alignment vs misalignment effect
+    contrasts_set['alignPhi'] = contrasts_set['align'] - contrasts_set['misalign']
+    contrasts_set['alignPhi_odd'] = contrasts_set['align_odd'] - contrasts_set['misalign_odd']
+    contrasts_set['alignPhi_even'] = contrasts_set['align_even'] - contrasts_set['misalign_even']
     return contrasts_set
 
 
@@ -89,8 +96,8 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects, 30)
-    for ifold in range(4, 9):
+    subjects_chunk = list_to_chunk(subjects, 60)
+    for ifold in range(6, 7):
         # creat dataroot
         dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                            configs['glm_type'], ifold)
@@ -100,4 +107,4 @@ if __name__ == "__main__":
         configs['ifold'] = ifold
         configs['dataroot'] = dataroot
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=30)(delayed(run_glm)(subj, configs) for subj in chunk)
+            results_list = Parallel(n_jobs=60)(delayed(run_glm)(subj, configs) for subj in chunk)
