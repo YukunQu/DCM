@@ -69,7 +69,7 @@ if __name__ == "__main__":
     print("total subjects:{}".format(len(sub_list)))
 
     # configure
-    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa'
+    data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
     glm_type = 'cv_test_align_spct'
     set_id = 'Setall'
     ifold = '6fold'
@@ -85,13 +85,7 @@ if __name__ == "__main__":
                         'cv_test_hexagon_spct': ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
                                                  'alignPhi_odd','alignPhi_even','alignPhi'],
                         'cv_hexagon_spct': ['M1', 'M2_corr', 'decision_corr','alignPhi'],
-                        'cv_test_align_spct': ['m2','decision',
-                                               'decision_align_even','decision_align_odd','decision_misalign_even','decision_misalign_odd',
-                                               'align_odd','align_even','align',
-                                               'm2_align_even','m2_align_odd','m2_misalign_even','m2_misalign_odd',
-                                               'misalign_odd','misalign_even','misalign',
-                                               'm2_alignPhi_odd','decision_alignPhi_odd','alignPhi_odd',
-                                               'm2_alignPhi_even','decision_alignPhi_even','alignPhi_even','alignPhi'],
+                        'cv_test_align_spct': ['m2_align_even','m2_misalign_even','m2_alignPhi_even'],
                         'distance_spct': ['M1', 'M2_corr', 'decision_corr','correct_error','M2_corrxdistance'],
                         '2distance_spct': ['M1', 'M2_corr', 'decision_corr',
                                            'm2xeucd','decisionxeucd','m2xmanhd','decisionxmanhd'],
@@ -118,19 +112,27 @@ if __name__ == "__main__":
     contrast_1st = contrast_configs[glm_type]
 
     # create output directory
-    data_root = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'group_203_mah_rho')
+    data_root = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'group')
     os.makedirs(data_root,exist_ok=True)
 
-    # mean effect of all subjects
+    # # mean effect of all subjects
     datasink = os.path.join(data_root, 'mean')
     os.makedirs(datasink,exist_ok=True)
     Parallel(n_jobs=25)(delayed(run_2nd_ttest)(sub_list, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
 
     # mean effect of high performance subjects
-    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.80)')  # look out
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game2_test_acc>0.80)')  # look out
     hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
-    print("high performance subjects:",len(hp_sub))
+    print("Game2's high performance subjects:",len(hp_sub))
+    datasink = os.path.join(data_root, 'game2_hp_all')
+    os.makedirs(datasink,exist_ok=True)
+    Parallel(n_jobs=25)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
+                        for contrast_id in contrast_1st)
+
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.80)and(game2_test_acc>0.8)')  # look out
+    hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
+    print("Both games' high performance subjects:",len(hp_sub))
     datasink = os.path.join(data_root, 'hp_all')
     os.makedirs(datasink,exist_ok=True)
     Parallel(n_jobs=25)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)

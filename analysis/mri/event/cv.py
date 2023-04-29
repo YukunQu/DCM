@@ -240,26 +240,31 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
                                 alignPhi_odd,alignPhi_even],axis=0)
         return event_data
 
-    def genpm_test_align(self, ev, phi, trial_type):
+    def genpm_test_align(self, ev, ifold, phi, trial_type):
         # generate parametric modulation for test GLM
         pmod_alignPhi = ev.copy()
         angle = ev['angle']
-        # split angles into 12 bins
-        alignedD_360 = [(a-phi) % 360 for a in angle]
-        anglebinNum = [round(a/30)+1 for a in alignedD_360]
-        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
-        anglebinNum = [str(a) for a in anglebinNum]
+        trials_type = []
+        # label alignment trials and misalignment trials according to the angle and Phi
+        period = 360/ifold
+        for a in angle:
+            distance = abs(a - phi)
+            distance = distance % period
+            if (distance < (period/4)) or (distance>(period*3/4)):
+                trials_type.append('align')
+            else:
+                trials_type.append('misalign')
 
-        pmod_alignPhi['trial_type'] = anglebinNum
+        pmod_alignPhi['trial_type'] = trials_type
         if trial_type == 'odd':
-            pmod_alignPhi['trial_type'] = 'odd_' + pmod_alignPhi['trial_type']
+            pmod_alignPhi['trial_type'] = pmod_alignPhi['trial_type'] + '_odd'
         elif trial_type == 'even':
-            pmod_alignPhi['trial_type'] = 'even_' + pmod_alignPhi['trial_type']
+            pmod_alignPhi['trial_type'] = pmod_alignPhi['trial_type'] + '_even'
         else:
             raise Exception("The variable 'trial type' only support odd and 'even'")
         return pmod_alignPhi
 
-    def game1ev_cv_test_align(self, odd_phi, even_phi):
+    def game1ev_cv_test_align(self, ifold, odd_phi, even_phi):
         # generatea M1, M2, Decision's event
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
@@ -273,23 +278,25 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
 
         # generate pmod of odd trials and even trials
         # odd trials
-        m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, even_phi, 'odd')
+        m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, ifold, even_phi, 'odd')
         m2_alignPhi_odd['trial_type'] = 'm2_' + m2_alignPhi_odd['trial_type']
-        #decision_alignPhi_odd = self.genpm_test_align(deev_odd, even_phi, 'odd')
-        #decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
+        decision_alignPhi_odd = self.genpm_test_align(deev_odd, ifold, even_phi, 'odd')
+        decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
+        alignPhi_odd = pd.concat([m2_alignPhi_odd,decision_alignPhi_odd],axis=0).sort_values('onset', ignore_index=True)
 
         # even trials
-        m2_alignPhi_even = self.genpm_test_align(m2ev_even,odd_phi,'even')
-        m2_alignPhi_even['trial_type'] = 'm2_'+m2_alignPhi_even['trial_type']
-        #decision_alignPhi_even = self.genpm_test_align(deev_even, odd_phi,'even')
-        #decision_alignPhi_even['trial_type'] = 'decision_' + decision_alignPhi_even['trial_type']
+        m2_alignPhi_even = self.genpm_test_align(m2ev_even, ifold, odd_phi,'even')
+        m2_alignPhi_even['trial_type'] = 'm2_' + m2_alignPhi_even['trial_type']
+        decision_alignPhi_even = self.genpm_test_align(deev_even, ifold, odd_phi,'even')
+        decision_alignPhi_even['trial_type'] = 'decision_' + decision_alignPhi_even['trial_type']
+        alignPhi_even = pd.concat([m2_alignPhi_even,decision_alignPhi_even],axis=0).sort_values('onset', ignore_index=True)
 
         # generate pmod of distance
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
 
-        event_data = pd.concat([m1ev,m2ev_error,deev_corr,deev_error,
-                                m2_alignPhi_odd,m2_alignPhi_even],axis=0)
+        event_data = pd.concat([m1ev, m2ev_error, deev_error,
+                                alignPhi_odd, alignPhi_even],axis=0)
         return event_data
 
 def gen_event_game1_cv_train():
@@ -355,7 +362,7 @@ def gen_event_game1_cv_test():
             for run_id in runs:
                 behDataPath = behav_path.format(sub, sub, run_id)
                 game1_cv = GAME1EV_cv_spct(behDataPath)
-                event = game1_cv.game1ev_cv_test_align(odd_phi, even_phi)  # look out
+                event = game1_cv.game1ev_cv_test_align(ifold,odd_phi, even_phi)  # look out
                 # save
                 out_dir = save_dir.format(sub, ifold)
                 if not os.path.exists(out_dir):
