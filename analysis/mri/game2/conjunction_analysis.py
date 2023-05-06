@@ -1,5 +1,6 @@
 from nilearn.image import binarize_img,math_img,get_data,new_img_like
 from scipy.stats import norm
+
 def conj_stat_maps(map1,map2,out_file,thr=2.3):
     """
     Runs a conjunction on stat maps
@@ -29,8 +30,8 @@ def conj_stat_maps(map1,map2,out_file,thr=2.3):
 
 
 if __name__ == "__main__":
-    map1 = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_distance_spct/Setall/6fold/group_203/mean/hexagon_zmap.nii.gz'
-    map2 = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/hexagon_spct/Setall/6fold/group/mean/hexagon_zmap.nii.gz'
-    outpath = r'/mnt/workdir/DCM/result/conjunction_analysis/hexagon/despiking_203/conj_hexagon_zmap.nii.gz'
+    map1 = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/Setall/6fold/group_203/mean/hexagon_zmap.nii.gz'
+    map2 = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_replace/game2/hexagon_replace_spct/Setall/6fold/group_193/mean/hexagon_zmap.nii.gz'
+    outpath = r'/mnt/workdir/DCM/Result/MRI/Conjunction_analysis/hexagon/replace_policy/conj_hexagon_zmap.nii.gz'
     thr = norm.ppf(1 - 0.001)
     conj_stat_maps(map1,map2,outpath,thr)

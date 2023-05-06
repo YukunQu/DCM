@@ -240,7 +240,7 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
                                 alignPhi_odd,alignPhi_even],axis=0)
         return event_data
 
-    def genpm_test_align(self, ev, ifold, phi, trial_type):
+    def genpm_test_align_stable(self, ev, ifold, phi, trial_type):
         # generate parametric modulation for test GLM
         pmod_alignPhi = ev.copy()
         angle = ev['angle']
@@ -264,6 +264,32 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
             raise Exception("The variable 'trial type' only support odd and 'even'")
         return pmod_alignPhi
 
+    def genpm_test_align(self, ev, ifold, phi, trial_type):
+        # generate parametric modulation for test GLM
+        pmod_alignPhi = ev.copy()
+        angle = ev['angle']
+        # label alignment trials and misalignment trials according to the angle and Phi
+        alignedD_360 = [(a-phi)% 360 for a in angle]
+        anglebinNum = [round(a/30)+1 for a in alignedD_360]
+        anglebinNum = [1 if a==13 else a for a in anglebinNum]
+
+        trials_type= []
+        for binNum in anglebinNum:
+            if binNum in range(1,13,2):
+                trials_type.append(f'align_{binNum}')
+            elif binNum in range(2,13,2):
+                trials_type.append(f'misalign_{binNum}')
+
+        pmod_alignPhi['trial_type'] = trials_type
+        if trial_type == 'odd':
+            pmod_alignPhi['trial_type'] = pmod_alignPhi['trial_type'] + '_odd'
+        elif trial_type == 'even':
+            pmod_alignPhi['trial_type'] = pmod_alignPhi['trial_type'] + '_even'
+        else:
+            raise Exception("The variable 'trial type' only support odd and 'even'")
+        pmod_alignPhi['Phi'] = phi
+        return pmod_alignPhi
+
     def game1ev_cv_test_align(self, ifold, odd_phi, even_phi):
         # generatea M1, M2, Decision's event
         m1ev = self.genM1ev()
@@ -280,7 +306,7 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
         # odd trials
         m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, ifold, even_phi, 'odd')
         m2_alignPhi_odd['trial_type'] = 'm2_' + m2_alignPhi_odd['trial_type']
-        decision_alignPhi_odd = self.genpm_test_align(deev_odd, ifold, even_phi, 'odd')
+        decision_alignPhi_odd = self.genpm_test(deev_odd, ifold, even_phi, 'odd')
         decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
         alignPhi_odd = pd.concat([m2_alignPhi_odd,decision_alignPhi_odd],axis=0).sort_values('onset', ignore_index=True)
 
@@ -295,9 +321,10 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
         m2ev_distance = self.genpm_distance_spct(trial_corr)
         m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
 
-        event_data = pd.concat([m1ev, m2ev_error, deev_error,
-                                alignPhi_odd, alignPhi_even],axis=0)
+        event_data = pd.concat([m1ev, m2ev_error,deev_error,
+                                alignPhi_even,m2ev_odd,deev_odd],axis=0)
         return event_data
+
 
 def gen_event_game1_cv_train():
     # define subject list

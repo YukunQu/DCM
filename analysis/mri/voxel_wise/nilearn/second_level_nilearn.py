@@ -58,7 +58,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     # configure
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = 'cv_test_align_spct'
+    glm_type = 'hexagon_replace_diff'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
@@ -78,6 +78,7 @@ if __name__ == "__main__":
 
     contrast_configs = {'base_spct':['M1', 'M2_corr', 'decision_corr', 'correct_error'],
                         'hexagon_spct': ['M1', 'M2_corr', 'decision_corr', 'correct_error', 'hexagon','sin','cos'],
+                        'hexagon_replace_diff': ['hexagon'],
                         'hexagon_distance_spct': ['M1', 'M2_corr', 'decision_corr', 'decision_error','hexagon','correct_error',
                                                   'M2xdistance', 'decisionxdistance', 'distance'],
                         'cv_train_hexagon_spct':['M1', 'M2_corr','decision_corr',
@@ -201,7 +202,7 @@ if __name__ == "__main__":
     Parallel(n_jobs=25)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
 
-    """
+
     # The covariate effect between the behavioral difference and neural difference
     datasink = os.path.join(data_root, 'behav_diff')
     acc_diff = data['game2_test_acc'] - data['game1_acc'].to_list()
@@ -217,4 +218,3 @@ if __name__ == "__main__":
     os.makedirs(datasink,exist_ok=True)
     Parallel(n_jobs=25)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
                         for contrast_id in contrast_1st)
-    """

@@ -12,7 +12,7 @@ def cal_diff(sub,contrast, game1_cmap_temp, game2_cmap_temp):
     diff_img = math_img("img2-img1", img1=img1, img2=img2)
 
     # save the difference image
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/base_diff/Setall/6fold/sub-{}/zmap'.format(sub) # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/hexagon_replace_diff/Setall/6fold/sub-{}/zmap'.format(sub) # look out
     os.makedirs(save_dir, exist_ok=True)
     diff_img.to_filename(os.path.join(save_dir, '{}_zmap.nii.gz'.format(contrast)))
 
@@ -24,7 +24,7 @@ data = participants_data.query(f'game2_fmri>=0.5')  # look out
 pid = data['Participant_ID'].to_list()
 sub_list = [p.split('-')[-1] for p in pid]
 
-task = 'base_spct'
+task = 'hexagon_spct'
 task_contrast = {'base_spct': ['M1', 'M2_corr', 'decision_corr', 'correct_error'],
                  'hexagon_spct': ['M1', 'M2_corr', 'decision_corr','correct_error','hexagon'],
                  'distance_spct': ['M1', 'M2_corr', 'decision_corr', 'correct_error', 'M2_corrxdistance'],
@@ -34,7 +34,7 @@ task_contrast = {'base_spct': ['M1', 'M2_corr', 'decision_corr', 'correct_error'
 contrast_1st = task_contrast[task]
 
 game1_cmap_temp = rf'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/{task}'+'/Setall/6fold/sub-{}/zmap/{}_zmap.nii.gz'
-game2_cmap_temp = rf'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/{task}'+'/Setall/6fold/sub-{}/zmap/{}_zmap.nii.gz'
+game2_cmap_temp = rf'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_replace/game2/{task}'+'/Setall/6fold/sub-{}/zmap/{}_zmap.nii.gz'
 
 for contrast in contrast_1st:
     print(task,'-',contrast,'start.')

@@ -13,24 +13,40 @@ from joblib import Parallel, delayed
 
 def set_contrasts(design_matrix):
     # set contrast
-    contrast_name = ['M1', 'M2_error', 'decision_error',
-                     'm2_align_even','m2_misalign_even','decision_align_even','decision_misalign_even',
-                     'm2_align_odd','m2_misalign_odd','decision_align_odd','decision_misalign_odd',
-                     ]
+    contrast_name = ['M1','M2_corr', 'M2_error', 'decision_corr','decision_error']
+    for onset in ['m2','decision']:
+        for even_odd in ['even']:
+            for bin in range(1,13,1):
+                if bin in range(1,13,2):
+                    contrast_name.append(onset+'_align_'+str(bin)+"_"+even_odd)
+                elif bin in range(2,13,2):
+                    contrast_name.append(onset+'_misalign_'+str(bin)+"_"+even_odd)
+
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
         contrast_index = get_reg_index(design_matrix, contrast_id)
         if len(contrast_index) == 0:
+            print(contrast_id, ' have no regressor!')
             continue
+
         contrast_vector = np.zeros(design_matrix.shape[1])
         contrast_vector[contrast_index] = 1
         contrasts_set[contrast_id] = contrast_vector
 
     # advanced contrast
     # align effect
-
-    # misalign effect
+    m2_align_even = np.zeros(design_matrix.shape[1])
+    m2_missalign_even = np.zeros(design_matrix.shape[1])
+    for cid, cvt in contrasts_set.items():
+        if ('m2_align' in cid) and ('even' in cid):
+            m2_align_even += cvt
+        elif ('m2_misalign' in cid) and ('even' in cid):
+            m2_missalign_even += cvt
+        else:
+            continue
+    contrasts_set['m2_align_even'] = m2_align_even
+    contrasts_set['m2_misalign_even'] = m2_missalign_even
 
     # hexagonal effect
     contrasts_set['m2_alignPhi_even'] = contrasts_set['m2_align_even'] - contrasts_set['m2_misalign_even']
@@ -70,7 +86,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects, 60)
+    subjects_chunk = list_to_chunk(subjects, 70)
     for ifold in range(6, 7):
         # creat dataroot
         dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
@@ -81,4 +97,4 @@ if __name__ == "__main__":
         configs['ifold'] = ifold
         configs['dataroot'] = dataroot
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=60)(delayed(run_glm)(subj, configs) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj, configs) for subj in chunk)
