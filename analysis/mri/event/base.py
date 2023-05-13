@@ -32,6 +32,47 @@ class GAME1EV(object):
             raise Exception("You need specify behavioral data format.")
         return starttime
 
+    # def label_trial_corr(self):
+    #     self.behData = self.behData.fillna('None')
+    #     if self.dformat == 'trial_by_trial':
+    #         keyResp_list = self.behData['resp.keys']
+    #     elif self.dformat == 'summary':
+    #         keyResp_tmp = self.behData['resp.keys_raw']
+    #         keyResp_list = []
+    #         for k in keyResp_tmp:
+    #             if k == 'None':
+    #                 keyResp_list.append(k)
+    #             else:
+    #                 keyResp_list.append(k[1])
+    #     else:
+    #         raise Exception("You need specify behavioral data format.")
+    #
+    #     trial_corr = []
+    #     for keyResp, row in zip(keyResp_list, self.behData.itertuples()):
+    #         rule = row.fightRule
+    #         if rule == '1A2D':
+    #             fight_result = row.pic1_ap - row.pic2_dp
+    #             if fight_result > 0:
+    #                 correctAns = 1
+    #             else:
+    #                 correctAns = 2
+    #         elif rule == '1D2A':
+    #             fight_result = row.pic2_ap - row.pic1_dp
+    #             if fight_result > 0:
+    #                 correctAns = 2
+    #             else:
+    #                 correctAns = 1
+    #         else:
+    #             raise Exception("None of rule have been found in the file.")
+    #         if (keyResp == 'None') or (keyResp is None):
+    #             trial_corr.append(False)
+    #         elif int(keyResp) == correctAns:
+    #             trial_corr.append(True)
+    #         else:
+    #             trial_corr.append(False)
+    #     accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
+    #     return trial_corr, accuracy
+
     def label_trial_corr(self):
         self.behData = self.behData.fillna('None')
         if self.dformat == 'trial_by_trial':
@@ -54,14 +95,22 @@ class GAME1EV(object):
                 fight_result = row.pic1_ap - row.pic2_dp
                 if fight_result > 0:
                     correctAns = 1
-                else:
+                elif fight_result <0:
                     correctAns = 2
+                elif fight_result == 0:
+                    correctAns = -1
+                else:
+                    raise Exception("fight result is not a number.")
             elif rule == '1D2A':
                 fight_result = row.pic2_ap - row.pic1_dp
                 if fight_result > 0:
                     correctAns = 2
-                else:
+                elif fight_result <0:
                     correctAns = 1
+                elif fight_result == 0:
+                    correctAns = -1
+                else:
+                    raise Exception("fight result is not a number.")
             else:
                 raise Exception("None of rule have been found in the file.")
             if (keyResp == 'None') or (keyResp is None):

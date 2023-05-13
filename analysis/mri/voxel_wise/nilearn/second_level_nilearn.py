@@ -58,7 +58,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     # subject
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
     # configure
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = 'hexagon_replace_diff'
+    glm_type = '2distance_spct'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
@@ -87,6 +87,7 @@ if __name__ == "__main__":
                                                  'alignPhi_odd','alignPhi_even','alignPhi'],
                         'cv_hexagon_spct': ['M1', 'M2_corr', 'decision_corr','alignPhi'],
                         'cv_test_align_spct': ['m2_align_even','m2_misalign_even','m2_alignPhi_even'],
+                        'cv_test_align_spct_drop_dogfall': ['m2_align_even','m2_misalign_even','m2_alignPhi_even'],
                         'distance_spct': ['M1', 'M2_corr', 'decision_corr','correct_error','M2_corrxdistance'],
                         '2distance_spct': ['M1', 'M2_corr', 'decision_corr',
                                            'm2xeucd','decisionxeucd','m2xmanhd','decisionxmanhd'],
@@ -131,10 +132,10 @@ if __name__ == "__main__":
     Parallel(n_jobs=25)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
 
-    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.80)and(game2_test_acc>0.8)')  # look out
+    hp_data = participants_data.query(f'({task}_fmri>=0.5)and(game1_acc>0.80)')  # look out
     hp_sub = [p.split('-')[-1] for p in hp_data['Participant_ID'].to_list()]
     print("Both games' high performance subjects:",len(hp_sub))
-    datasink = os.path.join(data_root, 'hp_all')
+    datasink = os.path.join(data_root, 'game1_hp_all')
     os.makedirs(datasink,exist_ok=True)
     Parallel(n_jobs=25)(delayed(run_2nd_ttest)(hp_sub, contrast_id, templates, datasink)
                         for contrast_id in contrast_1st)
@@ -204,17 +205,17 @@ if __name__ == "__main__":
 
 
     # The covariate effect between the behavioral difference and neural difference
-    datasink = os.path.join(data_root, 'behav_diff')
-    acc_diff = data['game2_test_acc'] - data['game1_acc'].to_list()
-    covariates = {'acc_diff': acc_diff}
-    os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
-                        for contrast_id in contrast_1st)
+    # datasink = os.path.join(data_root, 'age_behav_diff')
+    # acc_diff = data['game2_test_acc'] - data['game1_acc'].to_list()
+    # covariates = {'beh_diff': acc_diff,'age':data['Age']}
+    # os.makedirs(datasink,exist_ok=True)
+    # Parallel(n_jobs=25)(delayed(run_2nd_covariate)(sub_list, contrast_id, templates, covariates, datasink)
+    #                     for contrast_id in contrast_1st)
 
     # The covariate effect between the behavioral difference and neural difference for adult subjects
-    datasink = os.path.join(data_root, 'behav_diff_adult')
-    acc_diff = data_adult['game2_test_acc'] - data_adult['game1_acc'].to_list()
-    covariates = {'acc_diff': acc_diff}
-    os.makedirs(datasink,exist_ok=True)
-    Parallel(n_jobs=25)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
-                        for contrast_id in contrast_1st)
+    # datasink = os.path.join(data_root, 'behav_diff_adult')
+    # acc_diff = data_adult['game2_test_acc'] - data_adult['game1_acc'].to_list()
+    # covariates = {'acc_diff': acc_diff}
+    # os.makedirs(datasink,exist_ok=True)
+    # Parallel(n_jobs=25)(delayed(run_2nd_covariate)(adult_sub_list, contrast_id, templates, covariates, datasink)
+    #                     for contrast_id in contrast_1st)

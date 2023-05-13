@@ -240,7 +240,7 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
                                 alignPhi_odd,alignPhi_even],axis=0)
         return event_data
 
-    def genpm_test_align_stable(self, ev, ifold, phi, trial_type):
+    def genpm_test_align_old(self, ev, ifold, phi, trial_type):
         # generate parametric modulation for test GLM
         pmod_alignPhi = ev.copy()
         angle = ev['angle']
@@ -269,9 +269,9 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
         pmod_alignPhi = ev.copy()
         angle = ev['angle']
         # label alignment trials and misalignment trials according to the angle and Phi
-        alignedD_360 = [(a-phi)% 360 for a in angle]
+        alignedD_360 = [(a-phi) % 360 for a in angle]
         anglebinNum = [round(a/30)+1 for a in alignedD_360]
-        anglebinNum = [1 if a==13 else a for a in anglebinNum]
+        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
 
         trials_type= []
         for binNum in anglebinNum:
@@ -303,12 +303,12 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
         deev_odd,deev_even = self.split_event(deev_corr,trial_corr)
 
         # generate pmod of odd trials and even trials
-        # odd trials
-        m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, ifold, even_phi, 'odd')
-        m2_alignPhi_odd['trial_type'] = 'm2_' + m2_alignPhi_odd['trial_type']
-        decision_alignPhi_odd = self.genpm_test(deev_odd, ifold, even_phi, 'odd')
-        decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
-        alignPhi_odd = pd.concat([m2_alignPhi_odd,decision_alignPhi_odd],axis=0).sort_values('onset', ignore_index=True)
+        # # odd trials
+        # m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, ifold, even_phi, 'odd')
+        # m2_alignPhi_odd['trial_type'] = 'm2_' + m2_alignPhi_odd['trial_type']
+        # decision_alignPhi_odd = self.genpm_test(deev_odd, ifold, even_phi, 'odd')
+        # decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
+        # alignPhi_odd = pd.concat([m2_alignPhi_odd,decision_alignPhi_odd],axis=0).sort_values('onset', ignore_index=True)
 
         # even trials
         m2_alignPhi_even = self.genpm_test_align(m2ev_even, ifold, odd_phi,'even')
@@ -325,6 +325,94 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
                                 alignPhi_even,m2ev_odd,deev_odd],axis=0)
         return event_data
 
+
+class GAME1EV_cv_spct_drop_dogfall(GAME1EV_cv_spct):
+    def __init__(self, behDataPath):
+        GAME1EV_cv_spct.__init__(self, behDataPath)
+
+    def label_trial_corr(self):
+        self.behData = self.behData.fillna('None')
+        if self.dformat == 'trial_by_trial':
+            keyResp_list = self.behData['resp.keys']
+        elif self.dformat == 'summary':
+            keyResp_tmp = self.behData['resp.keys_raw']
+            keyResp_list = []
+            for k in keyResp_tmp:
+                if k == 'None':
+                    keyResp_list.append(k)
+                else:
+                    keyResp_list.append(k[1])
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        trial_corr = []
+        for keyResp, row in zip(keyResp_list, self.behData.itertuples()):
+            rule = row.fightRule
+            if rule == '1A2D':
+                fight_result = row.pic1_ap - row.pic2_dp
+                if fight_result > 0:
+                    correctAns = 1
+                elif fight_result <0:
+                    correctAns = 2
+                elif fight_result == 0:
+                    correctAns = -1
+                else:
+                    raise Exception("fight result is not a number.")
+            elif rule == '1D2A':
+                fight_result = row.pic2_ap - row.pic1_dp
+                if fight_result > 0:
+                    correctAns = 2
+                elif fight_result <0:
+                    correctAns = 1
+                elif fight_result == 0:
+                    correctAns = -1
+                else:
+                    raise Exception("fight result is not a number.")
+            else:
+                raise Exception("None of rule have been found in the file.")
+            if (keyResp == 'None') or (keyResp is None):
+                trial_corr.append(False)
+            elif int(keyResp) == correctAns:
+                trial_corr.append(True)
+            else:
+                trial_corr.append(False)
+        accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
+        return trial_corr, accuracy
+
+    def game1ev_cv_test_align(self, ifold, odd_phi, even_phi):
+        # generatea M1, M2, Decision's event
+        m1ev = self.genM1ev()
+        trial_corr, accuracy = self.label_trial_corr()
+        # split trial into correct trial and error trial
+        m2ev_corr, m2ev_error = self.genM2ev(trial_corr)
+        deev_corr, deev_error = self.genDeev(trial_corr)
+
+        # split correct trials into odd trials and even trials
+        m2ev_odd,m2ev_even = self.split_event(m2ev_corr,trial_corr)
+        deev_odd,deev_even = self.split_event(deev_corr,trial_corr)
+
+        # generate pmod of odd trials and even trials
+        # # odd trials
+        # m2_alignPhi_odd = self.genpm_test_align(m2ev_odd, ifold, even_phi, 'odd')
+        # m2_alignPhi_odd['trial_type'] = 'm2_' + m2_alignPhi_odd['trial_type']
+        # decision_alignPhi_odd = self.genpm_test_align(deev_odd, ifold, even_phi, 'odd')
+        # decision_alignPhi_odd['trial_type'] = 'decision_' + decision_alignPhi_odd['trial_type']
+        # alignPhi_odd = pd.concat([m2_alignPhi_odd,decision_alignPhi_odd],axis=0).sort_values('onset', ignore_index=True)
+
+        # even trials
+        m2_alignPhi_even = self.genpm_test_align(m2ev_even, ifold, odd_phi,'even')
+        m2_alignPhi_even['trial_type'] = 'm2_' + m2_alignPhi_even['trial_type']
+        decision_alignPhi_even = self.genpm_test_align(deev_even, ifold, odd_phi,'even')
+        decision_alignPhi_even['trial_type'] = 'decision_' + decision_alignPhi_even['trial_type']
+        alignPhi_even = pd.concat([m2_alignPhi_even,decision_alignPhi_even],axis=0).sort_values('onset', ignore_index=True)
+
+        # generate pmod of distance
+        m2ev_distance = self.genpm_distance_spct(trial_corr)
+        m2ev_distance['trial_type'] = 'M2_corrx' + m2ev_distance['trial_type']
+
+        event_data = pd.concat([m1ev,alignPhi_even,m2ev_odd,deev_odd,
+                                m2ev_error, deev_error],axis=0)
+        return event_data
 
 def gen_event_game1_cv_train():
     # define subject list
@@ -370,7 +458,7 @@ def gen_event_game1_cv_test():
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_align_spct/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_align_spct_drop_dogfall/sub-{}/{}fold'  # look out
 
     # set Phi estimated from specific ROI
     phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/' \
@@ -388,7 +476,7 @@ def gen_event_game1_cv_test():
             even_phi = phis_data.query(f'(sub_id=="sub-{sub}")and(ifold=="{ifold}fold")and(trial_type=="even")')['Phi_mean'].values[0]
             for run_id in runs:
                 behDataPath = behav_path.format(sub, sub, run_id)
-                game1_cv = GAME1EV_cv_spct(behDataPath)
+                game1_cv = GAME1EV_cv_spct_drop_dogfall(behDataPath)
                 event = game1_cv.game1ev_cv_test_align(ifold,odd_phi, even_phi)  # look out
                 # save
                 out_dir = save_dir.format(sub, ifold)

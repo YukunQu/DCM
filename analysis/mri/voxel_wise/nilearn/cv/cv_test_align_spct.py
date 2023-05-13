@@ -13,14 +13,14 @@ from joblib import Parallel, delayed
 
 def set_contrasts(design_matrix):
     # set contrast
-    contrast_name = ['M1','M2_corr', 'M2_error', 'decision_corr','decision_error']
+    contrast_name = ['M1','M2_corr','M2_error', 'decision_corr','decision_error']
     for onset in ['m2','decision']:
-        for even_odd in ['even']:
+        for even_odd in ['even','odd']:
             for bin in range(1,13,1):
                 if bin in range(1,13,2):
-                    contrast_name.append(onset+'_align_'+str(bin)+"_"+even_odd)
+                    contrast_name.append(onset + '_align_'+str(bin)+"_"+even_odd)
                 elif bin in range(2,13,2):
-                    contrast_name.append(onset+'_misalign_'+str(bin)+"_"+even_odd)
+                    contrast_name.append(onset + '_misalign_'+str(bin)+"_"+even_odd)
 
     # base contrast
     contrasts_set = {}
@@ -39,9 +39,9 @@ def set_contrasts(design_matrix):
     m2_align_even = np.zeros(design_matrix.shape[1])
     m2_missalign_even = np.zeros(design_matrix.shape[1])
     for cid, cvt in contrasts_set.items():
-        if ('m2_align' in cid) and ('even' in cid):
+        if (cid.startswith('m2_align')) and ('even' in cid):
             m2_align_even += cvt
-        elif ('m2_misalign' in cid) and ('even' in cid):
+        elif (cid.startswith('m2_misalign')) and ('even' in cid):
             m2_missalign_even += cvt
         else:
             continue
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     # specify configure parameters
     configs = {'TR': 3.0,
                'task': 'game1',
-               'glm_type': 'cv_test_align_spct',
+               'glm_type': 'cv_test_align_spct_drop_dogfall',
                'run_list': [1, 2, 3, 4, 5, 6],
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
