@@ -45,9 +45,13 @@ class GAME1EV_distance_spct(GAME1EV_base_spct):
         pmev_corr = pmev_corr.sort_values('onset', ignore_index=True)
         return pmev_corr
 
-    def game1ev_distance_spct(self):
+    def game1ev_distance_spct(self,drop_stalemate=False):
         m1ev = self.genM1ev()
-        trial_label, accuracy = self.label_trial_corr()
+        if drop_stalemate:
+            trial_label, accuracy = self.label_trial_drop_stalemate()
+        else:
+            trial_label, accuracy = self.label_trial_corr()
+
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
         distance_corr = self.genpm_distance_spct(trial_label)

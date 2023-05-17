@@ -71,10 +71,10 @@ from nilearn import image
 #from analysis.mri.img.zscore_nii import zscore_img
 from nilearn.plotting import plot_stat_map
 from nilearn.plotting import plot_roi
-from scipy.ndimage import binary_dilation,binary_erosion
+from scipy.ndimage import binary_dilation,binary_erosion,binary_closing
 
 # load statistical map and mask
-target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct'
+target_dir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct'
 stats_map = image.load_img(os.path.join(target_dir,'Setall/6fold/group_203/acc/hexagon_acc_zmap.nii.gz'))
 roi1 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/lh.isthmuscingulate.nii.gz')
 roi2 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/rh.isthmuscingulate.nii.gz')
@@ -86,7 +86,7 @@ if not np.array_equal(mask.affine,stats_map.affine):
 # get threshold map of statistical map
 img_data = stats_map.get_fdata()
 img_data = np.abs(img_data)
-img_data[img_data <=3.1] = 0
+img_data[img_data <3.1] = 0
 stats_map_thr = image.new_img_like(stats_map, img_data)
 plot_stat_map(stats_map_thr, title='', annotate=False, cut_coords=(0, -4, 0))
 bin_tmap_thr = (img_data != 0)
@@ -100,8 +100,22 @@ plot_stat_map(mask_thr, title='', annotate=False, cut_coords=(0, -4, 0))
 bin_tmap_thr_masked = np.logical_and(mask_data.astype(bool), bin_tmap_thr)
 
 # dilate mask
-bin_tmap_thr_masked = binary_erosion(bin_tmap_thr_masked,iterations=2)
+bin_tmap_thr_masked = binary_erosion(bin_tmap_thr_masked,iterations=3)
 # plot roi and save
 bin_tmap_thr_peak_spere_img = image.new_img_like(stats_map, bin_tmap_thr_masked.astype(int))
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0, 0, 0))
-bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"RSC_thr3.1_erosion2.nii.gz"))
+bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"RSC_thr3.1_erosion3.nii.gz"))
+
+
+#%%
+# calculate the dice index
+from nilearn.image import get_data
+import numpy as np
+def dice_index(arr1, arr2):
+    intersection = np.logical_and(arr1, arr2)
+    return 2.0 * intersection.sum() / (arr1.sum() + arr2.sum())
+
+arr1 = get_data(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
+arr2 = get_data(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
+dice = dice_index(arr1, arr2)
+print(dice)

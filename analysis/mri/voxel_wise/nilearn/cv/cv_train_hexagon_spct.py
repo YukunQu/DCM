@@ -50,7 +50,9 @@ def set_contrasts(design_matrix):
                                           contrasts_set['sin']])
 
     # correct contrast to error
-    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+    if 'decision_error' in contrasts_set.keys():
+        contrasts_set['m2_correct_superiority'] = contrasts_set['M2_corr'] - contrasts_set['M2_error']
+        contrasts_set['decision_correct_superiority'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
@@ -64,7 +66,7 @@ def run_glm(subj, configs):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj, ifold, configs, load_ev, True)
+        functional_imgs, design_matrices = prepare_data(subj, ifold, configs, load_ev, concat_runs=True, despiking=False)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 
@@ -87,7 +89,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects, 70)
+    subjects_chunk = list_to_chunk(subjects, 60)
     for ifold in [6]:
         # creat dataroot
         dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
@@ -98,4 +100,4 @@ if __name__ == "__main__":
         configs['ifold'] = ifold
         configs['dataroot'] = dataroot
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj, configs) for subj in chunk)
+            results_list = Parallel(n_jobs=60)(delayed(run_glm)(subj, configs) for subj in chunk)

@@ -70,25 +70,29 @@ if __name__ == "__main__":
 
     # configure
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = '2distance_spct'
+    glm_type = 'cv_train_hexagon_spct'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
-    #templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/rsa', '{}.nii.gz')
+    # templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/rsa', '{}.nii.gz')
 
     contrast_configs = {'base_spct':['M1', 'M2_corr', 'decision_corr', 'correct_error'],
-                        'hexagon_spct': ['M1', 'M2_corr', 'decision_corr', 'correct_error', 'hexagon','sin','cos'],
+                        'hexagon_spct': ['M1', 'M2_corr', 'decision_corr','sin', 'cos',
+                                         'hexagon','m2_correct_superiority','decision_correct_superiority'],
                         'hexagon_replace_diff': ['hexagon'],
                         'hexagon_distance_spct': ['M1', 'M2_corr', 'decision_corr', 'decision_error','hexagon','correct_error',
                                                   'M2xdistance', 'decisionxdistance', 'distance'],
-                        'cv_train_hexagon_spct':['M1', 'M2_corr','decision_corr',
-                                                 'odd_hexagon', 'even_hexagon', 'hexagon', 'correct_error'],
+                        'cv_train_hexagon_spct':['M1', 'M2_corr','decision_corr','odd_hexagon', 'even_hexagon', 'hexagon',
+                                                 'm2_correct_superiority','decision_correct_superiority'],
+
                         'cv_test_hexagon_spct': ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
                                                  'alignPhi_odd','alignPhi_even','alignPhi'],
                         'cv_hexagon_spct': ['M1', 'M2_corr', 'decision_corr','alignPhi'],
                         'cv_test_align_spct': ['m2_align_even','m2_misalign_even','m2_alignPhi_even'],
-                        'cv_test_align_spct_drop_dogfall': ['m2_align_even','m2_misalign_even','m2_alignPhi_even'],
-                        'distance_spct': ['M1', 'M2_corr', 'decision_corr','correct_error','M2_corrxdistance'],
+                        'cv_test_12bin_spct': ['m2_alignPhi','decision_alignPhi','alignPhi'],
+                        'distance_spct': ['M1','M2_corr','decision_corr','M2_corrxdistance','decision_corrxdistance',
+                                          'm2_correct_superiority','decision_correct_superiority'],
+
                         '2distance_spct': ['M1', 'M2_corr', 'decision_corr',
                                            'm2xeucd','decisionxeucd','m2xmanhd','decisionxmanhd'],
 

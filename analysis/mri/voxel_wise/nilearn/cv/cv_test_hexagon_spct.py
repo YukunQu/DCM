@@ -26,8 +26,6 @@ def set_contrasts(design_matrix):
     # advanced contrast
     # all trials' hexagonal modulation
     contrasts_set['alignPhi'] = contrasts_set['alignPhi_even'] + contrasts_set['alignPhi_odd']
-    # correct contrast to error
-    contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
@@ -49,7 +47,7 @@ if __name__ == "__main__":
     # specify configure parameters
     configs = {'TR': 3.0,
                'task': 'game1',
-               'glm_type': 'cv_test_hexagon_spct',
+               'glm_type': 'cv_test_hexagon_spct_exchange_test',
                'run_list': [1, 2, 3, 4, 5, 6],
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
@@ -64,7 +62,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects, 50)
+    subjects_chunk = list_to_chunk(subjects, 70)
     for ifold in range(6, 7):
         # creat dataroot
         dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
@@ -75,4 +73,4 @@ if __name__ == "__main__":
         configs['ifold'] = ifold
         configs['dataroot'] = dataroot
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=50)(delayed(run_glm)(subj, configs) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj, configs) for subj in chunk)
