@@ -6,8 +6,8 @@ from os.path import join as opj
 
 # copy data to new directory selectively
 def copy_mri_data(sub_id,mri_modes=('fmap','dwi')):
-    original_dir = r'/mnt/workdir/DCM/BIDS'
-    output_dir = '/mnt/data/DCM/tmp/sub_t1'
+    original_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep/'
+    output_dir = '/media/dell/6363-802B/T1_preprocessed'
 
     sourMriDir = opj(original_dir, sub_id)
     targMriDir = opj(output_dir, sub_id.replace('-', '-'))
@@ -54,8 +54,11 @@ if __name__ == "__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
 
     # copy meg data
-    data = participants_data.query('game1_fmri>=0.5')
-    subject_list = data['Participant_ID'].to_list()
+    #data = participants_data.query('game1_fmri>=0.5')
+    #subject_list = data['Participant_ID'].to_list()
+    sub_info = pd.read_csv(r"/mnt/data/DCM/sub_info.csv")
+    subject_list = sub_info['sub_id'].to_list()
+    subject_list = [s.replace('_','-') for s in subject_list]
 
     #subject_list = ['sub-'+str(s).zfill(3) for s in subject_list]
     for sub in subject_list:

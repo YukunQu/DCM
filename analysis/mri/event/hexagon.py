@@ -27,17 +27,23 @@ class GAME1EV_hexagon_spct(GAME1EV_base_spct, EV_hexagon):
     def game1ev_hexagon_spct(self, ifold, drop_stalemate=False):
         # base regressors
         m1ev = self.genM1ev()
-        if drop_stalemate:
-            trial_label, accuracy = self.label_trial_drop_stalemate()
-        else:
-            trial_label, accuracy = self.label_trial_corr()
+        # label the correct trials and incorrect trials
+        trial_label, accuracy = self.label_trial_corr()
 
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
 
-        # paramertric modulation regressors
-        m2_pmod_sin, m2_pmod_cos = self.genpm(m2ev_corr, ifold)
-        decision_pmod_sin, decision_pmod_cos = self.genpm(deev_corr, ifold)
+        # drop stalemate trials
+        if drop_stalemate:
+            m2ev_corr_dropsm = m2ev_corr.query('stalemate==0')
+            deev_corr_dropsm = deev_corr.query('stalemate==0')
+            # paramertric modulation regressors
+            m2_pmod_sin, m2_pmod_cos = self.genpm(m2ev_corr_dropsm, ifold)
+            decision_pmod_sin, decision_pmod_cos = self.genpm(deev_corr_dropsm, ifold)
+        else:
+            # paramertric modulation regressors
+            m2_pmod_sin, m2_pmod_cos = self.genpm(m2ev_corr, ifold)
+            decision_pmod_sin, decision_pmod_cos = self.genpm(deev_corr, ifold)
         sin = pd.concat([m2_pmod_sin, decision_pmod_sin], axis=0).sort_values('onset', ignore_index=True)
         cos = pd.concat([m2_pmod_cos, decision_pmod_cos], axis=0).sort_values('onset', ignore_index=True)
 

@@ -48,11 +48,6 @@ def set_contrasts(design_matrix):
     contrasts_set['sin'] = contrasts_set['sin_odd'] + contrasts_set['sin_even']
     contrasts_set['hexagon'] = np.vstack([contrasts_set['cos'],
                                           contrasts_set['sin']])
-
-    # correct contrast to error
-    if 'decision_error' in contrasts_set.keys():
-        contrasts_set['m2_correct_superiority'] = contrasts_set['M2_corr'] - contrasts_set['M2_error']
-        contrasts_set['decision_correct_superiority'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 

@@ -70,20 +70,19 @@ if __name__ == "__main__":
 
     # configure
     data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-    glm_type = 'cv_train_hexagon_spct'
+    glm_type = 'cv_test_hexagon_spct'
     set_id = 'Setall'
     ifold = '6fold'
     templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
     # templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/rsa', '{}.nii.gz')
 
-    contrast_configs = {'base_spct':['M1', 'M2_corr', 'decision_corr', 'correct_error'],
+    contrast_configs = {'base_spct':['M1', 'M2_corr', 'decision_corr', 'm2_correct_superiority','decision_correct_superiority'],
                         'hexagon_spct': ['M1', 'M2_corr', 'decision_corr','sin', 'cos',
                                          'hexagon','m2_correct_superiority','decision_correct_superiority'],
                         'hexagon_replace_diff': ['hexagon'],
                         'hexagon_distance_spct': ['M1', 'M2_corr', 'decision_corr', 'decision_error','hexagon','correct_error',
                                                   'M2xdistance', 'decisionxdistance', 'distance'],
-                        'cv_train_hexagon_spct':['M1', 'M2_corr','decision_corr','odd_hexagon', 'even_hexagon', 'hexagon',
-                                                 'm2_correct_superiority','decision_correct_superiority'],
+                        'cv_train_hexagon_spct':['M1', 'M2_corr','decision_corr','odd_hexagon', 'even_hexagon', 'hexagon'],
 
                         'cv_test_hexagon_spct': ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
                                                  'alignPhi_odd','alignPhi_even','alignPhi'],

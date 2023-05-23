@@ -21,12 +21,12 @@ phis1 = pd.read_csv(r"/mnt/data/DCM/result_backup/2023.3.24/Nilearn_smodel/game1
                     r"cv_train_hexagon_spct/estPhi_ROI-EC_circmean_cv.csv")
 phis1 = phis1.query("ifold=='6fold'")
 phis1 = phis1[phis1['sub_id'].isin(sub_id)]
-phis1_odd = phis1[phis1['trial_type']=='odd']['Phi_mean']
-phis1_even = phis1[phis1['trial_type']=='even']['Phi_mean']
+phis1_odd = phis1[phis1['trial_type'] == 'odd']['Phi_mean']
+phis1_even = phis1[phis1['trial_type'] == 'even']['Phi_mean']
 
-phis2 = pd.read_csv(r"/mnt/data/DCM/result_backup/2023.5.17/cv_train_hexagon_spct/estPhi_ROI-EC-cvtrian_circmean_cv.csv")
-phis2_odd = phis2[phis2['trial_type']=='odd']['Phi_mean']
-phis2_even = phis2[phis2['trial_type']=='even']['Phi_mean']
+phis2 = pd.read_csv(r"/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/estPhi_ROI-EC-anat_circmean_cv.csv")
+phis2_odd = phis2[phis2['trial_type'] == 'odd']['Phi_mean']
+phis2_even = phis2[phis2['trial_type'] == 'even']['Phi_mean']
 
 # calculate correlation
 corr_odd,p_odd = pearsonr(phis_mean, phis2_odd)

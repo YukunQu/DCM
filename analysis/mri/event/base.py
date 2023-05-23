@@ -73,7 +73,7 @@ class GAME1EV(object):
         accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
         return trial_corr, accuracy
 
-    def label_trial_drop_stalemate(self):
+    def label_trials_stalemate(self):
         self.behData = self.behData.fillna('None')
         if self.dformat == 'trial_by_trial':
             keyResp_list = self.behData['resp.keys']
@@ -88,39 +88,28 @@ class GAME1EV(object):
         else:
             raise Exception("You need specify behavioral data format.")
 
-        trial_corr = []
+        stalemate_trials = []
         for keyResp, row in zip(keyResp_list, self.behData.itertuples()):
             rule = row.fightRule
             if rule == '1A2D':
                 fight_result = row.pic1_ap - row.pic2_dp
-                if fight_result > 0:
-                    correctAns = 1
-                elif fight_result <0:
-                    correctAns = 2
-                elif fight_result == 0:
-                    correctAns = -999
-                else:
-                    raise Exception("fight result is not a number.")
             elif rule == '1D2A':
                 fight_result = row.pic2_ap - row.pic1_dp
-                if fight_result > 0:
-                    correctAns = 2
-                elif fight_result <0:
-                    correctAns = 1
-                elif fight_result == 0:
-                    correctAns = -999
-                else:
-                    raise Exception("fight result is not a number.")
             else:
                 raise Exception("None of rule have been found in the file.")
-            if (keyResp == 'None') or (keyResp is None):
-                trial_corr.append(False)
-            elif int(keyResp) == correctAns:
-                trial_corr.append(True)
+            if fight_result==0:
+                # add index of the row
+                stalemate_trials.append(1)
             else:
-                trial_corr.append(False)
-        accuracy = np.round(np.sum(trial_corr) / len(self.behData), 3)
-        return trial_corr, accuracy
+                stalemate_trials.append(0)
+        self.behData['stalemate'] = stalemate_trials
+        return stalemate_trials
+
+    @staticmethod
+    def drop_sm(ev):
+        # drop stalemate trials
+        ev = ev.query('stalemate == 0')
+        return ev
 
     def genM1ev(self):
         if self.dformat == 'trial_by_trial':
@@ -316,6 +305,7 @@ class GAME1EV_base_spct(GAME1EV):
             m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m2ev['trial_type'] = 'M2'
             m2ev['modulation'] = 1
+            m2ev['stalemate'] = self.behData['stalemate']
         elif self.dformat == 'summary':
             onset = self.behData['pic2_render.started_raw'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -323,6 +313,7 @@ class GAME1EV_base_spct(GAME1EV):
             m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m2ev['trial_type'] = 'M2'
             m2ev['modulation'] = 1
+            m2ev['stalemate'] = self.behData['stalemate']
         else:
             raise Exception("You need specify behavioral data format.")
 
@@ -356,6 +347,7 @@ class GAME1EV_base_spct(GAME1EV):
             deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
+            deev['stalemate'] = self.behData['stalemate']
         elif self.dformat == 'summary':
             onset = self.behData['cue1.started_raw'] - self.starttime
             duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
@@ -363,6 +355,7 @@ class GAME1EV_base_spct(GAME1EV):
             deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
+            deev['stalemate'] = self.behData['stalemate']
         else:
             raise Exception("You need specify behavioral data format.")
 
@@ -390,6 +383,7 @@ class GAME1EV_base_spct(GAME1EV):
 
     def game1ev_base_spct(self):
         m1ev = self.genM1ev()
+        self.label_trials_stalemate()
         trial_label, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
