@@ -74,26 +74,26 @@ from nilearn.plotting import plot_roi
 from scipy.ndimage import binary_dilation,binary_erosion,binary_closing
 
 # load statistical map and mask
-target_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct'
-stats_map = image.load_img(os.path.join(target_dir,'Setall/6fold/group/mean/hexagon_zmap.nii.gz'))
+target_dir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/value_spct'
+stats_map = image.load_img(os.path.join(target_dir,'Setall/6fold/group/mean/value_zmap.nii.gz'))
 # roi1 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/lh.isthmuscingulate.nii.gz')
 # roi2 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/rh.isthmuscingulate.nii.gz')
 # mask = image.math_img('np.logical_or(img1,img2)', img1=roi1, img2=roi2)
-mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
+mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/BN_mPFC.nii.gz')
 if not np.array_equal(mask.affine,stats_map.affine):
     raise Exception("The mask and statistical map have different affine matrix.")
 
 # get threshold map of statistical map
 img_data = stats_map.get_fdata()
-img_data = np.abs(img_data)
-img_data[img_data <3.1] = 0
+#img_data = np.abs(img_data)
+img_data[img_data <4] = 0
 stats_map_thr = image.new_img_like(stats_map, img_data)
 plot_stat_map(stats_map_thr, title='', annotate=False, cut_coords=(0, -4, 0))
 bin_tmap_thr = (img_data != 0)
 
 # mask the thresholded statistical map
 mask_data = image.get_data(mask)
-mask_data[mask_data<10] = 0
+mask_data[mask_data<0] = 0
 mask_thr = image.new_img_like(mask,mask_data)
 plot_stat_map(mask_thr, title='', annotate=False, cut_coords=(0, -4, 0))
 
@@ -104,7 +104,7 @@ bin_tmap_thr_masked = binary_closing(bin_tmap_thr_masked,iterations=3)
 # plot roi and save
 bin_tmap_thr_peak_spere_img = image.new_img_like(stats_map, bin_tmap_thr_masked.astype(int))
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0, 0, 0))
-bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"EC_thr3.1_closing.nii.gz"))
+bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"vmPFC_value.nii.gz"))
 
 
 #%%

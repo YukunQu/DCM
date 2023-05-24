@@ -5,7 +5,7 @@ import pandas as pd
 from os.path import join
 from scipy import signal
 from nilearn.masking import apply_mask
-from nilearn.image import load_img, clean_img, smooth_img,new_img_like
+from nilearn.image import load_img, clean_img, smooth_img,binarize_img
 import statsmodels.api as sm
 from joblib import Parallel, delayed
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
@@ -44,8 +44,7 @@ def load_data(func_file, confounds_file):
 
     # clean and smooth data
     high_pass_fre = 1 / 100
-    mni_mask = r'/mnt/workdir/DCM/Docs/Mask/res-02_desc-brain_mask.nii'
-    func_img = clean_img(func_img, detrend=True, standardize=True,
+    func_img = clean_img(func_img, detrend=True, standardize=False,
                          high_pass=high_pass_fre,
                          t_r=3.0,
                          confounds=motion)
@@ -53,54 +52,58 @@ def load_data(func_file, confounds_file):
     return func_img
 
 
-def extract_act(event,trial_type,func_data):
-    """For each trial, we extracted activity estimates in an 11 s window (55 time points),
+def extract_act(trial_onset,func_data):
+    """For each trial, we extracted activity estimates in an 15 s window (75 time points),
     time-locked to 1 s before the onset of each event of interest."""
 
     # upsampling from 3 second resolution to 0.2 second resolution,
     num_points = int(func_data.shape[0] * (3/0.2))
     upsampled_func_data = signal.resample(func_data, num_points, axis=0)
 
-    # find the trial onset
-    trial_onset = event[event['trial_type'] == 'M2_corr']['onset'].to_list()
-    trial_mod = event[event['trial_type'] == trial_type]['modulation'].to_list()
-    trial_onset = [t+1.5 for t in trial_onset]  # consider the slice_time_reference
-
-    # extracted activity estimates in an 11 s window (55 time points),
+    # extracted activity estimates in an 15 s window (75 time points),
     # time-locked to 1 s before the onset of each event of interest.
-    trial_act_course = np.zeros((len(trial_onset),55))
+    trial_act_course = np.zeros((len(trial_onset),100))
 
     for i,onset in enumerate(trial_onset):
         onset = onset - 1.0  # 1.0 is the time-locked
         onset_point = int(onset/0.2)-1  # 0.2 is the upsampled time resolution, 1 is considered that index start from 0
-        trial_activity_roi = upsampled_func_data[onset_point:onset_point+55,:]
+        trial_activity_roi = upsampled_func_data[onset_point:onset_point+100,:]
         mtrial_activity = trial_activity_roi.mean(axis=1)  # average across voxels
-        if len(mtrial_activity) != 55:
-            print(f'The run have not enough time points! Missing time points {55-len(mtrial_activity)} '
-                  'will be filled with the mean of the previous all trials.')
+        if len(mtrial_activity) != 100:
+            print(f'The trial {i+1}/{len(trial_onset)} have not enough time points! '
+                  f'Missing time points {100-len(mtrial_activity)} '
+                  f'will be filled with the mean of the previous all trials.')
             # fill the missing time point with the mean of the corresponding time points of the previous all trials
-            for t in range(len(mtrial_activity),55):
+            for t in range(len(mtrial_activity),100):
                 corresponding_pts = trial_act_course[:i,t].mean()
                 mtrial_activity = np.append(mtrial_activity,corresponding_pts)
         trial_act_course[i] = mtrial_activity
-    return upsampled_func_data, trial_act_course, trial_mod
+    return trial_act_course
 
 
 def time_point_regression(act_course,trial_mod):
-    from sklearn import linear_model
     # Apply a linear regression to each time point in activity time course
     # trial modulation is x, activity is y
     # return the beta and p value of each time point
-    beta = np.zeros((55,1))
-    p = np.zeros((55,1))
-    for i in range(55):
-        x = np.array(trial_mod)
-        x = sm.add_constant(x) # adding a constant
+    time_point_num = act_course.shape[1]
+    regressor_num = trial_mod.shape[1]
+    beta = np.zeros((time_point_num,regressor_num))
+    p = np.zeros((time_point_num,regressor_num))
+    f = np.zeros(time_point_num)
+    p_f = np.zeros(time_point_num)
+    for i in range(act_course.shape[1]):
+        x = trial_mod
+        x = sm.add_constant(x)  # adding a constant
         y = act_course[:,i]
         model = sm.OLS(y, x).fit()
-        beta[i] = model.params[1]
-        p[i] = model.pvalues[1]
-    return beta,p
+        beta[i] = model.params[1:]
+        p[i] = model.pvalues[1:]
+        # test the hypothesis that both cosine and sine coefficients are zero
+        null_hypothesis = 'cos = 0, sin = 0'
+        f_test = model.f_test(null_hypothesis)
+        f[i] = f_test.fvalue.reshape(-1)
+        p_f[i] = f_test.pvalue
+    return beta,p,f,p_f
 
 
 def run_peri_event_analysis(subj,pconfigs,roi):
@@ -109,7 +112,6 @@ def run_peri_event_analysis(subj,pconfigs,roi):
     event_dir = pconfigs['event_dir']
     task = pconfigs['task']
     glm_type = pconfigs['glm_type']
-    trial_type = pconfigs['trial_type']
     events_name = pconfigs['events_name']
     func_dir = pconfigs['func_dir']
     run_list = pconfigs['run_list']
@@ -129,14 +131,27 @@ def run_peri_event_analysis(subj,pconfigs,roi):
         func_roi_data = apply_mask(func_img, roi)
         event_path = join(event_dir, task, glm_type, f'sub-{subj}', '6fold', events_name.format(subj, run_id))
         event = pd.read_csv(event_path, sep='\t')
-        upsampled_func_data,trial_act_course, trial_mod = extract_act(event, trial_type, func_roi_data)
 
+        # find the trial onset and extract time series
+        trial_onset = event[event['trial_type'] == 'M2_corr']['onset'].to_list()
+        trial_act_course = extract_act(trial_onset, func_roi_data)
+
+        # extract trial modulation
+        sin_mod = event[event['trial_type'] == 'sin']['modulation'].to_list()
+        cos_mod = event[event['trial_type'] == 'cos']['modulation'].to_list()
+        trial_mod = pd.DataFrame({'sin': sin_mod, 'value': cos_mod})
         # apply linear regression to time point
-        beta,p = time_point_regression(trial_act_course, trial_mod)
+        # test code
+        #has_nan = trial_mod.isna().any().any()
+        #print(subj,run_id,"Contains NaN: ", has_nan)
+        beta,p,f,p_f = time_point_regression(trial_act_course, trial_mod)
 
         # add to results
         for tp in range(1,len(beta)+1):
-            results = results.append({'subj': 'sub-'+subj, 'run': run_id, 'time_point': tp, 'beta': beta[tp-1][0], 'p': p[tp-1][0]},
+            results = results.append({'subj': 'sub-'+subj, 'run': run_id, 'time_point': tp,
+                                      'sin_beta': beta[tp-1][0], 'sin_p': p[tp-1][0],
+                                      'cos_beta': beta[tp-1][1], 'cos_p': p[tp-1][1],
+                                      'f': f[tp-1], 'f_p': p_f[tp-1]},
                                      ignore_index=True)
     results.to_csv(join(save_dir, f'sub-{subj}_peri_event_analysis.csv'), index=False)
 
@@ -151,17 +166,20 @@ if __name__ == "__main__":
 
     # specify config
     pconfigs = {'TR': 3.0,
-                'task': 'game1','glm_type': 'value_spct','trial_type': 'value',
+                'task': 'game1','glm_type': 'hexagon_spct',
                 'run_list': [1,2,3,4,5,6],
                 'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-                'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
+                'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
+                'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                 'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
-                'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv',
-                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/value'}
+                'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv',
+                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/EC',
+                }
 
-    roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/VMPFC_merge_MNI152NL.nii.gz')
+    #roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/vmPFC_value.nii.gz')
+    roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
+    roi = binarize_img(roi,10)
 
-    subjects_chunk = list_to_chunk(subjects,50)
+    subjects_chunk = list_to_chunk(subjects,20)
     for chunk in subjects_chunk:
-        Parallel(n_jobs=50)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
+        Parallel(n_jobs=20)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
