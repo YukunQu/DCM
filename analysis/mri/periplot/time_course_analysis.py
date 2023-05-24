@@ -137,9 +137,9 @@ def run_peri_event_analysis(subj,pconfigs,roi):
         trial_act_course = extract_act(trial_onset, func_roi_data)
 
         # extract trial modulation
-        sin_mod = event[event['trial_type'] == 'sin']['modulation'].to_list()
-        cos_mod = event[event['trial_type'] == 'cos']['modulation'].to_list()
-        trial_mod = pd.DataFrame({'sin': sin_mod, 'value': cos_mod})
+        sin_mod = event[event['trial_type'] == 'sin']['modulation'].to_list()[::2]
+        cos_mod = event[event['trial_type'] == 'cos']['modulation'].to_list()[::2]
+        trial_mod = pd.DataFrame({'sin': sin_mod, 'cos': cos_mod})
         # apply linear regression to time point
         # test code
         #has_nan = trial_mod.isna().any().any()
@@ -180,6 +180,6 @@ if __name__ == "__main__":
     roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
     roi = binarize_img(roi,10)
 
-    subjects_chunk = list_to_chunk(subjects,20)
+    subjects_chunk = list_to_chunk(subjects,1)
     for chunk in subjects_chunk:
-        Parallel(n_jobs=20)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
+        Parallel(n_jobs=1)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
