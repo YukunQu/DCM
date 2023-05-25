@@ -98,12 +98,12 @@ def time_point_regression(act_course,trial_mod):
         model = sm.OLS(y, x).fit()
         beta[i] = model.params[1:]
         p[i] = model.pvalues[1:]
-        # test the hypothesis that both cosine and sine coefficients are zero
-        null_hypothesis = 'cos = 0, sin = 0'
-        f_test = model.f_test(null_hypothesis)
-        f[i] = f_test.fvalue.reshape(-1)
-        p_f[i] = f_test.pvalue
-    return beta,p,f,p_f
+        # # test the hypothesis that both cosine and sine coefficients are zero
+        # null_hypothesis = 'cos = 0, sin = 0'
+        # f_test = model.f_test(null_hypothesis)
+        # f[i] = f_test.fvalue.reshape(-1)
+        # p_f[i] = f_test.pvalue
+    return beta,p #,f,p_f
 
 
 def run_peri_event_analysis(subj,pconfigs,roi):
@@ -137,21 +137,28 @@ def run_peri_event_analysis(subj,pconfigs,roi):
         trial_act_course = extract_act(trial_onset, func_roi_data)
 
         # extract trial modulation
-        sin_mod = event[event['trial_type'] == 'sin']['modulation'].to_list()[::2]
-        cos_mod = event[event['trial_type'] == 'cos']['modulation'].to_list()[::2]
-        trial_mod = pd.DataFrame({'sin': sin_mod, 'cos': cos_mod})
+        # sin_mod = event[event['trial_type'] == 'sin']['modulation'].to_list()[::2]
+        # cos_mod = event[event['trial_type'] == 'cos']['modulation'].to_list()[::2]
+        # trial_mod = pd.DataFrame({'sin': sin_mod, 'cos': cos_mod})
+        distance_mod = event[event['trial_type'] == 'distance']['modulation'].to_list()
+        value_mod = event[event['trial_type'] == 'value']['modulation'].to_list()
+        trial_mod = pd.DataFrame({'distance': distance_mod, 'value': value_mod})
         # apply linear regression to time point
         # test code
         #has_nan = trial_mod.isna().any().any()
         #print(subj,run_id,"Contains NaN: ", has_nan)
-        beta,p,f,p_f = time_point_regression(trial_act_course, trial_mod)
+        beta,p = time_point_regression(trial_act_course, trial_mod)
 
         # add to results
         for tp in range(1,len(beta)+1):
+            # results = results.append({'subj': 'sub-'+subj, 'run': run_id, 'time_point': tp,
+            #                           'sin_beta': beta[tp-1][0], 'sin_p': p[tp-1][0],
+            #                           'cos_beta': beta[tp-1][1], 'cos_p': p[tp-1][1],
+            #                           'f': f[tp-1], 'f_p': p_f[tp-1]},
+            #                          ignore_index=True)
             results = results.append({'subj': 'sub-'+subj, 'run': run_id, 'time_point': tp,
-                                      'sin_beta': beta[tp-1][0], 'sin_p': p[tp-1][0],
-                                      'cos_beta': beta[tp-1][1], 'cos_p': p[tp-1][1],
-                                      'f': f[tp-1], 'f_p': p_f[tp-1]},
+                                      'distance_beta': beta[tp-1][0], 'distance_p': p[tp-1][0],
+                                      'value_beta': beta[tp-1][1], 'value_p': p[tp-1][1]},
                                      ignore_index=True)
     results.to_csv(join(save_dir, f'sub-{subj}_peri_event_analysis.csv'), index=False)
 
@@ -166,20 +173,21 @@ if __name__ == "__main__":
 
     # specify config
     pconfigs = {'TR': 3.0,
-                'task': 'game1','glm_type': 'hexagon_spct',
+                'task': 'game1','glm_type': 'distance_value_spct',
                 'run_list': [1,2,3,4,5,6],
                 'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                 'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
                 'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                 'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                 'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv',
-                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/EC',
+                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/dmPFC_test',
                 }
 
-    #roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/vmPFC_value.nii.gz')
-    roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
-    roi = binarize_img(roi,10)
+    roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/dmPFC/dmPFC_distance.nii.gz')
+    # roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
+    # # roi = binarize_img(roi,10)
+    # roi = load_img(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
 
-    subjects_chunk = list_to_chunk(subjects,1)
+    subjects_chunk = list_to_chunk(subjects,40)
     for chunk in subjects_chunk:
-        Parallel(n_jobs=1)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
+        Parallel(n_jobs=40)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)

@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 # generate different duration events
 onset = [1]
 trial_type = ['distance']
-duration = [2.5]
+duration = [1]
 event1 = pd.DataFrame({'onset':onset,'trial_type':trial_type,
-                       'duration':duration,'modulation':0.6})
+                       'duration':duration,'modulation':1})
 
 onset = [6]
 trial_type = ['value']
