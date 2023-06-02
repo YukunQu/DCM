@@ -5,7 +5,7 @@ import pandas as pd
 from os.path import join
 from scipy import signal
 from nilearn.masking import apply_mask
-from nilearn.image import load_img, clean_img, smooth_img,binarize_img
+from nilearn.image import load_img, clean_img, smooth_img,binarize_img,math_img
 import statsmodels.api as sm
 from joblib import Parallel, delayed
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
@@ -180,14 +180,17 @@ if __name__ == "__main__":
                 'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                 'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                 'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv',
-                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/dmPFC_test',
+                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/occipital',
                 }
 
-    roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/dmPFC/dmPFC_distance.nii.gz')
+    # roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/VMPFC_merge_MNI152NL.nii.gz')
     # roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
     # # roi = binarize_img(roi,10)
     # roi = load_img(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
+    roi1 = load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/lh.lateraloccipital.nii.gz')
+    roi2 = load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/rh.lateraloccipital.nii.gz')
+    roi = math_img('np.logical_or(img1,img2)', img1=roi1, img2=roi2)
 
-    subjects_chunk = list_to_chunk(subjects,40)
+    subjects_chunk = list_to_chunk(subjects,20)
     for chunk in subjects_chunk:
-        Parallel(n_jobs=40)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
+        Parallel(n_jobs=20)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)

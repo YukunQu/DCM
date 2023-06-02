@@ -1,5 +1,4 @@
 import os
-
 import numpy as np
 import pandas as pd
 from nilearn.masking import apply_mask
@@ -22,7 +21,7 @@ def extractStats(stat_map,subjects,roi):
         ifold = str(i) + 'fold'
         print(f"________{ifold} start____________")
         for sub in subjects:
-                stats_map = stat_map.format(sub,ifold)
+                stats_map = stat_map.format(ifold,sub)
                 print(stats_map)
                 stats_img = load_img(stats_map)
                 if not np.array_equal(stats_img.affine,roi.affine):
@@ -43,30 +42,22 @@ if __name__ == "__main__":
     subjects = data['Participant_ID'].to_list()
 
     # set roi
-    roi_path = r'/mnt/workdir/DCM/result/ROI/anat/juelich_EC_MNI152NL_prob.nii.gz'
+    roi_path = r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz'
     roi_img = load_img(roi_path)
-    roi_img = threshold_img(roi_img,5)
-    roi_img = binarize_img(roi_img)
+    roi_img = binarize_img(roi_img,5)
+    #roi_img = load_img(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
 
     # set path template:
-    #stats_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/{}/{}/zmap/alignPhi_zmap.nii.gz'
-    stats_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_img_coarse_{}.nii.gz'
+    stats_template = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/cv_test_hexagon_spct/Setall/{}/{}/zmap/alignPhi_even_zmap.nii.gz'
+    #stats_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_img_coarse_{}.nii.gz'
 
     # set savepath
-    savedir = r'/mnt/workdir/DCM/result/Specificity_to_6/RSA'
+    savedir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/cv_test_hexagon_spct'
     if not os.path.exists(savedir):
         os.mkdir(savedir)
-    save_path = r'/mnt/workdir/DCM/result/Specificity_to_6/RSA/sub_stats-z_roi-ec_trial-all_withoutZtransform.csv'
+    save_path = os.path.join(savedir,'sub_stats-z_roi-ec_trial-even_anat_EC.csv')
 
     sub_stats_results = extractStats(stats_template,subjects,roi_img)
-    sub_stats_results['trial_type'] = 'all'
+    sub_stats_results['trial_type'] = 'even'
     sub_stats_results.to_csv(save_path)
 
-    """
-    for sub in subjects:
-        age = data.loc[data.Participant_ID == sub_tmp, 'Age'].values[0]
-        acc = data.loc[data.Participant_ID == sub_tmp, 'game1_acc'].values[0]
-        tmp_data = {'sub_id': sub, 'amplitude': amplitude, 'age': age, 'acc': acc}
-        sub_fold_beta = sub_fold_beta.append(tmp_data, ignore_index=True)
-    sub_fold_beta.to_csv(save_path, index=False)
-    """

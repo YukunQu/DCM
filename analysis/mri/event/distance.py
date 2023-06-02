@@ -48,7 +48,7 @@ class GAME1EV_distance_spct(GAME1EV_base_spct):
     def game1ev_distance_spct(self,drop_stalemate=False):
         m1ev = self.genM1ev()
         if drop_stalemate:
-            trial_label, accuracy = self.label_trial_drop_stalemate()
+            trial_label, accuracy = self.label_trials_stalemate()
         else:
             trial_label, accuracy = self.label_trial_corr()
 
@@ -164,6 +164,89 @@ class GAME1EV_2distance_spct(GAME1EV_base_spct):
         eudc_ev,mand_ev = self.genpm_2distance_spct(trial_label)
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 eudc_ev,mand_ev], axis=0)
+        return event_data
+
+
+class GAME1EV_3distance_spct(GAME1EV_base_spct):
+    # A variant of event generator only care about the hexagonal effect on M2.
+    def __init__(self, behDataPath):
+        GAME1EV_base_spct.__init__(self, behDataPath)
+
+    def genpm_3distance_spct(self, trial_label):
+        # generate euclidean distance and manhattan distance
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            eucd = np.sqrt(self.behData['ap_diff'] ** 2 + self.behData['dp_diff'] ** 2)
+            ap = np.abs(self.behData['ap_diff'])
+            dp = np.abs(self.behData['dp_diff'])
+            # euclean distance event
+            eudc_ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            eudc_ev['trial_type'] = 'eucd'
+            eudc_ev['modulation'] = eucd
+            # ap distance event
+            ap_ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            ap_ev['trial_type'] = 'ap'
+            ap_ev['modulation'] = ap
+            # dp distance event
+            dp_ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            dp_ev['trial_type'] = 'dp'
+            dp_ev['modulation'] = dp
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            eucd = np.sqrt(self.behData['ap_diff'] ** 2 + self.behData['dp_diff'] ** 2)
+            ap = np.abs(self.behData['ap_diff'])
+            dp = np.abs(self.behData['dp_diff'])
+            # euclean distance event
+            eudc_ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            eudc_ev['trial_type'] = 'eucd'
+            eudc_ev['modulation'] = eucd
+            # ap distance event
+            ap_ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            ap_ev['trial_type'] = 'ap'
+            ap_ev['modulation'] = ap
+            # dp distance event
+            dp_ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            dp_ev['trial_type'] = 'dp'
+            dp_ev['modulation'] = dp
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        assert len(eudc_ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+        assert len(ap_ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+        assert len(dp_ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        eudc_ev = eudc_ev.iloc[correct_trials_index].copy()
+        eudc_ev = eudc_ev.sort_values('onset', ignore_index=True)
+
+        ap_ev = ap_ev.iloc[correct_trials_index].copy()
+        ap_ev = ap_ev.sort_values('onset', ignore_index=True)
+
+        dp_ev = dp_ev.iloc[correct_trials_index].copy()
+        dp_ev = dp_ev.sort_values('onset', ignore_index=True)
+        return eudc_ev,ap_ev,dp_ev
+
+    def game1ev_3distance_spct(self):
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+        eudc_ev,ap_ev,dp_ev = self.genpm_3distance_spct(trial_label)
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                eudc_ev, ap_ev, dp_ev], axis=0)
         return event_data
 
 

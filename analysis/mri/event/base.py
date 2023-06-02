@@ -97,7 +97,7 @@ class GAME1EV(object):
                 fight_result = row.pic2_ap - row.pic1_dp
             else:
                 raise Exception("None of rule have been found in the file.")
-            if fight_result==0:
+            if fight_result == 0:
                 # add index of the row
                 stalemate_trials.append(1)
             else:
@@ -116,7 +116,6 @@ class GAME1EV(object):
             onset = self.behData['pic1_render.started'] - self.starttime
             duration = self.behData['pic2_render.started'] - self.behData['pic1_render.started']
             angle = self.behData['angles']
-
             m1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m1ev['trial_type'] = 'M1'
             m1ev['modulation'] = 1
@@ -305,7 +304,8 @@ class GAME1EV_base_spct(GAME1EV):
             m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m2ev['trial_type'] = 'M2'
             m2ev['modulation'] = 1
-            m2ev['stalemate'] = self.behData['stalemate']
+            if 'stalemate' in self.behData.columns:
+                m2ev['stalemate'] = self.behData['stalemate']
         elif self.dformat == 'summary':
             onset = self.behData['pic2_render.started_raw'] - self.starttime
             duration = [2.5] * len(self.behData)
@@ -313,7 +313,8 @@ class GAME1EV_base_spct(GAME1EV):
             m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             m2ev['trial_type'] = 'M2'
             m2ev['modulation'] = 1
-            m2ev['stalemate'] = self.behData['stalemate']
+            if 'stalemate' in self.behData.columns:
+                m2ev['stalemate'] = self.behData['stalemate']
         else:
             raise Exception("You need specify behavioral data format.")
 
@@ -336,7 +337,7 @@ class GAME1EV_base_spct(GAME1EV):
 
         m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
         m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
-        return m2ev_corr,m2ev_error
+        return m2ev_corr, m2ev_error
 
     def genDeev(self, trial_label):
         # generate the event of decision
@@ -347,7 +348,8 @@ class GAME1EV_base_spct(GAME1EV):
             deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
-            deev['stalemate'] = self.behData['stalemate']
+            if 'stalemate' in self.behData.columns:
+                deev['stalemate'] = self.behData['stalemate']
         elif self.dformat == 'summary':
             onset = self.behData['cue1.started_raw'] - self.starttime
             duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
@@ -355,7 +357,8 @@ class GAME1EV_base_spct(GAME1EV):
             deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
             deev['trial_type'] = 'decision'
             deev['modulation'] = 1
-            deev['stalemate'] = self.behData['stalemate']
+            if 'stalemate' in self.behData.columns:
+                deev['stalemate'] = self.behData['stalemate']
         else:
             raise Exception("You need specify behavioral data format.")
 

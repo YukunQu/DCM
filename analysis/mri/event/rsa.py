@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from analysis.mri.event.base import GAME1EV_base_spct
 from analysis.mri.event.hexagon import GAME1EV_hexagon_spat,Game2EV_hexagon_spat
 
 
@@ -123,6 +124,91 @@ class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
         m2ev_corr,_ = self.genM2ev_corr(trial_corr)
         deev = self.genDeev()
         event_data = pd.concat([m1ev,m2ev_corr,corr_angle_ev,deev], axis=0)
+        return event_data
+
+
+class GAME1EV_map_rsa(GAME1EV_base_spct):
+    def __init__(self, behDataPath):
+        GAME1EV_base_spct.__init__(self, behDataPath)
+        self.behData['angles'] = round(self.behData['angles'], 1)
+
+    def monsters_ev(self,trial_label):
+        if self.dformat == 'trial_by_trial':
+            # set m1 event
+            onset = self.behData['pic1_render.started'] - self.starttime
+            duration = self.behData['pic2_render.started'] - self.behData['pic1_render.started']
+            ap = self.behData['pic1_ap'].to_list()
+            dp = self.behData['pic1_dp'].to_list()
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic1'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m1ev['trial_type'] = pic_name
+            m1ev['modulation'] = 1
+            # set m2 event
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            ap = self.behData['pic2_ap'].to_list()
+            dp = self.behData['pic2_dp'].to_list()
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic2'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m2ev['trial_type'] = pic_name
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            # set m1 event
+            onset = self.behData['pic1_render.started_raw'] - self.starttime
+            duration = self.behData['pic2_render.started_raw'] - self.behData['pic1_render.started_raw']
+            ap = self.behData['pic1_ap'].to_list()
+            dp = self.behData['pic1_dp'].to_list()
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic1'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m1ev['trial_type'] = pic_name
+            m1ev['modulation'] = 1
+            # set m2 event
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            ap = self.behData['pic2_ap'].to_list()
+            dp = self.behData['pic2_dp'].to_list()
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic2'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m2ev['trial_type'] = pic_name
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        m1ev_corr = m1ev.iloc[correct_trials_index].copy()
+        m2ev_corr = m2ev.iloc[correct_trials_index].copy()
+
+        m1ev_error = m1ev.iloc[error_trials_index].copy()
+        m2ev_error = m2ev.iloc[error_trials_index].copy()
+
+        monsters_ev_corr = pd.concat([m1ev_corr, m2ev_corr], axis=0)
+        monsters_ev_error = pd.concat([m1ev_error, m2ev_error], axis=0)
+        monsters_ev_error['trial_type'] = 'error'
+
+        monsters_ev_corr = monsters_ev_corr.sort_values(by=['onset'])
+        monsters_ev_error = monsters_ev_error.sort_values(by=['onset'])
+        return monsters_ev_corr, monsters_ev_error
+
+    def game1ev_map_rsa(self):
+        # label the correct trials and incorrect trials
+        trial_label, accuracy = self.label_trial_corr()
+        # generate event for each monster
+        mos_ev_corr,mos_ev_error = self.monsters_ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+        event_data = pd.concat([mos_ev_corr,mos_ev_error,deev_corr, deev_error], axis=0)
         return event_data
 
 

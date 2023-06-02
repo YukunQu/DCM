@@ -65,6 +65,29 @@ def get_sub_angles_nilearn(ev_files):
     return angle_con_names
 
 
+def get_sub_pos(ev_files):
+    """
+    get angle regressors name from event files
+    :param ev_files: a list of event files path
+    :return:
+    """
+    regressors_name = []
+    for ev_file in ev_files:
+        ev_info = pd.read_csv(ev_file, sep='\t')
+        regressors_name.extend(ev_info['trial_type'].to_list())
+    angle_con_names = list(set(regressors_name))
+
+    # remove other regressors.
+    for non_angle_reg in ['error','decision_corr','decision_error']:
+        if non_angle_reg in angle_con_names:
+            angle_con_names.remove(non_angle_reg)
+        else:
+            print(ev_files,"don't have",non_angle_reg)
+    # sort angle as value
+    angle_con_names.sort()
+    return angle_con_names
+
+
 def cal_neural_rdm(sub_id):
     """
     using searchilight calculate neural RDM for different angles
@@ -74,16 +97,17 @@ def cal_neural_rdm(sub_id):
     # get subject's contrast_names(angles)
     ev_files = []
     ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                  r'game1/grid_rsa_corr_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
+                  r'game1/map_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
     runs = range(1,7)  # look out
     for i in runs:
         ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
-    con_names = get_sub_angles_nilearn(ev_files)
+    #con_names = get_sub_angles_nilearn(ev_files)
+    con_names = get_sub_pos(ev_files)
 
     # get subject's cmap
-    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/' \
-                  'game1/grid_rsa_corr_trials/Setall/6fold/{}'
-    image_paths = [os.path.join(cmap_folder.format(sub_id),'zmap/{}_zmap.nii.gz'.format(con_id))
+    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
+                  'game1/map_rsa/Setall/6fold/{}'
+    image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
                    for con_id in con_names]
 
     # load one image to get the dimensions and make the mask
@@ -106,11 +130,11 @@ def cal_neural_rdm(sub_id):
     data_2d = data.reshape([data.shape[0], -1])
     data_2d = np.nan_to_num(data_2d)
 
-    SL_RDM = get_searchlight_RDMs(data_2d, centers, neighbors, image_value, method='correlation')
+    SL_RDM = get_searchlight_RDMs(data_2d, centers, neighbors, image_value, method='mahalanobis')
     savepath = os.path.join(cmap_folder.format(sub_id),'rsa')
     if not os.path.exists(savepath):
         os.mkdir(savepath)
-    savepath = os.path.join(savepath,'{}-neural_RDM.hdf5'.format(sub_id))
+    savepath = os.path.join(savepath,'{}-neural_cmap_RDM.hdf5'.format(sub_id))
     SL_RDM.save(savepath,'hdf5',overwrite=True)
     print("The {}'s rdm have been done.".format(sub_id))
     return "The {}'s rdm have been done.".format(sub_id)
@@ -122,6 +146,6 @@ if __name__ == "__main__":
     data = participants_data.query('game1_fmri>=0.5')  # look out
     subjects = data['Participant_ID'].to_list()
 
-    subjects_chunk = list_to_chunk(subjects,10)
+    subjects_chunk = list_to_chunk(subjects,50)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=10,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)
+        results_list = Parallel(n_jobs=50,backend="multiprocessing")(delayed(cal_neural_rdm)(subj) for subj in chunk)

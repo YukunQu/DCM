@@ -13,9 +13,9 @@ from joblib import Parallel, delayed
 
 def set_rsa_contrasts(design_matrix):
     regressor = design_matrix.columns
-    angle_regs = list(set([reg.split("_")[-1] for reg in regressor if 'angle' in reg]))
-    angle_regs.sort()
-    contrast_name = ['M1','M2_error','decision'] + angle_regs
+    monsters_regs = list(set([reg.split("_")[-1] for reg in regressor if 'p' in reg]))
+    monsters_regs.sort()
+    contrast_name = ['error','decision_corr','decision_error'] + monsters_regs
 
     # base contrast
     contrasts_set = {}
@@ -53,16 +53,16 @@ if __name__ == "__main__":
     subjects = [p.split('-')[-1] for p in pid]
 
     if task == 'game1':
-        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'grid_rsa_corr_trials',
+        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'map_rsa',
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv',
-                   'out_rootdir':'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa'}
+                   'out_rootdir':'/mnt/workdir/DCM/BIDS/derivatives/Nilearn'}
     elif task == 'game2':
-        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'grid_rsa_corr_trials',
+        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'map_rsa',
                    'run_list': [1, 2],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -74,6 +74,6 @@ if __name__ == "__main__":
         raise Exception("The type of task is not supoort.")
 
     ifold = 6
-    subjects_chunk = list_to_chunk(subjects,30)
+    subjects_chunk = list_to_chunk(subjects,60)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=30)(delayed(run_glm)(subj,configs,ifold) for subj in chunk)
+        results_list = Parallel(n_jobs=60)(delayed(run_glm)(subj,configs,ifold) for subj in chunk)
