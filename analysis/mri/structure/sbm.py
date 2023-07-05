@@ -65,7 +65,9 @@ val_sub_info = val_sub_info[val_sub_info['Participant_ID'] != 'sub-197']
 val_sub = val_sub_info['Participant_ID'].to_list()
 
 # load sbm data
-sbm_metrics = pd.read_csv(r'/mnt/data/DCM/HNY/Structure/SBM/Organized/stats.thickness.aparc_AllData.csv')
+#sbm_metrics = pd.read_csv(r'/mnt/data/DCM/HNY/Structure/SBM/Organized/stats.gauscurv.aparc_AllData.csv')
+sbm_metrics = pd.read_csv(r'/mnt/data/DCM/HNY/Structure/SBM/Rawdata/基于表面的脑形态学分析_2023-03-12T18_39_14/Results/stats.volume.hippo/'
+                          r'stats.volume.hippo_AllData.csv')
 sbm_metrics = sbm_metrics.drop('Group', axis=1)
 
 # update sub_id for vbm meteric
@@ -86,14 +88,15 @@ else:
 
 # extract EC's data
 metrics_names = sbm_metrics.columns
-lec_metrics_names = [mn for mn in metrics_names if 'lh_entorhinal' in mn][0]
-rec_metrics_names = [mn for mn in metrics_names if 'rh_entorhinal' in mn][0]
+lec_metrics_names = [mn for mn in metrics_names if 'left_Whole_hippocampus' in mn][0]# lh_entorhinal
+rec_metrics_names = [mn for mn in metrics_names if 'right_Whole_hippocampus' in mn][0]
 wbrain_metric = sbm_metrics[[lec_metrics_names, rec_metrics_names]]
 age = val_sub_info['Age'].to_list()
 game1_acc = val_sub_info['game1_acc'].to_list()
 wbrain_metric.loc[:, 'Age'] = age
 wbrain_metric.loc[:, 'game1_acc'] = game1_acc
 x_var = 'game1_acc'
+
 # plot scatter figure
 # left EC
 r, p = pearsonr(wbrain_metric[x_var], wbrain_metric[lec_metrics_names])
@@ -123,6 +126,20 @@ if p < 0.001:
 else:
     g.fig.suptitle('r:{}, p:{}'.format(round(r,3),round(p,3)),size=20)
 g.set_axis_labels(x_var,rec_metrics_names,size=20)
+
+import pingouin as pg
+from sklearn.preprocessing import StandardScaler
+iv = 'Age'
+m = [lec_metrics_names]
+dv = 'game1_acc'
+# Instantiate the StandardScaler
+scaler = StandardScaler()
+
+# Fit the scaler to the columns and transform
+wbrain_metric[['Age','game1_acc',m[0]]] = scaler.fit_transform(wbrain_metric[['Age','game1_acc',m[0]]])
+# Mediation analysis
+mediation_results = pg.mediation_analysis(data=wbrain_metric, x=iv, m=m, y=dv, seed=42,n_boot=10000,return_dist=False)
+print(mediation_results.round(3))
 
 
 #%%

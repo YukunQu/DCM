@@ -66,8 +66,8 @@ if __name__ == "__main__":
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data#.query('game1_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
-    sub_list = ['sub_'+p.split('-')[-1] for p in pid if int(p.split('-')[-1])>230]
-
+    #sub_list = ['sub_'+p.split('-')[-1] for p in pid if int(p.split('-')[-1])>230]
+    sub_list = ['sub_105']
     log = check_subs_meg(sub_list, data_dir)
     for info in log:
         print(info)

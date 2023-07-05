@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from analysis.mri.event.base import GAME1EV_base_spct
+from analysis.mri.event.base import GAME1EV_base_spct,GAME1EV_base_spat
 from analysis.mri.event.hexagon import GAME1EV_hexagon_spat,Game2EV_hexagon_spat
 
 
@@ -80,7 +80,6 @@ class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
         m1ev = self.genM1ev()
         angle_ev = self.angle_ev()
         deev = self.genDeev()
-        response = self.response()
         event_data = pd.concat([m1ev,angle_ev,deev], axis=0)
         return event_data
 
@@ -127,7 +126,7 @@ class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
         return event_data
 
 
-class GAME1EV_map_rsa(GAME1EV_base_spct):
+class GAME1EV_map_rsa_spct(GAME1EV_base_spct):
     def __init__(self, behDataPath):
         GAME1EV_base_spct.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
@@ -210,6 +209,70 @@ class GAME1EV_map_rsa(GAME1EV_base_spct):
         deev_corr, deev_error = self.genDeev(trial_label)
         event_data = pd.concat([mos_ev_corr,mos_ev_error,deev_corr, deev_error], axis=0)
         return event_data
+
+
+class GAME1EV_map_rsa_spat(GAME1EV_base_spat):
+    def __init__(self, behDataPath):
+        GAME1EV_base_spat.__init__(self, behDataPath)
+        self.behData['angles'] = round(self.behData['angles'], 1)
+
+    def monsters_ev(self):
+        if self.dformat == 'trial_by_trial':
+            # set m1 event
+            onset = self.behData['pic1_render.started'] - self.starttime
+            duration = self.behData['pic2_render.started'] - self.behData['pic1_render.started']
+            ap = self.behData['pic1_ap'].to_list()
+            dp = self.behData['pic1_dp'].to_list()
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic1'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m1ev['trial_type'] = pic_name
+            m1ev['modulation'] = 1
+            # set m2 event
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            ap = self.behData['pic2_ap'].to_list()
+            dp = self.behData['pic2_dp'].to_list()
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic2'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m2ev['trial_type'] = pic_name
+            m2ev['modulation'] = 1
+        elif self.dformat == 'summary':
+            # set m1 event
+            onset = self.behData['pic1_render.started_raw'] - self.starttime
+            duration = self.behData['pic2_render.started_raw'] - self.behData['pic1_render.started_raw']
+            ap = self.behData['pic1_ap'].to_list()
+            dp = self.behData['pic1_dp'].to_list()
+            m1ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic1'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m1ev['trial_type'] = pic_name
+            m1ev['modulation'] = 1
+            # set m2 event
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            ap = self.behData['pic2_ap'].to_list()
+            dp = self.behData['pic2_dp'].to_list()
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration,'AP':ap,'DP':dp})
+            pic_path = self.behData['pic2'].to_list()
+            pic_name = ['p'+path.split('/')[-1].split('.')[0] for path in pic_path]
+            m2ev['trial_type'] = pic_name
+            m2ev['modulation'] = 1
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        monsters_ev = pd.concat([m1ev, m2ev], axis=0)
+        monsters_ev = monsters_ev.sort_values(by=['onset'])
+        return monsters_ev
+
+    def game1ev_map_rsa_spat(self):
+        # generate event for each monster
+        mos_ev = self.monsters_ev()
+        deev = self.genDeev()
+        event_data = pd.concat([mos_ev,deev], axis=0)
+        return event_data
+
 
 
 class Game1_grid_rsa_decision(GAME1EV_hexagon_spat):

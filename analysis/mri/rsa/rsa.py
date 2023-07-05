@@ -38,7 +38,7 @@ def calc_rs_map(sub_id, ifold):
     :return:
     """
     # set path
-    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/map_rsa/Setall/6fold'
+    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/map_rsa_spat/Setall/6fold'
     neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_cmap_RDM.hdf5'.format(sub_id,sub_id))
     gird_RDM_path = os.path.join(default_dir,'{}/rsa/{}_map_RDM.npy'.format(sub_id,sub_id,ifold))
     rsmap_savepath = os.path.join(default_dir,'{}/rsa/cmap_rsa_img.nii.gz'.format(sub_id,ifold))

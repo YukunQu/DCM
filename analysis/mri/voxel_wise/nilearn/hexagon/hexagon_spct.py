@@ -37,7 +37,7 @@ def run_glm(task,subj,ifold):
         configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'hexagon_spct',
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+                   'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
@@ -52,7 +52,7 @@ def run_glm(task,subj,ifold):
     else:
         raise Exception("The type of task is not supoort.")
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_fir/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_test/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                        configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,30)
+    subjects_chunk = list_to_chunk(subjects,70)
     for ifold in [6]:
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

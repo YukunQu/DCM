@@ -12,7 +12,8 @@ import pandas as pd
 import nibabel as nib
 from nilearn.glm.first_level import make_first_level_design_matrix
 
-#%%
+
+
 # simulation parameters
 omegas = range(-29,30,5) # 根据Erie 的代码重新改范围
 omega = random.choice(omegas)

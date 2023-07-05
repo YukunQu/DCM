@@ -29,8 +29,8 @@ if __name__ == "__main__":
     subjects = data['Participant_ID'].to_list()
 
     for ifold in range(6,7):
-        cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/map_rsa/Setall/6fold/{}/rsa/cmap_rsa_img.nii.gz'
-        save_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/map_rsa/Setall/6fold/{}/rsa/cmap_rsa_zscore_img.nii.gz'
+        cmap_template = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_img_coarse_6fold.nii.gz'
+        save_template = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_zscore_img_coarse_6fold.nii.gz'
         for sub_id in subjects:
             zscored_map = ztransf_img(cmap_template.format(sub_id,ifold))
             zscored_map.to_filename(save_template.format(sub_id,ifold))

@@ -20,7 +20,7 @@ def get_sub_pos_condition(ev_files):
     pos_con_names = list(set(regressors_name))
 
     # remove other regressors.
-    for non_angle_reg in ['error','decision_corr','decision_error']:
+    for non_angle_reg in ['decision']:
         if non_angle_reg in pos_con_names:
             pos_con_names.remove(non_angle_reg)
         else:
@@ -58,9 +58,9 @@ if __name__ == "__main__":
     if task == 'game1':
         runs = range(1,7)
         ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                      r'game1/map_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'
+                      r'game1/map_rsa_spat/{}/6fold/{}_task-game1_run-{}_events.tsv'
         savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
-                   'game1/map_rsa/Setall/6fold/{}/rsa/{}_map_RDM.npy'
+                   'game1/map_rsa_spat/Setall/6fold/{}/rsa/{}_map_RDM.npy'
     elif task == 'game2':
         runs = range(1,3)
         ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query(f'{task}_fmri>=0.5')  # look out
-    subjects = data['Participant_ID'].to_list()
+    subjects = data['Participant_ID'].to_list()[:1]
     for sub_id in subjects:
         print(sub_id)
         ev_files = []
@@ -85,7 +85,7 @@ if __name__ == "__main__":
             rdm = calc_rdm_pos_distance(pos_con_names,pos_ap,pos_dp)
             np.save(savepath.format(sub_id,sub_id,ifold),rdm)
 
-            plot = False
+            plot = True
             if plot:
                 import matplotlib.pyplot as plt
                 fig, ax = plt.subplots(figsize=(12,12))

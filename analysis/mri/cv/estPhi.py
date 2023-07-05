@@ -81,7 +81,6 @@ def estimate_game1_cv_phi(workdir):
 
     # set output
     savepath = os.path.join(workdir,f'estPhi_ROI-EC-anat_{method}_cv.csv')
-
     subs_phi = pd.DataFrame(columns=['ifold','sub_id','trial_type','Phi_mean','Phi_std'])
 
     for ifold in folds:

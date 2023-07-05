@@ -13,9 +13,9 @@ from joblib import Parallel, delayed
 
 def set_contrasts(design_matrix):
     # set contrast
-    contrast_name = ['M1', 'M2_error', 'decision_error']
+    contrast_name = ['M1', 'M2_error', 'decision_error','M2_corr','decision_corr']
     for onset in ['m2', 'decision']:
-        for even_odd in ['even', 'odd']:
+        for even_odd in ['even']:
             for bin in range(1, 13, 1):
                 if bin in range(1, 13, 2):
                     contrast_name.append(onset + '_align_' + str(bin) + "_" + even_odd)
@@ -36,8 +36,8 @@ def set_contrasts(design_matrix):
 
     # advanced contrast
     # align and misalign and alignPhi contrast
-    for onset in ['m2', 'decision']:
-        for odevity in ['even', 'odd']:
+    for onset in ['m2','decision']:
+        for odevity in ['even']:
             align = np.zeros(design_matrix.shape[1])
             missalign = np.zeros(design_matrix.shape[1])
             for cid, cvt in contrasts_set.items():
@@ -50,10 +50,10 @@ def set_contrasts(design_matrix):
             contrasts_set[f'{onset}_align_{odevity}'] = align
             contrasts_set[f'{onset}_misalign_{odevity}'] = missalign
             contrasts_set[f'{onset}_alignPhi_{odevity}'] = align - missalign
-        contrasts_set[f'{onset}_align'] = contrasts_set[f'{onset}_align_odd'] + contrasts_set[f'{onset}_align_even']
-        contrasts_set[f'{onset}_misalign'] = contrasts_set[f'{onset}_misalign_odd'] + contrasts_set[f'{onset}_misalign_even']
-        contrasts_set[f'{onset}_alignPhi'] = contrasts_set[f'{onset}_align'] - contrasts_set[f'{onset}_misalign']
-    contrasts_set['alignPhi'] = contrasts_set['m2_alignPhi'] + contrasts_set['decision_alignPhi']
+        # contrasts_set[f'{onset}_align'] = contrasts_set[f'{onset}_align_odd'] + contrasts_set[f'{onset}_align_even']
+        # contrasts_set[f'{onset}_misalign'] = contrasts_set[f'{onset}_misalign_odd'] + contrasts_set[f'{onset}_misalign_even']
+        #contrasts_set[f'{onset}_alignPhi'] = contrasts_set[f'{onset}_align'] - contrasts_set[f'{onset}_misalign']
+    #contrasts_set['alignPhi'] = contrasts_set['m2_alignPhi'] + contrasts_set['decision_alignPhi']
     return contrasts_set
 
 
@@ -75,9 +75,9 @@ if __name__ == "__main__":
     # specify configure parameters
     configs = {'TR': 3.0,
                'task': 'game1',
-               'glm_type': 'cv_test_12bin_spct',
+               'glm_type': 'cv_test_align_spct',
                'run_list': [1, 2, 3, 4, 5, 6],
-               'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+               'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
@@ -90,10 +90,10 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects, 50)
+    subjects_chunk = list_to_chunk(subjects,60)
     for ifold in range(6, 7):
         # creat dataroot
-        dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
+        dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_test/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                            configs['glm_type'], ifold)
         if not os.path.exists(dataroot):
             os.makedirs(dataroot)
@@ -101,4 +101,4 @@ if __name__ == "__main__":
         configs['ifold'] = ifold
         configs['dataroot'] = dataroot
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=50)(delayed(run_glm)(subj, configs) for subj in chunk)
+            results_list = Parallel(n_jobs=60)(delayed(run_glm)(subj, configs) for subj in chunk)

@@ -78,7 +78,7 @@ def get_sub_pos(ev_files):
     angle_con_names = list(set(regressors_name))
 
     # remove other regressors.
-    for non_angle_reg in ['error','decision_corr','decision_error']:
+    for non_angle_reg in ['decision']:
         if non_angle_reg in angle_con_names:
             angle_con_names.remove(non_angle_reg)
         else:
@@ -97,7 +97,7 @@ def cal_neural_rdm(sub_id):
     # get subject's contrast_names(angles)
     ev_files = []
     ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                  r'game1/map_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
+                  r'game1/map_rsa_spat/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
     runs = range(1,7)  # look out
     for i in runs:
         ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
@@ -106,7 +106,7 @@ def cal_neural_rdm(sub_id):
 
     # get subject's cmap
     cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
-                  'game1/map_rsa/Setall/6fold/{}'
+                  'game1/map_rsa_spat/Setall/6fold/{}'
     image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
                    for con_id in con_names]
 

@@ -44,7 +44,8 @@ if __name__ == "__main__":
     # set roi
     roi_path = r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz'
     roi_img = load_img(roi_path)
-    roi_img = binarize_img(roi_img,5)
+    roi_img = binarize_img(roi_img,30)
+    #roi_img = load_img(r'/mnt/workdir/DCM/Docs/Mask/Park_Grid_ROI/EC_Grid_roi.nii')
     #roi_img = load_img(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
 
     # set path template:
@@ -55,9 +56,23 @@ if __name__ == "__main__":
     savedir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/cv_test_hexagon_spct'
     if not os.path.exists(savedir):
         os.mkdir(savedir)
-    save_path = os.path.join(savedir,'sub_stats-z_roi-ec_trial-even_anat_EC.csv')
+    save_path = os.path.join(savedir,'sub_stats-z_roi-ec_trial-even_anat_EC_thr20.csv')
 
     sub_stats_results = extractStats(stats_template,subjects,roi_img)
     sub_stats_results['trial_type'] = 'even'
-    sub_stats_results.to_csv(save_path)
+    #sub_stats_results.to_csv(save_path)
 
+    # high performance filter
+    participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+    participants_data = pd.read_csv(participants_tsv, sep='\t')
+    hp_info = participants_data.query(f'(game1_fmri>=0.5)and(game1_acc>0.8)')  # look out
+    hp_sub = hp_info['Participant_ID'].to_list()
+    data = sub_stats_results.loc[sub_stats_results['sub_id'].isin(hp_sub)]
+
+    from scipy.stats import ttest_1samp
+    for i in range(4,9):
+        ifold = str(i)+'fold'
+        fold6_act = data[data['ifold']==ifold]['statistic'].to_list()
+        _,p = ttest_1samp(fold6_act,0)
+        p = round(p,5)
+        print('one sample t-test for {}fold: pvalue={}'.format(i,str(p).zfill(3)))

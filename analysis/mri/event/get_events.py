@@ -5,17 +5,19 @@ from analysis.mri.event.base import GAME1EV_base_spct,GAME2EV_base_spct
 from analysis.mri.event.hexagon import GAME1EV_hexagon_spct,GAME2EV_hexagon_spct,GAME2EV_hexagon_center_spct
 from analysis.mri.event.distance import GAME1EV_2distance_spct,GAME1EV_distance_spct,GAME2EV_2distance_spct,\
     GAME2EV_distance_spct,GAME2EV_distance_center_spct,GAME1EV_3distance_spct
-from analysis.mri.event.value import GAME1EV_value_spct,GAME2EV_value_spct
-from analysis.mri.event.rsa import GAME1EV_map_rsa
+from analysis.mri.event.value import GAME1EV_value_spct,GAME1EV_pure_value_spct,GAME1EV_ap_spct,GAME1EV_dp_spct,GAME1EV_apdp_spct,GAME2EV_value_spct
+from analysis.mri.event.rsa import GAME1EV_map_rsa_spat
+from analysis.mri.event.joint import GAME1EV_distance_value_spct
 
 
 ifolds = range(6,7)
 task = 'game1'
-glm_type = 'map_rsa'
-drop_stalemate = False
+glm_type = 'distance_spct'
+drop_stalemate = True
 print(glm_type)
 template = {'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'+glm_type+'/sub-{}/{}fold',
             'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
+
 if task == 'game1':
     runs = range(1, 7)
     template['behav_path'] = '/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/' \
@@ -29,6 +31,7 @@ else:
 
 participants_data = pd.read_csv('/mnt/workdir/DCM/BIDS/participants.tsv', sep='\t')
 subjects = participants_data.query(f'{task}_fmri>=0.5')['Participant_ID'].str.split('-').str[-1].str.zfill(3)
+
 #%%
 for subj in subjects:
     print(f'----sub-{subj}----')

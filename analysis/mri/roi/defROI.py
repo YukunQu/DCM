@@ -74,11 +74,11 @@ from nilearn.plotting import plot_roi
 from scipy.ndimage import binary_dilation,binary_erosion,binary_closing
 
 # load statistical map and mask
-target_dir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/value_spct'
-stats_map = image.load_img(os.path.join(target_dir,'Setall/6fold/group/mean/value_zmap.nii.gz'))
-# roi1 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/lh.isthmuscingulate.nii.gz')
-# roi2 = image.load_img(r'/mnt/data/DCM/tmp/aparc/mask/rh.isthmuscingulate.nii.gz')
-# mask = image.math_img('np.logical_or(img1,img2)', img1=roi1, img2=roi2)
+target_dir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/hexagon_spct'
+stats_map = image.load_img(os.path.join(target_dir,'Setall/6fold/group/mean/hexagon_zmap.nii.gz'))
+roi1 = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/lh.isthmuscingulate.nii.gz')
+#roi2 = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/rh.isthmuscingulate.nii.gz')
+#mask = image.math_img('np.logical_or(img1,img2)', img1=roi1, img2=roi2)
 mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/BN_mPFC.nii.gz')
 if not np.array_equal(mask.affine,stats_map.affine):
     raise Exception("The mask and statistical map have different affine matrix.")
@@ -86,7 +86,7 @@ if not np.array_equal(mask.affine,stats_map.affine):
 # get threshold map of statistical map
 img_data = stats_map.get_fdata()
 #img_data = np.abs(img_data)
-img_data[img_data <4] = 0
+img_data[img_data < 2.6] = 0
 stats_map_thr = image.new_img_like(stats_map, img_data)
 plot_stat_map(stats_map_thr, title='', annotate=False, cut_coords=(0, -4, 0))
 bin_tmap_thr = (img_data != 0)
@@ -104,13 +104,14 @@ bin_tmap_thr_masked = binary_closing(bin_tmap_thr_masked,iterations=3)
 # plot roi and save
 bin_tmap_thr_peak_spere_img = image.new_img_like(stats_map, bin_tmap_thr_masked.astype(int))
 plot_roi(bin_tmap_thr_peak_spere_img, cut_coords=(0, 0, 0))
-bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"vmPFC_value.nii.gz"))
+bin_tmap_thr_peak_spere_img.to_filename(os.path.join(target_dir,"RSC_thr2.6.nii.gz"))
 
 
 #%%
 # calculate the dice index
 from nilearn.image import get_data
 import numpy as np
+
 def dice_index(arr1, arr2):
     intersection = np.logical_and(arr1, arr2)
     return 2.0 * intersection.sum() / (arr1.sum() + arr2.sum())
@@ -119,3 +120,34 @@ arr1 = get_data(r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/E
 arr2 = get_data(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
 dice = dice_index(arr1, arr2)
 print(dice)
+
+#%%
+from nilearn import image
+from scipy.ndimage import binary_closing,binary_dilation,binary_erosion,binary_opening
+
+img = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/PCC/BN_Atlas_PCC.nii.gz')
+img_new = binary_opening(img.get_fdata(),iterations=1)
+img_new = image.new_img_like(img,img_new)
+brain_mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/dmPFC/tpl-MNI152NLin2009cAsym_res-02_desc-brain_T1w.nii.gz')
+brain_mask = image.binarize_img(brain_mask)
+img_new = image.math_img('img1*img2',img1=img_new,img2=brain_mask)
+img_new.to_filename(r'/mnt/workdir/DCM/Docs/Mask/PCC/BN_Atlas_PCC_open.nii.gz')
+
+#%%
+# Identification of connected components
+import numpy as np
+from scipy.ndimage import label
+from nilearn import image
+from nilearn.plotting import plot_roi
+
+img = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/PCC/PCCk3_MNI152Nl.nii.gz')
+img_data = img.get_fdata()
+#img_data[img_data < 2.3] = 0
+labels, _ = label(img_data)
+print(np.unique(labels))
+first_roi_data = (img_data == 6).astype(int)
+first_roi_img = image.new_img_like(img, first_roi_data)
+plot_roi(first_roi_img)
+first_roi_img.to_filename(r'/mnt/workdir/DCM/Docs/Mask/PCC/PCCk3_MNI152Nl_label6.nii.gz')
+#label_img = image.new_img_like(img, labels)
+#label_img.to_filename(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/hexagon_diff/hexagon_mean_label.nii.gz')

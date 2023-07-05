@@ -2,8 +2,8 @@ import os
 import shutil
 
 
-fmriprep_dir = r'/mnt/data/DCM/derivatives/fmriprep_volume_v22_nofmap'
-target_dir = r'/mnt/workdir/DCM/tmp/fmriprep_report/fmriprepv22_nofmap'
+fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep'
+target_dir = r'/mnt/workdir/DCM/tmp/fmriprep_report/'
 if not os.path.exists(target_dir):
     os.mkdir(target_dir)
 

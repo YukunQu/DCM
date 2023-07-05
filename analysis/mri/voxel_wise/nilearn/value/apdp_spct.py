@@ -6,15 +6,8 @@ from analysis.mri.voxel_wise.nilearn.firstLevel_analysis import load_ev,prepare_
 from joblib import Parallel, delayed
 
 
-def load_ev_m2(event_path):
-    event = pd.read_csv(event_path, sep='\t')
-    event_condition = event.query("trial_type in ['M1','M2_corr','decision_corr','decision_error','distance','value1','value2']")
-    event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
-    return event_condition
-
-
 def set_contrasts(design_matrix):
-    contrast_name = ['M1','M2_corr','decision_corr','decision_error','distance','value1','value2']
+    contrast_name = ['M1','M2_corr','decision_corr','decision_error','ap','dp']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -24,23 +17,20 @@ def set_contrasts(design_matrix):
         contrast_vector = np.zeros(design_matrix.shape[1])
         contrast_vector[contrast_index] = 1
         contrasts_set[contrast_id] = contrast_vector
-
-    # advanced contrast:average value
-    contrasts_set['value_average'] = 0.5 * contrasts_set['value1'] + 0.5*contrasts_set['value2']
     return contrasts_set
 
 
 def run_glm(task, subj, ifold):
     if task == 'game1':
-        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'distance_value_spct',
+        configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'apdp_spct',
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+                   'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     elif task == 'game2':
-        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': '2distance_value_spct',
+        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'value_spct',
                    'run_list': [1, 2],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -60,7 +50,7 @@ def run_glm(task, subj, ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev_m2,True)
+        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,concat_runs=True,despiking=True)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 

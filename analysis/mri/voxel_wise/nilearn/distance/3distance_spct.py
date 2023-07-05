@@ -13,15 +13,13 @@ from joblib import Parallel, delayed
 
 def load_ev_3distance(event_path):
     event = pd.read_csv(event_path, sep='\t')
-    event_condition = event[event['trial_type'].isin(['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
-                                                      'dp'])]
+    event_condition = event[event['trial_type'].isin(['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error','dp'])]
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
     return event_condition
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error',
-                     'dp']
+    contrast_name = ['M1', 'M2_corr', 'M2_error', 'decision_corr', 'decision_error','dp']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:

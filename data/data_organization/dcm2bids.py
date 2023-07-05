@@ -5,23 +5,27 @@ Created on Wed Feb  9 21:02:34 2022
 
 @author: dell
 """
+import os
 
 
-# %%
 def dcm2bids_helper(subjects):
     # generate the help files for dicom to bids
     import subprocess
     for subj in subjects:
         subj = str(subj).zfill(3)
         ori_dir = r'/mnt/data/DCM/sourcedata/sub_{}/NeuroData/MRI'.format(subj)
-        out_dir = r'/mnt/data/DCM/tmp/{}_helper'.format(subj)
+        out_dir = r'/mnt/data/DCM/tmp/Nifti/sub_{}'.format(subj)
         command = r'dcm2bids_helper -d {} -o {}'.format(ori_dir, out_dir)
         print("Command:", command)
         subprocess.call(command, shell=True)
 
 
-subjects = ['013','041','042']
-dcm2bids_helper(subjects)
+sub_list1 = os.listdir(r'/mnt/data/DCM/tmp/ToLuoYao/Elekta')
+sub_list2 = os.listdir(r'/mnt/data/DCM/tmp/ToLuoYao/MRI')
+sub_list2 = [s.replace('-', '_') for s in sub_list2]
+sub_list = [x.split('_')[-1] for x in sub_list1 if x not in sub_list2]
+#subjects = ['013','041','042']
+dcm2bids_helper(sub_list)
 
 # %%
 import subprocess

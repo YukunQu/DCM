@@ -89,6 +89,7 @@ def time_point_regression(act_course,trial_mod):
     regressor_num = trial_mod.shape[1]
     beta = np.zeros((time_point_num,regressor_num))
     p = np.zeros((time_point_num,regressor_num))
+    t = np.zeros((time_point_num,regressor_num))
     f = np.zeros(time_point_num)
     p_f = np.zeros(time_point_num)
     for i in range(act_course.shape[1]):
@@ -98,12 +99,13 @@ def time_point_regression(act_course,trial_mod):
         model = sm.OLS(y, x).fit()
         beta[i] = model.params[1:]
         p[i] = model.pvalues[1:]
+        t[i] = model.tvalues[1:]
         # # test the hypothesis that both cosine and sine coefficients are zero
         # null_hypothesis = 'cos = 0, sin = 0'
         # f_test = model.f_test(null_hypothesis)
         # f[i] = f_test.fvalue.reshape(-1)
         # p_f[i] = f_test.pvalue
-    return beta,p #,f,p_f
+    return beta,p,t #,f,p_f
 
 
 def run_peri_event_analysis(subj,pconfigs,roi):
@@ -147,7 +149,7 @@ def run_peri_event_analysis(subj,pconfigs,roi):
         # test code
         #has_nan = trial_mod.isna().any().any()
         #print(subj,run_id,"Contains NaN: ", has_nan)
-        beta,p = time_point_regression(trial_act_course, trial_mod)
+        beta,p,t = time_point_regression(trial_act_course, trial_mod)
 
         # add to results
         for tp in range(1,len(beta)+1):
@@ -157,8 +159,8 @@ def run_peri_event_analysis(subj,pconfigs,roi):
             #                           'f': f[tp-1], 'f_p': p_f[tp-1]},
             #                          ignore_index=True)
             results = results.append({'subj': 'sub-'+subj, 'run': run_id, 'time_point': tp,
-                                      'distance_beta': beta[tp-1][0], 'distance_p': p[tp-1][0],
-                                      'value_beta': beta[tp-1][1], 'value_p': p[tp-1][1]},
+                                      'distance_beta': beta[tp-1][0], 'distance_p': p[tp-1][0],'distance_t': t[tp-1][0],
+                                      'value_beta': beta[tp-1][1], 'value_p': p[tp-1][1],'value_t': t[tp-1][1]},
                                      ignore_index=True)
     results.to_csv(join(save_dir, f'sub-{subj}_peri_event_analysis.csv'), index=False)
 
@@ -180,17 +182,18 @@ if __name__ == "__main__":
                 'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
                 'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                 'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries.tsv',
-                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/occipital',
+                'save_dir':'/mnt/data/DCM/derivatives/peri_event_analysis/mPFC_GP',
                 }
 
     # roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/VMPFC_merge_MNI152NL.nii.gz')
     # roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
     # # roi = binarize_img(roi,10)
     # roi = load_img(r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/hexagon_spct/EC_thr3.1.nii.gz')
-    roi1 = load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/lh.lateraloccipital.nii.gz')
-    roi2 = load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/rh.lateraloccipital.nii.gz')
-    roi = math_img('np.logical_or(img1,img2)', img1=roi1, img2=roi2)
+    # roi1 = load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/lh.lateraloccipital.nii.gz')
+    # roi2 = load_img(r'/mnt/workdir/DCM/Docs/Mask/aparc/mask/rh.lateraloccipital.nii.gz')
+    # roi = math_img('np.logical_or(img1,img2)', img1=roi1, img2=roi2)
+    roi = load_img(r'/mnt/workdir/DCM/Docs/Mask/Park_Grid_ROI/mPFC_GP_roi.nii')
 
-    subjects_chunk = list_to_chunk(subjects,20)
+    subjects_chunk = list_to_chunk(subjects,50)
     for chunk in subjects_chunk:
-        Parallel(n_jobs=20)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)
+        Parallel(n_jobs=50)(delayed(run_peri_event_analysis)(subj,pconfigs,roi) for subj in chunk)

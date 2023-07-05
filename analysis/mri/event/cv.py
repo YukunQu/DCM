@@ -163,7 +163,7 @@ class GAME1EV_cv_spct(Game1EV_hexagon_distance_spct):
         anglebinNum = [round(a/30)+1 for a in alignedD_360]
         anglebinNum = [1 if a == 13 else a for a in anglebinNum]
 
-        trials_type= []
+        trials_type = []
         for binNum in anglebinNum:
             if binNum in range(1,13,2):
                 trials_type.append(f'align_{binNum}')

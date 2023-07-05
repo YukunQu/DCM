@@ -1,6 +1,7 @@
 from nilearn.image import binarize_img,math_img,get_data,new_img_like
 from scipy.stats import norm
 
+
 def conj_stat_maps(map1,map2,out_file,thr=2.3):
     """
     Runs a conjunction on stat maps
@@ -30,8 +31,8 @@ def conj_stat_maps(map1,map2,out_file,thr=2.3):
 
 
 if __name__ == "__main__":
-    map1 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/distance_spct/Setall/6fold/group_203/age_all/M2_corrxdistance_Age_zmap.nii.gz'
-    map2 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/distance_spct/Setall/6fold/group_193/age_all/M2_corrxdistance_Age_zmap.nii.gz'
-    outpath = r'/mnt/workdir/DCM/Result/analysis/MRI/Conjunction_analysis/distance/conj_distance_age_zmap.nii.gz'
+    map1 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/distance_spct/Setall/6fold/group_203/mean/thr_M2_corrxdistance_zmap.nii.gz'
+    map2 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/distance_spct/Setall/6fold/group_193/mean/thr_M2_corrxdistance_zmap.nii.gz'
+    outpath = r'/mnt/workdir/DCM/Result/analysis/MRI/Conjunction_analysis/distance/conj_distance_zmap.nii.gz'
     thr = norm.ppf(1 - 0.001)
     conj_stat_maps(map1,map2,outpath,thr)
