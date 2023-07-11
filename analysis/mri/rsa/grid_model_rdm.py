@@ -3,7 +3,7 @@ import pandas as pd
 from nipype.interfaces.base import Bunch
 from rsatoolbox.rdm import RDMs
 from rsatoolbox.model import ModelFixed
-
+from matplotlib.colors import LinearSegmentedColormap
 
 def get_sub_angles_nilearn(ev_files):
     """
@@ -18,7 +18,7 @@ def get_sub_angles_nilearn(ev_files):
     angle_con_names = list(set(regressors_name))
 
     # remove other regressors.
-    for non_angle_reg in ['M1','M2_error','decision']:
+    for non_angle_reg in ['M1','decision']:
         if non_angle_reg in angle_con_names:
             angle_con_names.remove(non_angle_reg)
         else:
@@ -62,9 +62,9 @@ if __name__ == "__main__":
     if task == 'game1':
         runs = range(1,7)
         ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                      r'game1/grid_rsa_corr_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'
-        savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_rsa/' \
-                   'game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_{}fold.npy'
+                      r'game1/grid_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'
+        savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
+                   'game1/grid_rsa/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_{}fold.npy'
     elif task == 'game2':
         runs = range(1,3)
         ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
@@ -77,25 +77,37 @@ if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query(f'{task}_fmri>=0.5')  # look out
-    subjects = data['Participant_ID'].to_list()
+    subjects = data['Participant_ID'].to_list()[:1]
     for sub_id in subjects:
         ev_files = []
         for i in runs:
             ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
         sub_angles_set = get_sub_angles_nilearn(ev_files)
 
-        for ifold in range(4,9):
+        for ifold in range(6,7):
             rdm = calc_rdm_angular_distance(sub_angles_set,ifold=ifold,scale='coarse')
             np.save(savepath.format(sub_id,sub_id,ifold),rdm)
 
-            plot = False
+            plot = True
             if plot:
                 import matplotlib.pyplot as plt
+
+                # Define the colors and alpha values
+                colors = [(0.8, 0.8, 0.8, 0.4), (1.0, 0.0, 0.0, 0.3)]  # light grey to red
+                positions = [0, 1]  # corresponding positions of the colors
+
+                # Create the custom color map
+                cmap = LinearSegmentedColormap.from_list('newCMap', colors, N=256)
+                plt.register_cmap(cmap=cmap)
+
                 fig, ax = plt.subplots(figsize=(12,12))
-                im = ax.imshow(rdm,cmap='GnBu')
+                im = ax.imshow(rdm,cmap='newCMap')
                 ax.set_xticks(np.arange(len(sub_angles_set)), labels=sub_angles_set)
                 ax.set_yticks(np.arange(len(sub_angles_set)), labels=sub_angles_set)
                 plt.title("Mdoel RDM of {}fold".format(ifold),size=30)
                 plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
                          rotation_mode="anchor")
+                plt.savefig(r'/mnt/workdir/DCM/Result/paper/sf/sf2/RSA_model_RDM_{}fold2.pdf'.format(ifold),
+                            dpi=300, bbox_inches='tight', pad_inches=0, transparent=True)
+
         print("{}'s grid rdm is generated.".format(sub_id))

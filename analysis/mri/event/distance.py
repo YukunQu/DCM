@@ -430,8 +430,8 @@ class GAME2EV_distance_spct(GAME2EV_base_spct):
         trial_label, accuracy = self.label_trial_corr()
         m2ev_corr, m2ev_error = self.genM2ev(trial_label)
         deev_corr, deev_error = self.genDeev(trial_label)
-        pmod_distance = self.genpm_distance_spct(trial_label)
 
+        pmod_distance = self.genpm_distance_spct(trial_label)
         event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
                                 pmod_distance], axis=0)
         return event_data

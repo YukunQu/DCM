@@ -59,7 +59,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 if __name__ == "__main__":
     for ifold in ['6fold']:
-        task = 'game1'
+        task = 'game2'
         # subject
         participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
         participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -71,9 +71,8 @@ if __name__ == "__main__":
 
         # configure
         data_root = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn'
-        glm_type = 'hexModvalue_spct'
+        glm_type = 'distance_spct'
         set_id = 'Setall'
-        #ifold = '6fold'
         templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
         #templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/rsa',  '{}.nii.gz')
 
@@ -92,8 +91,7 @@ if __name__ == "__main__":
 
                             'distance_spct': ['distance'],
                             'manhd_spct':['m2xmanhd','decisionxmanhd'],
-                            '2distance_spct': ['M1', 'M2_corr', 'decision_corr',
-                                               'm2xeucd','decisionxeucd','m2xmanhd','decisionxmanhd'],
+                            '2distance_spct': ['m2xeucd','decisionxeucd','m2xmanhd','decisionxmanhd'],
                             '3distance_spct': ['M1', 'M2_corr', 'decision_corr','eucd','ap','dp'],
                             'ap_distance_spct': ['M1', 'M2_corr', 'decision_corr','ap'],
                             'dp_distance_spct': ['M1', 'M2_corr', 'decision_corr','dp'],
@@ -109,12 +107,13 @@ if __name__ == "__main__":
                             'distance_value_spct_v1':['distance','value1','value2','value','decision_corrxdistance'],
                             '2distance_value_spct':['M1', 'M2_corr', 'decision_corr','value','eucd','manhd'],
 
+                            'grid_rsa':['rsa_img_coarse_6fold','rsa_zscore_img_coarse_6fold'],
                             'grid_rsa_corr_trials':['rsa_img_coarse_6fold','rsa_zscore_img_coarse_6fold'],
                             'map_rsa':['cmap_rsa_img','cmap_rsa_zscore_img'],
                             'map_rsa_spat':['cmap_rsa_img','cmap_rsa_ztransf_img'],
                             'base_diff':['M1', 'M2_corr', 'decision_corr', 'correct_error'],
                             'hexagon_diff':['M1', 'M2_corr', 'decision_corr', 'correct_error','hexagon'],
-                            'distance_diff':['M1', 'M2_corr', 'decision_corr', 'correct_error', 'M2_corrxdistance'],
+                            'distance_diff':['distance'],
                             'value_diff':['M1', 'M2_corr', 'decision_corr','correct_error','value'],
                             '2distance_diff':['M1', 'M2_corr', 'decision_corr','m2xeucd', 'decisionxeucd', 'm2xmanhd', 'decisionxmanhd', 'correct_error'],
                             'distance_value_diff':['distance_value_diff'],

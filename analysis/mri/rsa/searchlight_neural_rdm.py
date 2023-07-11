@@ -30,7 +30,7 @@ def get_sub_angles_spm(ev_files):
         conditions.extend(run_info.conditions)
     conditions_names = list(set(conditions))
     conditions_names.sort()
-    for non_angle_reg in ['M1','M2_error','decision']:
+    for non_angle_reg in ['M1','decision']:
         if non_angle_reg in conditions_names:
             conditions_names.remove(non_angle_reg)
         else:
@@ -52,7 +52,7 @@ def get_sub_angles_nilearn(ev_files):
     angle_con_names = list(set(regressors_name))
 
     # remove other regressors.
-    for non_angle_reg in ['M1','M2_error','decision']:
+    for non_angle_reg in ['M1','decision']:
         if non_angle_reg in angle_con_names:
             angle_con_names.remove(non_angle_reg)
         else:
@@ -97,17 +97,17 @@ def cal_neural_rdm(sub_id):
     # get subject's contrast_names(angles)
     ev_files = []
     ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                  r'game1/map_rsa_spat/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
+                  r'game1/grid_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
     runs = range(1,7)  # look out
     for i in runs:
         ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
-    #con_names = get_sub_angles_nilearn(ev_files)
-    con_names = get_sub_pos(ev_files)
+    con_names = get_sub_angles_nilearn(ev_files)
+    #con_names = get_sub_pos(ev_files)
 
     # get subject's cmap
     cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
-                  'game1/map_rsa_spat/Setall/6fold/{}'
-    image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
+                  'game1/grid_rsa/Setall/6fold/{}'
+    image_paths = [os.path.join(cmap_folder.format(sub_id),'zmap/{}_zmap.nii.gz'.format(con_id))
                    for con_id in con_names]
 
     # load one image to get the dimensions and make the mask
@@ -130,11 +130,11 @@ def cal_neural_rdm(sub_id):
     data_2d = data.reshape([data.shape[0], -1])
     data_2d = np.nan_to_num(data_2d)
 
-    SL_RDM = get_searchlight_RDMs(data_2d, centers, neighbors, image_value, method='mahalanobis')
+    SL_RDM = get_searchlight_RDMs(data_2d, centers, neighbors, image_value, method='correlation')
     savepath = os.path.join(cmap_folder.format(sub_id),'rsa')
     if not os.path.exists(savepath):
         os.mkdir(savepath)
-    savepath = os.path.join(savepath,'{}-neural_cmap_RDM.hdf5'.format(sub_id))
+    savepath = os.path.join(savepath,'{}-neural_zmap_RDM.hdf5'.format(sub_id))
     SL_RDM.save(savepath,'hdf5',overwrite=True)
     print("The {}'s rdm have been done.".format(sub_id))
     return "The {}'s rdm have been done.".format(sub_id)

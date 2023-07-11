@@ -5,7 +5,7 @@ from analysis.mri.event.base import GAME1EV_base_spct,GAME1EV_base_spat
 from analysis.mri.event.hexagon import GAME1EV_hexagon_spat,Game2EV_hexagon_spat
 
 
-class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
+class GAME1_Grid_rsa_m2(GAME1EV_hexagon_spat):
     def __init__(self, behDataPath):
         GAME1EV_hexagon_spat.__init__(self, behDataPath)
         self.behData['angles'] = round(self.behData['angles'], 1)
@@ -57,7 +57,7 @@ class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
                 duration = 2.5
                 angle = row['angles']
                 angle = round(angle % 360)
-                trial_type = str(angle)
+                trial_type = 'angle'+str(angle)
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
@@ -67,7 +67,7 @@ class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
                 duration = 2.5
                 angle = row['angles']
                 angle = round(angle % 360)
-                trial_type = str(angle)
+                trial_type = 'angle'+str(angle)
                 angle_ev = angle_ev.append(
                     {'onset': onset, 'duration': duration, 'trial_type': trial_type, 'modulation': 1},
                     ignore_index=True)
@@ -120,7 +120,7 @@ class Game1_grid_rsa_m2(GAME1EV_hexagon_spat):
         m1ev = self.genM1ev()
         trial_corr, accuracy = self.label_trial_corr()
         corr_angle_ev = self.correct_angle_ev(trial_corr)
-        m2ev_corr,_ = self.genM2ev_corr(trial_corr)
+        m2ev_corr,m2ev_error = self.genM2ev_corr(trial_corr)
         deev = self.genDeev()
         event_data = pd.concat([m1ev,m2ev_corr,corr_angle_ev,deev], axis=0)
         return event_data
@@ -274,7 +274,6 @@ class GAME1EV_map_rsa_spat(GAME1EV_base_spat):
         return event_data
 
 
-
 class Game1_grid_rsa_decision(GAME1EV_hexagon_spat):
     def __init__(self, behDataPath):
         GAME1EV_hexagon_spat.__init__(self, behDataPath)
@@ -397,7 +396,9 @@ def gen_gird_rsa_event(task):
     # define subject list
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-
+    # set folds and runs for cross validation
+    ifolds = range(6, 7)
+    runs = range(1,7)
     if task == 'game1':
         data = participants_data.query("game1_fmri>=0.5")
         pid = data['Participant_ID'].to_list()
@@ -405,12 +406,8 @@ def gen_gird_rsa_event(task):
 
         # define the template of behavioral file
         behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
-        save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/grid_rsa_corr_trials_demean/sub-{}/{}fold'
+        save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/grid_rsa/sub-{}/{}fold'
         event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-
-        # set folds and runs for cross validation
-        ifolds = range(6, 7)
-        runs = range(1, 7)
     elif task == 'game2':
         data = participants_data.query("game2_fmri>=0.5")
         pid = data['Participant_ID'].to_list()
@@ -420,10 +417,6 @@ def gen_gird_rsa_event(task):
         behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game2-test/sub-{}_task-game2_run-{}.csv'
         save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game2/grid_rsa_corr_trials/sub-{}/{}fold'
         event_file = 'sub-{}_task-game2_run-{}_events.tsv'
-
-        # set folds and runs for cross validation
-        ifolds = range(6, 7)
-        runs = range(1,7)
     else:
         raise Exception("The task is wrong.")
 
@@ -434,8 +427,12 @@ def gen_gird_rsa_event(task):
                 # generate event
                 behDataPath = behav_path.format(sub, sub, run_id)
                 if task == 'game1':
-                    game1_cv = Game1_grid_rsa_m2(behDataPath)
-                    event = game1_cv.grid_rsa_corr_trials_ev()
+                    if trial_type == 'all':
+                        game1_cv = GAME1_Grid_rsa_m2(behDataPath)
+                        event = game1_cv.grid_rsa_ev()
+                    elif trial_type == 'corr':
+                        game1_cv = GAME1_Grid_rsa_m2(behDataPath)
+                        event = game1_cv.grid_rsa_corr_trials_ev()
                 elif task == 'game2':
                     game2_cv = Game2_grid_rsa_m2(behDataPath)
                     event = game2_cv.grid_rsa_corr_trials_ev()
@@ -451,4 +448,5 @@ def gen_gird_rsa_event(task):
 
 if __name__ == "__main__":
     task = 'game1'
+    trial_type = 'all'
     gen_gird_rsa_event(task)

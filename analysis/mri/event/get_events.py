@@ -11,9 +11,9 @@ from analysis.mri.event.joint import GAME1EV_distance_value_spct
 
 
 ifolds = range(6,7)
-task = 'game1'
+task = 'game2'
 glm_type = 'distance_spct'
-drop_stalemate = True
+drop_stalemate = False
 print(glm_type)
 template = {'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'+glm_type+'/sub-{}/{}fold',
             'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
