@@ -31,8 +31,8 @@ def conj_stat_maps(map1,map2,out_file,thr=2.3):
 
 
 if __name__ == "__main__":
-    map1 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/distance_spct/Setall/6fold/group_203/mean/thr_M2_corrxdistance_zmap.nii.gz'
-    map2 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/distance_spct/Setall/6fold/group_193/mean/thr_M2_corrxdistance_zmap.nii.gz'
-    outpath = r'/mnt/workdir/DCM/Result/analysis/MRI/Conjunction_analysis/distance/conj_distance_zmap.nii.gz'
+    map1 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/cv_train_hexagon_spct/Setall/6fold/group_203/mean/hexagon_zmap_fdr.nii.gz'
+    map2 = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/hexagon_spct/Setall/6fold/group/mean/hexagon_zmap_fdr_brain.nii.gz'
+    outpath = r'/mnt/workdir/DCM/Result/analysis/MRI/Conjunction_analysis/hexagon/2023.4.16backup/conj_hexagon_zmap_fdr.nii.gz'
     thr = norm.ppf(1 - 0.001)
     conj_stat_maps(map1,map2,outpath,thr)

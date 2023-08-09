@@ -47,7 +47,7 @@ if __name__ == "__main__":
     # specify configure parameters
     configs = {'TR': 3.0,
                'task': 'game1',
-               'glm_type': 'cv_test_hexagon_spct',
+               'glm_type': 'cv_test_OFC_hexagon_spct',
                'run_list': [1, 2, 3, 4, 5, 6],
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                'events_name': r'sub-{}_task-game1_run-{}_events.tsv',

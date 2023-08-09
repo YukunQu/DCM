@@ -600,9 +600,136 @@ class GAME2EV_2distance_spct(GAME2EV_base_spct):
         return event_data
 
 
+class GAME2EV_hexModdistance_spct(GAME2EV_base_spct):
+    # distance effect modulated by hexagonal effect
+    def __init__(self, behDataPath):
+        GAME2EV_base_spct.__init__(self, behDataPath)
+
+    def genhexsplitM2ev(self, trial_label,phi):
+        if self.dformat == 'trial_by_trial':
+            onset =  self.behData['testPic2.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+            if 'stalemate' in self.behData.columns:
+                m2ev['stalemate'] = self.behData['stalemate']
+        elif self.dformat == 'summary':
+            onset = self.behData['testPic2.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            m2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            m2ev['trial_type'] = 'M2'
+            m2ev['modulation'] = 1
+            if 'stalemate' in self.behData.columns:
+                m2ev['stalemate'] = self.behData['stalemate']
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        assert len(m2ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        m2ev_corr = m2ev.iloc[correct_trials_index].copy()
+        m2ev_error = m2ev.iloc[error_trials_index].copy()
+        m2ev_corr['trial_type'] = 'M2_corr'
+        m2ev_error['trial_type'] = 'M2_error'
+
+        m2ev_corr = m2ev_corr.sort_values('onset', ignore_index=True)
+        m2ev_error = m2ev_error.sort_values('onset', ignore_index=True)
+
+        # according to hexagonal effect and split distance into two types(align and misalign)
+        corr_trials_angle = m2ev_corr['angle']
+        # label alignment trials and misalignment trials according to the angle and Phi
+        alignedD_360 = [(a-phi) % 360 for a in corr_trials_angle]
+        anglebinNum = [round(a/30)+1 for a in alignedD_360]
+        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
+
+        trials_type = []
+        for binNum in anglebinNum:
+            if binNum in range(1,13,2):
+                trials_type.append(f'alignxM2_corr')
+            elif binNum in range(2,13,2):
+                trials_type.append(f'misalignxM2_corr')
+        m2ev_corr['trial_type'] = trials_type
+        return m2ev_corr, m2ev_error
+
+    def genpm_hexModdistance_spct(self, trial_label, phi):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['testPic2.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            distance = np.sqrt(self.behData['ap_diff'] ** 2 + self.behData['dp_diff'] ** 2)
+
+            pmev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            pmev['trial_type'] = 'distance'
+            pmev['modulation'] = distance
+        elif self.dformat == 'summary':
+            onset = self.behData['testPic2.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+            distance = np.sqrt(self.behData['ap_diff'] ** 2 + self.behData['dp_diff'] ** 2)
+
+            pmev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            pmev['trial_type'] = 'distance'
+            pmev['modulation'] = distance
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        assert len(pmev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        pmev_corr = pmev.iloc[correct_trials_index].copy()
+        pmev_corr = pmev_corr.sort_values('onset', ignore_index=True)
+
+        # according to hexagonal effect and split distance into two types(align and misalign)
+        corr_trials_angle = pmev_corr['angle']
+        # label alignment trials and misalignment trials according to the angle and Phi
+        alignedD_360 = [(a-phi) % 360 for a in corr_trials_angle]
+        anglebinNum = [round(a/30)+1 for a in alignedD_360]
+        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
+
+        trials_type = []
+        for binNum in anglebinNum:
+            if binNum in range(1,13,2):
+                trials_type.append(f'alignxdistance')
+            elif binNum in range(2,13,2):
+                trials_type.append(f'misalignxdistance')
+        pmev_corr['trial_type'] = trials_type
+        return pmev_corr
+
+    def game2ev_hexModdistance_spct(self,phi):
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genhexsplitM2ev(trial_label, phi)
+        deev_corr, deev_error = self.genDeev(trial_label)
+        distance_corr = self.genpm_hexModdistance_spct(trial_label, phi)
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                distance_corr], axis=0)
+        return event_data
+
+
 if __name__ == "__main__":
-    ifolds = range(4,9)
-    task = 'game1'
+    ifolds = range(6,7)
+    task = 'game2'
     glm_type = 'hexModdistance_spct'
     drop_stalemate = False
     print(glm_type)
@@ -639,7 +766,7 @@ if __name__ == "__main__":
             for idx in runs:
                 run_id = str(idx)
                 behav_path = template['behav_path'].format(subj, subj, task, run_id)
-                event = GAME1EV_hexModdistance_spct(behav_path)
-                event_data = event.game1ev_hexModdistance_spct(phi,drop_stalemate)
+                event = GAME2EV_hexModdistance_spct(behav_path)
+                event_data = event.game2ev_hexModdistance_spct(phi)
                 tsv_save_path = join(save_dir, template['event_file'].format(subj, task, run_id))
                 event_data.to_csv(tsv_save_path, sep='\t', index=False)

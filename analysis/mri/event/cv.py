@@ -342,11 +342,11 @@ def gen_event_game1_cv_test():
     # define the template of behavioral file
     behav_path = r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/fmri_task-game1/sub-{}_task-game1_run-{}.csv'
     event_file = 'sub-{}_task-game1_run-{}_events.tsv'
-    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_hexagon_spct/sub-{}/{}fold'  # look out
+    save_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Events/game1/cv_test_OFC_hexagon_spct/sub-{}/{}fold'  # look out
 
     # set Phi estimated from specific ROI
-    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/cv_train_hexagon_spct/' \
-                r'estPhi_ROI-EC-anat_circmean_cv.csv'  # look out
+    phis_file = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/cv_train_hexagon_spct/' \
+                r'estPhi_ROI-OFC_circmean_cv.csv'  # look out
     phis_data = pd.read_csv(phis_file)
 
     # set folds and runs for cross validation
@@ -361,7 +361,7 @@ def gen_event_game1_cv_test():
             for run_id in runs:
                 behDataPath = behav_path.format(sub, sub, run_id)
                 game1_cv = GAME1EV_cv_spct(behDataPath)
-                event = game1_cv.game1ev_cv_test(ifold,odd_phi,even_phi,drop_stalemate=True)  # look out
+                event = game1_cv.game1ev_cv_test(ifold,odd_phi,even_phi,drop_stalemate=False)  # look out
                 # save
                 out_dir = save_dir.format(sub, ifold)
                 if not os.path.exists(out_dir):

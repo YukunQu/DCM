@@ -62,6 +62,67 @@ class GAME1EV_value_spct(GAME1EV_base_spct):
         return event_data
 
 
+class GAME1EV_m2value_spct(GAME1EV_base_spct):
+    # A variant of event generator for GAME1's value parametric modulation at decision.
+    def __init__(self, behDataPath):
+        GAME1EV_base_spct.__init__(self, behDataPath)
+
+    def genpm_m2value_spct(self, trial_label):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['pic2_render.started'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+        elif self.dformat == 'summary':
+            onset = self.behData['pic2_render.started_raw'] - self.starttime
+            duration = [2.5] * len(self.behData)
+            angle = self.behData['angles']
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        value1ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+        value2ev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+
+        value1 = []
+        value2 = []
+        for row in self.behData.itertuples():
+            value1.append(np.abs(row.pic1_ap - row.pic2_dp))
+            value2.append(np.abs(row.pic2_ap - row.pic1_dp))
+
+        value1ev['trial_type'] = 'value1'
+        value1ev['modulation'] = value1
+
+        value2ev['trial_type'] = 'value2'
+        value2ev['modulation'] = value2
+        assert len(value1ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+        assert len(value2ev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        value1ev_corr = value1ev.iloc[correct_trials_index].copy()
+        value1ev_corr = value1ev_corr.sort_values('onset', ignore_index=True)
+        value2ev_corr = value2ev.iloc[correct_trials_index].copy()
+        value2ev_corr = value2ev_corr.sort_values('onset', ignore_index=True)
+        return value1ev_corr,value2ev_corr
+
+    def game1ev_m2value_spct(self):
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genDeev(trial_label)
+        value1ev_corr,value2ev_corr = self.genpm_m2value_spct(trial_label)
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                value1ev_corr, value2ev_corr], axis=0)
+        return event_data
+
+
 class GAME1EV_hexModvalue_spct(GAME1EV_base_spct):
     # A variant of event generator for GAME1's value parametric modulation at decision.
     def __init__(self, behDataPath):
@@ -426,7 +487,6 @@ class GAME1EV_apdp_spct(GAME1EV_base_spct):
         return event_data
 
 
-
 class GAME2EV_value_spct(GAME2EV_base_spct):
     # A variant of event generator for GAME2's value parametric modulation at decision.
     def __init__(self, behDataPath):
@@ -483,9 +543,141 @@ class GAME2EV_value_spct(GAME2EV_base_spct):
         return event_data
 
 
+class GAME2EV_hexModvalue_spct(GAME2EV_base_spct):
+    # A variant of event generator for GAME1's value parametric modulation at decision.
+    def __init__(self, behDataPath):
+        GAME2EV_base_spct.__init__(self, behDataPath)
+
+    def genhexsplitDeev(self, trial_label,phi):
+        # generate the event of decision
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+            if 'stalemate' in self.behData.columns:
+                deev['stalemate'] = self.behData['stalemate']
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+            deev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+            deev['trial_type'] = 'decision'
+            deev['modulation'] = 1
+            if 'stalemate' in self.behData.columns:
+                deev['stalemate'] = self.behData['stalemate']
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        assert len(deev) == len(
+            trial_label), "The number of trial label didn't not  same as the number of event-decision."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        deev_corr = deev.iloc[correct_trials_index].copy()
+        deev_error = deev.iloc[error_trials_index].copy()
+        deev_corr['trial_type'] = 'decision_corr'
+        deev_error['trial_type'] = 'decision_error'
+
+        deev_corr = deev_corr.sort_values('onset', ignore_index=True)
+        deev_error = deev_error.sort_values('onset', ignore_index=True)
+
+        # according to hexagonal effect and split distance into two types(align and misalign)
+        corr_trials_angle = deev_corr['angle']
+        # label alignment trials and misalignment trials according to the angle and Phi
+        alignedD_360 = [(a-phi) % 360 for a in corr_trials_angle]
+        anglebinNum = [round(a/30)+1 for a in alignedD_360]
+        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
+
+        trials_type = []
+        for binNum in anglebinNum:
+            if binNum in range(1,13,2):
+                trials_type.append(f'alignxDecision_corr')
+            elif binNum in range(2,13,2):
+                trials_type.append(f'misalignxDecision_corr')
+        deev_corr['trial_type'] = trials_type
+        return deev_corr, deev_error
+
+    def genpm_hexModvalue_spct(self, trial_label, phi):
+        if self.dformat == 'trial_by_trial':
+            onset = self.behData['cue1.started'] - self.starttime
+            duration = self.behData['cue1_2.started'] - self.behData['cue1.started']
+            angle = self.behData['angles']
+        elif self.dformat == 'summary':
+            onset = self.behData['cue1.started_raw'] - self.starttime
+            duration = self.behData['cue1_2.started_raw'] - self.behData['cue1.started_raw']
+            angle = self.behData['angles']
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        pmev = pd.DataFrame({'onset': onset, 'duration': duration, 'angle': angle})
+
+        value = []
+        for row in self.behData.itertuples():
+            rule = row.fightRule
+            if rule == '1A2D':
+                value.append(np.abs(row.pic1_ap - row.pic2_dp))
+            elif rule == '1D2A':
+                value.append(np.abs(row.pic2_ap - row.pic1_dp))
+
+        pmev['trial_type'] = 'value'
+        pmev['modulation'] = value
+        assert len(pmev) == len(trial_label), "The number of trial label didn't not same as the number of event-M2."
+
+        correct_trials_index = []
+        error_trials_index = []
+        for i, label in enumerate(trial_label):
+            if label:
+                correct_trials_index.append(i)
+            elif not label:
+                error_trials_index.append(i)
+            else:
+                raise ValueError("The trial label should be True or False.")
+
+        pmev_corr = pmev.iloc[correct_trials_index].copy()
+        pmev_corr = pmev_corr.sort_values('onset', ignore_index=True)
+
+        # according to hexagonal effect and split value into two types(align and misalign)
+        corr_trials_angle = pmev_corr['angle']
+        # label alignment trials and misalignment trials according to the angle and Phi
+        alignedD_360 = [(a-phi) % 360 for a in corr_trials_angle]
+        anglebinNum = [round(a/30)+1 for a in alignedD_360]
+        anglebinNum = [1 if a == 13 else a for a in anglebinNum]
+
+        trials_type = []
+        for binNum in anglebinNum:
+            if binNum in range(1,13,2):
+                trials_type.append(f'alignxvalue')
+            elif binNum in range(2,13,2):
+                trials_type.append(f'misalignxvalue')
+        pmev_corr['trial_type'] = trials_type
+        return pmev_corr
+
+    def game2ev_hexModvalue_spct(self,phi):
+        m1ev = self.genM1ev()
+        trial_label, accuracy = self.label_trial_corr()
+        m2ev_corr, m2ev_error = self.genM2ev(trial_label)
+        deev_corr, deev_error = self.genhexsplitDeev(trial_label,phi)
+        value_corr = self.genpm_hexModvalue_spct(trial_label,phi)
+        event_data = pd.concat([m1ev, m2ev_corr, m2ev_error, deev_corr, deev_error,
+                                value_corr], axis=0)
+        return event_data
+
+
+
 if __name__ == "__main__":
     ifolds = range(6,7)
-    task = 'game1'
+    task = 'game2'
     glm_type = 'hexModvalue_spct'
     drop_stalemate = False
     print(glm_type)
@@ -521,7 +713,7 @@ if __name__ == "__main__":
             for idx in runs:
                 run_id = str(idx)
                 behav_path = template['behav_path'].format(subj, subj, task, run_id)
-                event = GAME1EV_hexModvalue_spct(behav_path)
-                event_data = event.game1ev_hexModvalue_spct(phi)
+                event = GAME2EV_hexModvalue_spct(behav_path)
+                event_data = event.game2ev_hexModvalue_spct(phi)
                 tsv_save_path = join(save_dir, template['event_file'].format(subj, task, run_id))
                 event_data.to_csv(tsv_save_path, sep='\t', index=False)

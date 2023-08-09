@@ -126,6 +126,7 @@ def first_level_glm(datasink, run_imgs, design_matrices, set_contrasts):
         for dir in ['cmap', 'stat_map', 'zmap']:
             if not os.path.exists(os.path.join(datasink, dir)):
                 os.mkdir(os.path.join(datasink, dir))
+    design_matrices.to_csv(os.path.join(datasink,'design_matrix.csv'), index=False)
 
     # fit first level glm to estimate mean orientation
     mni_mask = r'/mnt/workdir/DCM/Docs/Mask/tpl-MNI152NLin2009cAsym_res-02_desc-brain_mask.nii'

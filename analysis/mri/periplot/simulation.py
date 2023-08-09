@@ -53,8 +53,8 @@ def generate_Ntrial_activity(onset,trial_type,duration,modulation):
 # generate distance effect * 1000 trials
 onset = [1] * 100
 trial_type = ['distance'] * 100
-duration = [3] * 100
-modulation = np.random.uniform(np.sqrt(2),4*np.sqrt(2),100) * 0.7
+duration = [2.5] * 100
+modulation = np.random.uniform(np.sqrt(2),4*np.sqrt(2),100) * 0.9
 distance_act = generate_Ntrial_activity(onset,trial_type,duration,modulation)
 
 # generate value effect * 1000 trials
@@ -62,7 +62,7 @@ x= [np.random.uniform(1,4) for i in range(100)]
 onset = [1+2.5+i for i in x]
 trial_type = ['value'] * 100
 duration = generate_skewed_data(100, 3)
-modulation = np.random.uniform(1,4,100) *2.2
+modulation = np.random.uniform(1,4,100) * 2.2
 value_act = generate_Ntrial_activity(onset,trial_type,duration,modulation)
 
 #%%
@@ -97,6 +97,6 @@ plt.title('Activity Over Time for Value and Distance')
 ax.tick_params(axis='x', which='both', bottom=True, top=False, direction='out')
 
 ax.tick_params(axis='y', which='both', left=True, right=False, direction='out')
-savepath = r'/mnt/workdir/DCM/Result/paper/figure3/figure3_new/periplot_simulation.pdf'
-plt.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300,transparent=True)
+# savepath = r'/mnt/workdir/DCM/Result/paper/figure3/figure3_new/periplot_simulation.pdf'
+# plt.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300,transparent=True)
 plt.show()

@@ -40,10 +40,10 @@ def run_glm(task,subj,ifold):
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
 
     elif task == 'game2':
-        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'distance_spct',
+        configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'hexModdistance_spct',
                    'run_list': [1, 2],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-                   'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
+                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
                    'func_name': 'func/sub-{}_task-game2_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game2_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game2_run-{}_desc-confounds_timeseries_trimmed.tsv'}
@@ -64,8 +64,8 @@ def run_glm(task,subj,ifold):
 
 
 if __name__ == "__main__":
-    task = 'game1'
-    for ifold in [4,5,7,8]:
+    task = 'game2'
+    for ifold in [6]:
         # specify subjects
         participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
         participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -73,6 +73,6 @@ if __name__ == "__main__":
         pid = data['Participant_ID'].to_list()
         subjects = [p.split('-')[-1] for p in pid]
 
-        subjects_chunk = list_to_chunk(subjects,30)
+        subjects_chunk = list_to_chunk(subjects,50)
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=50)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

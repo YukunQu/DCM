@@ -59,7 +59,7 @@ def run_glm(task, subj, ifold):
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     ifold = 6
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'

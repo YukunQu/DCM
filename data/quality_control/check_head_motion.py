@@ -1,6 +1,7 @@
 import json
 import os
 
+import numpy as np
 import pandas as pd
 from os.path import join as pjoin
 
@@ -52,13 +53,13 @@ sub_list = data['Participant_ID'].to_list()
 sub_age = data['Age'].to_list()
 subs_hm = pd.DataFrame(columns=['Participant_ID', 'task', 'run', 'fd_mean'])
 
-#%%
+
 for sub, age in zip(sub_list, sub_age):
     print(f"--------------{sub} start------------")
     # read head motion for each subject
     for run_id in range(1, 7):
         # game1
-        filepath = pjoin(mriqc_dir, f'{sub}/func/{sub}_task-game1_run-{run_id}_desc-confounds_timeseries.tsv')
+        filepath = pjoin(mriqc_dir, f'{sub}/func/{sub}_task-game1_run-{run_id}_desc-confounds_timeseries_trimmed.tsv')
         if os.path.exists(filepath):
             quality_para = read_quality_para(filepath,target='fmriprep')
             fd = quality_para['framewise_displacement']
@@ -66,7 +67,7 @@ for sub, age in zip(sub_list, sub_age):
             if sub == 'sub-238':
                 print(filepath)
             print("The", sub, f"didn't have game1 run-{run_id}")
-            fd = 999
+            fd = np.NAN
             tsnr = 0
         subs_hm = subs_hm.append(
             {'Participant_ID': sub, 'Age': age, 'task': 'game1', 'run': run_id, 'fd_mean': fd},
@@ -80,7 +81,7 @@ for sub, age in zip(sub_list, sub_age):
             fd = quality_para['framewise_displacement']
         else:
             print("The", sub, f"didn't have game2 run-{run_id}")
-            fd = 999
+            fd = np.NAN
             tsnr = 0
         subs_hm = subs_hm.append(
             {'Participant_ID': sub, 'Age': age, 'task': 'game2', 'run': run_id, 'fd_mean': fd},
@@ -93,7 +94,7 @@ for sub, age in zip(sub_list, sub_age):
             fd = quality_para['framewise_displacement']
         else:
             print("The", sub, f"didn't have rest run-{run_id}")
-            fd = 999
+            fd = np.NAN
             tsnr = 0
         subs_hm = subs_hm.append(
             {'Participant_ID': sub, 'Age': age, 'task': 'rest', 'run': run_id, 'fd_mean': fd},
@@ -109,7 +110,7 @@ for index, row in subs_hm.iterrows():
     else:
         quality.append('good')
 subs_hm.loc[:, 'quality'] = quality
-subs_hm.to_csv(rf'/mnt/workdir/DCM/result/quality_control/{standard}/participants_data_quality.csv', index=False)
+subs_hm.to_csv(rf'/mnt/workdir/DCM/Result/analysis/quality_control/participants_data_quality.csv', index=False)
 
 
 #%%

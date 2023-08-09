@@ -34,7 +34,7 @@ subjects = [p.split('-')[-1] for p in pid]
 # load data
 results = pd.DataFrame(columns=['subj', 'run', 'time_point', 'beta', 'p'])
 for subj in subjects:
-    sub_res = pd.read_csv(f'/mnt/data/DCM/derivatives/peri_event_analysis/mPFC_GP/sub-{subj}_peri_event_analysis.csv')
+    sub_res = pd.read_csv(f'/mnt/data/DCM/derivatives/peri_event_analysis/vmPFC/sub-{subj}_peri_event_analysis.csv')
     results = results.append(sub_res)
 
 results2 = pd.DataFrame(columns=['subj', 'run', 'time_point', 'distance_beta','value_beta'])
@@ -82,8 +82,8 @@ ax.set_xticks([0 ,5, 10, 15, 20])
 # Add tick lines to the bottom and left spines
 ax.tick_params(axis='x', which='both', bottom=True, top=False, direction='out')
 ax.tick_params(axis='y', which='both', left=True, right=False, direction='out')
-savepath = r'/mnt/workdir/DCM/Result/paper/figure3/periplot_all_subjects.pdf'
-plt.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300,transparent=True)
+#savepath = r'/mnt/workdir/DCM/Result/paper/figure3/periplot_all_subjects.pdf'
+#plt.savefig(savepath,bbox_inches='tight',pad_inches=0,dpi=300,transparent=True)
 
 #%%
 # plot peri-stimulus time course for different age group of specified effect

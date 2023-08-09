@@ -11,30 +11,25 @@ from analysis.mri.voxel_wise.nilearn.firstLevel_analysis import prepare_data,loa
 from joblib import Parallel, delayed
 
 
-# def load_ev_distance(event_path):
-#     event = pd.read_csv(event_path, sep='\t')
-#     event_condition = event.query("trial_type in ['M1','M2_corr','M2_error', 'decision_corr','decision_error']")
-#
-#     pmod_distance = event.query("trial_type=='distance'")
-#     distance_mod = pmod_distance['modulation'].to_list()
-#
-#     # generate parametric modulation for M2
-#     m2xdistance = event.query("trial_type == 'M2_corr'").copy()
-#     m2xdistance.loc[:, 'modulation'] = distance_mod
-#     m2xdistance['trial_type'] = 'M2_corrxdistance'
-#
-#     # # generate parametric modulation for decision
-#     decisionxdistance = event.query("trial_type == 'decision_corr'").copy()
-#     decisionxdistance.loc[:, 'modulation'] = distance_mod
-#     decisionxdistance['trial_type'] = 'decision_corrxdistance'
-#
-#     event_condition = event_condition.append([m2xdistance,decisionxdistance])
-#     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
-#     return event_condition
+def load_ev_distance(event_path):
+    event = pd.read_csv(event_path, sep='\t')
+    event_condition = event.query("trial_type in ['M1','M2_corr','M2_error', 'decision_corr','decision_error']")
+
+    pmod_distance = event.query("trial_type=='distance'")
+    distance_mod = pmod_distance['modulation'].to_list()
+
+    # # generate parametric modulation for decision
+    decisionxdistance = event.query("trial_type == 'decision_corr'").copy()
+    decisionxdistance.loc[:, 'modulation'] = distance_mod
+    decisionxdistance['trial_type'] = 'decision_corrxdistance'
+
+    event_condition = event_condition.append([decisionxdistance])
+    event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
+    return event_condition
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1','M2_corr','M2_error','decision_corr','decision_error','distance']
+    contrast_name = ['M1','M2_corr','M2_error','decision_corr','decision_error','decision_corrxdistance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -67,7 +62,7 @@ def run_glm(task, subj, ifold):
     else:
         raise Exception("The type of task is not supoort.")
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_test/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                        configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
@@ -77,12 +72,12 @@ def run_glm(task, subj, ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,concat_runs=True,despiking=True)
+        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev_distance,concat_runs=True,despiking=True)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 
 if __name__ == "__main__":
-    task = 'game2'
+    task = 'game1'
     ifold = 6
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'

@@ -32,6 +32,23 @@ class GAME1EV(object):
             raise Exception("You need specify behavioral data format.")
         return starttime
 
+    def get_rt(self):
+        self.behData = self.behData.fillna('None')
+        if self.dformat == 'trial_by_trial':
+            rt_tmp = self.behData['resp.rt']
+        elif self.dformat == 'summary':
+            rt_tmp = self.behData['resp.rt_raw']
+        else:
+            raise Exception("You need specify behavioral data format.")
+
+        rt = []
+        for r in rt_tmp:
+            if r == 'None':
+                rt.append(3)
+            else:
+                rt.append(r)
+        return rt
+
     def label_trial_corr(self):
         self.behData = self.behData.fillna('None')
         if self.dformat == 'trial_by_trial':

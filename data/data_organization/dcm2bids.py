@@ -15,16 +15,18 @@ def dcm2bids_helper(subjects):
         subj = str(subj).zfill(3)
         ori_dir = r'/mnt/data/DCM/sourcedata/sub_{}/NeuroData/MRI'.format(subj)
         out_dir = r'/mnt/data/DCM/tmp/Nifti/sub_{}'.format(subj)
+        # ori_dir = r'/mnt/data/AIM/Development/sourcedata/MRI_T1/20230325_K207_R1{}'.format(subj)
+        # out_dir = r'/mnt/data/AIM/Development/tmp/R1{}'.format(subj)
         command = r'dcm2bids_helper -d {} -o {}'.format(ori_dir, out_dir)
         print("Command:", command)
         subprocess.call(command, shell=True)
 
 
-sub_list1 = os.listdir(r'/mnt/data/DCM/tmp/ToLuoYao/Elekta')
-sub_list2 = os.listdir(r'/mnt/data/DCM/tmp/ToLuoYao/MRI')
-sub_list2 = [s.replace('-', '_') for s in sub_list2]
-sub_list = [x.split('_')[-1] for x in sub_list1 if x not in sub_list2]
-#subjects = ['013','041','042']
+# sub_list1 = os.listdir(r'/mnt/data/DCM/tmp/ToLuoYao/Elekta')
+# sub_list2 = os.listdir(r'/mnt/data/DCM/tmp/ToLuoYao/MRI')
+# sub_list2 = [s.replace('-', '_') for s in sub_list2]
+# sub_list = [x.split('_')[-1] for x in sub_list1 if x not in sub_list2]
+sub_list = ['006']
 dcm2bids_helper(sub_list)
 
 # %%
@@ -51,15 +53,15 @@ subjects_list = data['Participant_ID'].to_list()
 subjects_list.sort()
 subjects_list = [s.split("-")[-1] for s in subjects_list]
 
-subjects_list = ['089','197']
+subjects_list = ['006','007','008']
 
 
-config_type = 'DWI'  # key parameter
+config_type = 'PKU'  # key parameter
 if config_type == 'CS':
-    config_ibp = r'/mnt/workdir/DCM/config/config_CS.json'  # 中科院扫描的配置文件
+    config_ibp = r'/mnt/workdir/DCM/BIDS/derivatives/config/config_CS.json'  # 中科院扫描的配置文件
     dcm2bids(subjects_list, config_ibp)
 elif config_type == 'PKU':
-    config_pk = r'/mnt/workdir/DCM/config/config_Peking.json'  # 北大扫描的配置文件
+    config_pk = r'/mnt/workdir/DCM/BIDS/derivatives/config/config_Peking.json'  # 北大扫描的配置文件
     dcm2bids(subjects_list, config_pk)
 elif config_type == 'individual':
     for sub in subjects_list:

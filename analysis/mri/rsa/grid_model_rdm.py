@@ -4,6 +4,16 @@ from nipype.interfaces.base import Bunch
 from rsatoolbox.rdm import RDMs
 from rsatoolbox.model import ModelFixed
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.patches import FancyArrow
+
+
+def draw_arrow(angle, ax, x, y, length=1, color='black'):
+    rad = np.deg2rad(angle)
+    dx = length * np.cos(rad)
+    dy = length * np.sin(rad)
+    arrow = FancyArrow(x-dx/2, y-dy/2, dx, dy, color=color, width=0.2, length_includes_head=True)
+    ax.add_patch(arrow)
+
 
 def get_sub_angles_nilearn(ev_files):
     """
@@ -93,7 +103,7 @@ if __name__ == "__main__":
                 import matplotlib.pyplot as plt
 
                 # Define the colors and alpha values
-                colors = [(0.8, 0.8, 0.8, 0.4), (1.0, 0.0, 0.0, 0.3)]  # light grey to red
+                colors = [(0.850980392, 0.160784314, 0.11372549, 0.5),(0.537254902, 0.537254902, 0.537254902,0.3)]  #  red to grey
                 positions = [0, 1]  # corresponding positions of the colors
 
                 # Create the custom color map
@@ -102,12 +112,21 @@ if __name__ == "__main__":
 
                 fig, ax = plt.subplots(figsize=(12,12))
                 im = ax.imshow(rdm,cmap='newCMap')
-                ax.set_xticks(np.arange(len(sub_angles_set)), labels=sub_angles_set)
-                ax.set_yticks(np.arange(len(sub_angles_set)), labels=sub_angles_set)
-                plt.title("Mdoel RDM of {}fold".format(ifold),size=30)
-                plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
-                         rotation_mode="anchor")
-                plt.savefig(r'/mnt/workdir/DCM/Result/paper/sf/sf2/RSA_model_RDM_{}fold2.pdf'.format(ifold),
-                            dpi=300, bbox_inches='tight', pad_inches=0, transparent=True)
 
+                # Draw arrows at tick positions
+                for i, angle in enumerate(sub_angles_set):
+                    draw_arrow(angle, ax, i, -1.5)
+                    draw_arrow(angle, ax, -1.5, i)
+
+                ax.set_xticks(np.arange(len(sub_angles_set)),sub_angles_set)
+                ax.set_yticks(np.arange(len(sub_angles_set)),sub_angles_set)
+
+                ax.set_xlim([-5, len(sub_angles_set)+5])
+                ax.set_ylim([-5, len(sub_angles_set)+5])
+
+                plt.title("Mdoel RDM of {}fold".format(ifold),size=30)
+                # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+                #          rotation_mode="anchor")
+                plt.savefig(r'/mnt/workdir/DCM/Result/paper/sf/sf2/RSA/RSA_model_pattern_similarity_{}fold.pdf'.format(ifold),
+                            dpi=300, bbox_inches='tight', transparent=True)
         print("{}'s grid rdm is generated.".format(sub_id))
