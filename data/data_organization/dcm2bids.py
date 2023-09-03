@@ -52,11 +52,8 @@ data = participants_data.query('game1_fmri>=0.5')
 subjects_list = data['Participant_ID'].to_list()
 subjects_list.sort()
 subjects_list = [s.split("-")[-1] for s in subjects_list]
-
-subjects_list = ['006','007','008']
-
-
-config_type = 'PKU'  # key parameter
+subjects_list = ['207']
+config_type = 'DWI'  # key parameter
 if config_type == 'CS':
     config_ibp = r'/mnt/workdir/DCM/BIDS/derivatives/config/config_CS.json'  # 中科院扫描的配置文件
     dcm2bids(subjects_list, config_ibp)
@@ -68,7 +65,7 @@ elif config_type == 'individual':
         individual_config = r'/mnt/workdir/DCM/config/config_{}.json'.format(sub)
         dcm2bids([sub], individual_config)
 elif config_type == 'DWI':
-    config_dwi = r'/mnt/workdir/DCM/config/config_dwi.json'
+    config_dwi = r'/mnt/workdir/DCM/BIDS/derivatives/config/config_dwi.json'
     dcm2bids(subjects_list, config_dwi)
 elif config_type == 'sbref':
     config_dwi = r'/mnt/workdir/DCM/config/config_sbref.json'

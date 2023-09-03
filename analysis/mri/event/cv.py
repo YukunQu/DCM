@@ -510,7 +510,7 @@ class Game2_cv_hexagon_distance_spct(Game2_cv_hexagon_spct):
         return event_data
 
 
-def gen_sub_event(subjects):
+def gen_sub_game2_event(subjects):
     """
     generate game2 evnet based on game1's Phi
     """
@@ -521,12 +521,12 @@ def gen_sub_event(subjects):
     parameters = {'behav_path': r'/mnt/workdir/DCM/sourcedata/sub_{}/Behaviour/'
                                 r'fmri_task-game2-test/sub-{}_task-{}_run-{}.csv',
                   'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'
-                              r'cv_hexagon_center_spct/sub-{}/{}fold',      # look out
+                              r'cv_mpfc_hexagon_spct/sub-{}/{}fold',      # look out
                   'event_file': 'sub-{}_task-{}_run-{}_events.tsv'}
 
     # set Phi estimated from specific ROI
-    glm_type = 'hexagon_center_spct'
-    phis_file = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/hexagon_spct/estPhi_ROI-EC_circmean_trial-all.csv'  # look out
+    glm_type = 'hexagon_spct'
+    phis_file = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/cv_train_hexagon_spct/estPhi_ROI-dmPFC_circmean_trial-all.csv'  # look out
     phis_data = pd.read_csv(phis_file)
 
     for ifold in ifolds:
@@ -556,10 +556,10 @@ def gen_sub_event(subjects):
 if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
-    data = participants_data.query(f'game1_fmri>=0.5')
+    data = participants_data.query(f'game2_fmri>=0.5')
     pid = data['Participant_ID'].to_list()
     subjects_list = [p.split('-')[-1] for p in pid]
     #gen_event_game1_cv_train()
-    gen_event_game1_cv_test()
-    #gen_sub_event(subjects_list)
+    #gen_event_game1_cv_test()
+    gen_sub_game2_event(subjects_list)
 

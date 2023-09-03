@@ -6,7 +6,7 @@ from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
-data = participants_data.query('game1_fmri==1')  # look out
+data = participants_data.query('game1_fmri==0.5')  # look out
 data = data.query("(game1_acc>=0.8)and(Age>=18)")
 subject_list = data['Participant_ID'].to_list()
 

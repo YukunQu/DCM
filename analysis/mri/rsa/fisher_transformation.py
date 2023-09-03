@@ -13,7 +13,6 @@ def ztransf_img(filepath):
     img_mean = apply_mask(img, mask).mean()
     #img_data = np.arctanh(img_data - img_mean)
     img_data = (img_data - img_mean) / np.std(img_data)
-    #img_data = np.arctanh(img_data)
 
     mask_data = get_data(mask)
     img_data[mask_data == 0] = np.float64('NaN')
@@ -29,8 +28,8 @@ if __name__ == "__main__":
     subjects = data['Participant_ID'].to_list()
 
     for ifold in range(6,7):
-        cmap_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa/Setall/6fold/{}/rsa/rsa_img_coarse_6fold.nii.gz'
-        save_template = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa/Setall/6fold/{}/rsa/rsa_zscore_img_coarse_6fold.nii.gz'
+        cmap_template = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa_cmap/rsa_ori-img_coarse_6fold_corr.nii.gz'
+        save_template = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa_cmap/rsa_zscore_ori-img_coarse_6fold_corr.nii.gz'
         for sub_id in subjects:
             zscored_map = ztransf_img(cmap_template.format(sub_id,ifold))
             zscored_map.to_filename(save_template.format(sub_id,ifold))

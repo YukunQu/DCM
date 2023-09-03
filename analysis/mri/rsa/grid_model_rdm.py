@@ -28,7 +28,7 @@ def get_sub_angles_nilearn(ev_files):
     angle_con_names = list(set(regressors_name))
 
     # remove other regressors.
-    for non_angle_reg in ['M1','decision']:
+    for non_angle_reg in ['M1','M2_error','decision']:
         if non_angle_reg in angle_con_names:
             angle_con_names.remove(non_angle_reg)
         else:
@@ -71,13 +71,13 @@ if __name__ == "__main__":
     task = 'game1'
     if task == 'game1':
         runs = range(1,7)
-        ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                      r'game1/grid_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'
-        savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
-                   'game1/grid_rsa/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_{}fold.npy'
+        ev_tempalte = r'/mnt/data/DCM/result_backup/2023.5.14/Events/' \
+                      r'game1/grid_rsa_corr_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'
+        savepath = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/' \
+                   'game1/grid_rsa_corr_trials/Setall/6fold/{}/rsa_cmap/{}_grid_RDM_coarse_{}fold.npy'
     elif task == 'game2':
         runs = range(1,3)
-        ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
+        ev_tempalte = r'/mnt/data/DCM/result_backup/2023.5.14/Events/' \
                       r'game2/grid_rsa_corr_trials/{}/6fold/{}_task-game2_run-{}_events.tsv'
         savepath = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
                    'game2/grid_rsa_corr_trials/Setall/6fold/{}/rsa/{}_grid_RDM_coarse_{}fold.npy'
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
     data = participants_data.query(f'{task}_fmri>=0.5')  # look out
-    subjects = data['Participant_ID'].to_list()[:1]
+    subjects = data['Participant_ID'].to_list()
     for sub_id in subjects:
         ev_files = []
         for i in runs:
@@ -127,6 +127,6 @@ if __name__ == "__main__":
                 plt.title("Mdoel RDM of {}fold".format(ifold),size=30)
                 # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
                 #          rotation_mode="anchor")
-                plt.savefig(r'/mnt/workdir/DCM/Result/paper/sf/sf2/RSA/RSA_model_pattern_similarity_{}fold.pdf'.format(ifold),
-                            dpi=300, bbox_inches='tight', transparent=True)
+                #plt.savefig(r'/mnt/workdir/DCM/Result/paper/sf/sf2/RSA/RSA_model_pattern_similarity_{}fold.pdf'.format(ifold),
+#                            dpi=300, bbox_inches='tight', transparent=True)
         print("{}'s grid rdm is generated.".format(sub_id))

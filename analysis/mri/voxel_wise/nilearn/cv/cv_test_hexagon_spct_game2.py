@@ -25,14 +25,11 @@ def set_contrasts(design_matrix):
         contrast_vector[contrast_index] = 1
         contrasts_set[contrast_id] = contrast_vector
 
-    # advanced contrast
-    if 'decision_error' in contrasts_set.keys():
-        contrasts_set['correct_error'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
     return contrasts_set
 
 
 def run_glm(subj,ifold):
-    configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'cv_hexagon_center_spct',
+    configs = {'TR': 3.0, 'task': 'game2', 'glm_type': 'cv_mpfc_hexagon_spct',
                'run_list': [1, 2],
                'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
@@ -40,7 +37,7 @@ def run_glm(subj,ifold):
                'events_name': r'sub-{}_task-game2_run-{}_events.tsv',
                'regressor_name': r'sub-{}_task-game2_run-{}_desc-confounds_timeseries_trimmed.tsv'}
 
-    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn_center/{}/{}/Setall/{}fold'.format(configs['task'],
+    dataroot = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/{}/{}/Setall/{}fold'.format(configs['task'],
                                                                                        configs['glm_type'], ifold)
     if not os.path.exists(dataroot):
         os.makedirs(dataroot)
@@ -50,7 +47,7 @@ def run_glm(subj,ifold):
         print(f"sub-{subj} already have results.")
     else:
         print("-------{} start!--------".format(subj))
-        functional_imgs, design_matrices = prepare_data(subj,ifold,configs,load_ev,True)
+        functional_imgs, design_matrices = prepare_data(subj, ifold,configs,load_ev,True)
         first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts)
 
 
@@ -62,7 +59,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,70)
+    subjects_chunk = list_to_chunk(subjects,50)
     for ifold in range(6,7):
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=70)(delayed(run_glm)(subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=50)(delayed(run_glm)(subj, ifold) for subj in chunk)

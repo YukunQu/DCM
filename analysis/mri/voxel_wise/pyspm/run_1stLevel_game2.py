@@ -5,12 +5,12 @@ from misc.load_spm import SPMfile
 from analysis.mri.img.FtoZ_transformation import ftoz
 from analysis.mri.voxel_wise.pyspm.firstLevel import run_firstLevel_spm
 
+
 # specify subjects
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game2_fmri>=0.5')
 pid = data['Participant_ID'].to_list()
-pid = ['sub-193']
 
 # check the existence of preprocessing file
 fmriprep_dir = r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep'

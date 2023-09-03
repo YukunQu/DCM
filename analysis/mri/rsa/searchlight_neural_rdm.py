@@ -2,7 +2,7 @@ import os.path
 import numpy as np
 import pandas as pd
 import nibabel as nib
-from nilearn.image import binarize_img
+from nilearn.image import binarize_img,mean_img
 from nipype.interfaces.base import Bunch
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
 from rsatoolbox.util.searchlight import get_volume_searchlight, get_searchlight_RDMs
@@ -52,7 +52,7 @@ def get_sub_angles_nilearn(ev_files):
     angle_con_names = list(set(regressors_name))
 
     # remove other regressors.
-    for non_angle_reg in ['M1','decision']:
+    for non_angle_reg in ['M1','M2_error','decision']:
         if non_angle_reg in angle_con_names:
             angle_con_names.remove(non_angle_reg)
         else:
@@ -96,8 +96,8 @@ def cal_neural_rdm(sub_id):
     """
     # get subject's contrast_names(angles)
     ev_files = []
-    ev_tempalte = r'/mnt/workdir/DCM/BIDS/derivatives/Events/' \
-                  r'game1/grid_rsa/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
+    ev_tempalte = r'/mnt/data/DCM/result_backup/2023.5.14/Events/' \
+                  r'game1/grid_rsa_corr_trials/{}/6fold/{}_task-game1_run-{}_events.tsv'  # look out
     runs = range(1,7)  # look out
     for i in runs:
         ev_files.append(ev_tempalte.format(sub_id,sub_id,i))
@@ -105,9 +105,9 @@ def cal_neural_rdm(sub_id):
     #con_names = get_sub_pos(ev_files)
 
     # get subject's cmap
-    cmap_folder = '/mnt/workdir/DCM/BIDS/derivatives/Nilearn/' \
-                  'game1/grid_rsa/Setall/6fold/{}'
-    image_paths = [os.path.join(cmap_folder.format(sub_id),'zmap/{}_zmap.nii.gz'.format(con_id))
+    cmap_folder = '/mnt/data/DCM/result_backup/2023.5.14/Nilearn/' \
+                  'game1/grid_rsa_corr_trials/Setall/6fold/{}'
+    image_paths = [os.path.join(cmap_folder.format(sub_id),'cmap/{}_cmap.nii.gz'.format(con_id))
                    for con_id in con_names]
 
     # load one image to get the dimensions and make the mask
@@ -120,7 +120,8 @@ def cal_neural_rdm(sub_id):
     data = np.zeros((len(image_paths), x, y, z))
     for x, im in enumerate(image_paths):
         data[x] = nib.load(im).get_fdata()
-
+    #mean_cmap = np.mean(data,axis=0)
+    #data = data - mean_cmap
     # only one pattern per image
     image_value = np.arange(len(image_paths))
 
@@ -131,10 +132,10 @@ def cal_neural_rdm(sub_id):
     data_2d = np.nan_to_num(data_2d)
 
     SL_RDM = get_searchlight_RDMs(data_2d, centers, neighbors, image_value, method='correlation')
-    savepath = os.path.join(cmap_folder.format(sub_id),'rsa')
+    savepath = os.path.join(cmap_folder.format(sub_id),'rsa_cmap')
     if not os.path.exists(savepath):
         os.mkdir(savepath)
-    savepath = os.path.join(savepath,'{}-neural_zmap_RDM.hdf5'.format(sub_id))
+    savepath = os.path.join(savepath,'{}-neural_cmap_RDM_corr.hdf5'.format(sub_id))
     SL_RDM.save(savepath,'hdf5',overwrite=True)
     print("The {}'s rdm have been done.".format(sub_id))
     return "The {}'s rdm have been done.".format(sub_id)

@@ -15,21 +15,21 @@ def load_ev_distance(event_path):
     event = pd.read_csv(event_path, sep='\t')
     event_condition = event.query("trial_type in ['M1','M2_corr','M2_error', 'decision_corr','decision_error']")
 
-    pmod_distance = event.query("trial_type=='distance'")
-    distance_mod = pmod_distance['modulation'].to_list()
+    reg_distance = event.query("trial_type=='distance'").copy()
+    distance_mod = reg_distance['modulation'].to_list()
 
-    # # generate parametric modulation for decision
-    decisionxdistance = event.query("trial_type == 'decision_corr'").copy()
-    decisionxdistance.loc[:, 'modulation'] = distance_mod
-    decisionxdistance['trial_type'] = 'decision_corrxdistance'
+    # demean parametric modulaiton
+    distance_mod = np.array(distance_mod)
+    distance_mod = distance_mod - np.mean(distance_mod)
+    reg_distance['modulation'] = distance_mod
 
-    event_condition = event_condition.append([decisionxdistance])
+    event_condition = pd.concat([event_condition,reg_distance])
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
     return event_condition
 
 
 def set_contrasts(design_matrix):
-    contrast_name = ['M1','M2_corr','M2_error','decision_corr','decision_error','decision_corrxdistance']
+    contrast_name = ['M1','M2_corr','M2_error','decision_corr','decision_error','distance']
     # base contrast
     contrasts_set = {}
     for contrast_id in contrast_name:
@@ -86,6 +86,6 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,50)
+    subjects_chunk = list_to_chunk(subjects,10)
     for chunk in subjects_chunk:
-        results_list = Parallel(n_jobs=50)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+        results_list = Parallel(n_jobs=10)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

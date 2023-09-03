@@ -5,11 +5,11 @@ import seaborn as sns
 import nibabel as nib
 import matplotlib.colors
 import matplotlib.pyplot as plt
-from rsatoolbox.rdm.rdms import load_rdm
+from rsatoolbox.rdm.rdms import load_rdm,permute_rdms
 from rsatoolbox.inference import eval_fixed
 from rsatoolbox.model import ModelFixed
 from rsatoolbox.util.searchlight import evaluate_models_searchlight
-
+from rsatoolbox import vis
 from nilearn.image import new_img_like
 import concurrent.futures
 from analysis.mri.preprocess.fsl.preprocess_melodic import list_to_chunk
@@ -38,22 +38,31 @@ def calc_rs_map(sub_id, ifold):
     :return:
     """
     # set path
-    default_dir = r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/grid_rsa/Setall/6fold'
-    neural_RDM_path = os.path.join(default_dir,'{}/rsa/{}-neural_zmap_RDM.hdf5'.format(sub_id,sub_id))
-    gird_RDM_path = os.path.join(default_dir,'{}/rsa/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
-    rsmap_savepath = os.path.join(default_dir,'{}/rsa/rsa_img_coarse_6fold.nii.gz'.format(sub_id,ifold))
+    default_dir = r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/grid_rsa_corr_trials/Setall/6fold'
+    neural_RDM_path = os.path.join(default_dir,'{}/rsa_cmap/{}-neural_cmap_RDM_corr.hdf5'.format(sub_id,sub_id))
+    gird_RDM_path = os.path.join(default_dir,'{}/rsa_cmap/{}_grid_RDM_coarse_{}fold.npy'.format(sub_id,sub_id,ifold))
+    rsmap_savepath = os.path.join(default_dir,'{}/rsa_cmap/rsa_img_coarse_{}fold_corr.nii.gz'.format(sub_id,ifold))
 
     #  load neural RDM for each voxel
     neural_RDM = load_rdm(neural_RDM_path)
+
     # load grid model
     grid_RDM = np.load(gird_RDM_path)
     grid_model = ModelFixed('Grid RDM', upper_tri(grid_RDM))
-    # evaluate
-    eval_results = evaluate_models_searchlight(neural_RDM, grid_model, eval_fixed, method='corr', n_jobs=3)
+    # vis.show_rdm(grid_model.rdm_obj)
+    # # rdms = [grid_model]
+    # # for i in range(1, 100):
+    # #     permuted_grid_RDM = permute_rdms(grid_model.rdm_obj)
+    # #     rdms.append(ModelFixed(f'Permuted_{i}_Grid_RDM', permuted_grid_RDM))
+
+    # evaluat
+    eval_results = evaluate_models_searchlight(neural_RDM, grid_model, eval_fixed, method='corr', n_jobs=2)
 
     # get the evaulation score for each voxel
     # We only have one model, but evaluations returns a list. By using float we just grab the value within that list
     eval_score = [np.float64(e.evaluations) for e in eval_results]
+    #eval_score = np.array(eval_score).reshape((248868,100))
+    #eval_zscore = [((e[0] - np.mean(e)))/(np.std(e)/np.sqrt(100)) for e in eval_score]
 
     # Create an 3D array, with the size of mask, and
     mni_mask = r'/mnt/workdir/DCM/Docs/Mask/res-02_desc-brain_mask.nii'
@@ -67,7 +76,7 @@ def calc_rs_map(sub_id, ifold):
 
     corr_img = new_img_like(mask_img, RDM_brain)
     corr_img.to_filename(rsmap_savepath)
-    print("The calculation of {}-{} have been done.".format(ifold,sub_id))
+    print("The calculation of {}-{} have been done.".format(ifold, sub_id))
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ from scipy.stats import pearsonr
 
 # load participant
 participants = pd.read_csv(r"/mnt/workdir/DCM/BIDS/participants.tsv", sep='\t')
-sub_id = participants.query('game1_fmri>0')['Participant_ID'].tolist()
+sub_id = participants.query('(game1_fmri>=0.5)&(game1_acc>0.8)')['Participant_ID'].tolist()
 
 
 # load data
