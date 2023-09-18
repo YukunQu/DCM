@@ -25,7 +25,17 @@ for subjid in subject_list:
     print("Command:",cmd1)
     subprocess.call(cmd1, shell=True)
 
-    cmd2 = f'mri_segstats --seg {segvol} --in {subj_surf_dir}/{hemi}.{stats}.fsaverage.mgh --sum {outpath}'
-    print("Command:",cmd2)
+    if stats == 'thickness':
+        cmd2 = f'mri_segstats --seg {segvol} --in {subj_surf_dir}/{hemi}.{stats}.fsaverage.mgh --sum {outpath}'
+    elif stats == 'volume':
+        cmd2 = f'mri_segstats --seg {segvol} --in {subj_surf_dir}/{hemi}.{stats}.fsaverage.mgh --sum {outpath} --accumulate'
+    print("Command:", cmd2)
     subprocess.call(cmd2, shell=True)
     print(subjid,'finsihed.')
+
+#%%
+
+participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
+participants_data = pd.read_csv(participants_tsv, sep='\t')
+data = participants_data.query('game1_fmri>=0.5')  # look out
+subject_list = data['Participant_ID'].to_list()

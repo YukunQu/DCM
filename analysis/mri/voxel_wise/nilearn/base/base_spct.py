@@ -25,17 +25,17 @@ def set_contrasts(design_matrix):
 
     # advanced contrast
     if 'decision_error' in contrasts_set.keys():
-        contrasts_set['m2_correct_superiority'] = contrasts_set['M2_corr'] - contrasts_set['M2_error']
-        contrasts_set['decision_correct_superiority'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+        contrasts_set['m2_accurate'] = contrasts_set['M2_corr'] - contrasts_set['M2_error']
+        contrasts_set['decision_accurate'] = contrasts_set['decision_corr'] - contrasts_set['decision_error' ]
     return contrasts_set
 
 
-def run_glm(task,subj,ifold):
+def run_glm(task,subj, ifold):
     if task == 'game1':
         configs = {'TR': 3.0, 'task': 'game1', 'glm_type': 'base_spct',
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
-                   'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
+                   'event_dir': r'/mnt/data/DCM/result_backup/2023.5.14/Events',
                    'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
@@ -76,4 +76,4 @@ if __name__ == "__main__":
     subjects_chunk = list_to_chunk(subjects,30)
     for ifold in [6]:
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=30)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=50)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

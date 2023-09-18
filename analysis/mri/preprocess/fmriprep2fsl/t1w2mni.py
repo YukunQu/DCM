@@ -8,6 +8,7 @@ antsApplyTransforms --float --default-value 0  \
 		-t $FMRIPREP_DIR/sub-060/anat/sub-060_from-T1w_to-MNI152NLin2009cAsym_mode-image_xfm.h5
 """
 
+
 import pandas as pd
 from os.path import join as pjoin
 from subprocess import Popen, PIPE
@@ -41,8 +42,8 @@ for sub in subject_list:
 
         cmd_list = [antsAT_cmd.format(inv, ouv, r, t) for inv, ouv, r, t in zip(input, output, ref, transform)]
 
-cmd_list = list_to_chunk(cmd_list, 70)
-for cmd_chunk in cmd_list:
+cmd_list = list_to_chunk(cmd_list[:2], 70)
+for cmd_chunk in cmd_list[:1]:
     procs_list = []
     for cmd in cmd_chunk:
         print(cmd)
@@ -51,3 +52,5 @@ for cmd_chunk in cmd_list:
     for pdir, proc in zip(output, procs_list):
         proc.wait()
         print("{} finished!".format(pdir))
+
+#%%

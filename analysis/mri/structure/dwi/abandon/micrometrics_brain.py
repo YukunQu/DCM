@@ -7,7 +7,6 @@ from nilearn.image import load_img, get_data, new_img_like
 from nilearn.masking import apply_mask
 
 # extract the microsructural measurements of every brain areas of each subject.
-
 def load_label_dict_from_file(input_file,reverse=False):
     with open(input_file, 'r') as f:
         ldict = json.load(f)
@@ -30,7 +29,7 @@ label_dict = load_label_dict_from_file(input_file_path)
 # get all subjects' diffusion metrics file
 dmetric_files = glob.glob(r'/mnt/data/DCM/HNY/Diffusion/DTI/DTI/'
                           r'Development_Cognitive_Map_*_Development_Cognitive_Map_*_DTI 参数分析_2023-03-12T18_43_40/'
-                          r'smoothed_dti_FA.nii.gz')
+                          r'smoothed_dti_RD.nii.gz')
 # dmetric_files = glob.glob(r'/mnt/data/DCM/HNY/Diffusion/DTI/DTI/'
 #                           r'Development_Cognitive_Map_*_Development_Cognitive_Map_*_DTI 参数分析_2023-03-12T18_43_40/'
 #                           r'smoothed_dti_MD.nii.gz')
@@ -50,7 +49,7 @@ for sub_id,dmetric_file in zip(subs_id,dmetric_files):
     metrics_aparc_subData = pd.DataFrame.from_dict(metrics_aparc_subData,orient='index').T
     metrics_aparc_AllData = pd.concat([metrics_aparc_AllData,metrics_aparc_subData],axis=0)
 metrics_aparc_AllData = metrics_aparc_AllData.sort_values('sub-id')
-metrics_aparc_AllData.to_csv(r"/mnt/data/DCM/HNY/Diffusion/Micro_brainareas/metrics_DMN_dti_FA_AllData.csv",index=False)
+metrics_aparc_AllData.to_csv(r"/mnt/data/DCM/HNY/Diffusion/Micro_brainareas/metrics_DMN_dti_RD_AllData.csv",index=False)
 
 #%%
 # 计算每个脑区的FA，MD，MK和推理能力/年龄的相关
