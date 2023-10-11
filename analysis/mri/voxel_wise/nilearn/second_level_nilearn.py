@@ -59,7 +59,7 @@ def run_2nd_covariate(subjects, contrast_id, cmap_template, covariates, datasink
 
 if __name__ == "__main__":
     for ifold in ['6fold']:
-        task = 'game1'
+        task = 'game2'
         # subject
         participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
         participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -76,8 +76,10 @@ if __name__ == "__main__":
         templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/zmap', '{}_zmap.nii.gz')
         #templates = pjoin(data_root, f'{task}/{glm_type}/{set_id}/{ifold}', 'sub-{}/rsa_cmap', '{}.nii.gz')
 
-        contrast_configs = {'base_spct':['M1', 'M2_corr', 'decision_corr', 'm2_accurate','decision_accurate'],
+        contrast_configs = {#'base_spct':['M1', 'M2_corr', 'decision_corr', 'm2_accurate','decision_accurate'],
+                            'base_spct':['M1', 'M2_corr', 'decision_corr'],
                             'hexagon_spct': ['hexagon'],
+                            'hexagon_spat': ['hexagon'],
                             'hexagon_sum':['hexagon'],
                             'hexagon_replace_diff': ['hexagon'],
                             'hexagon_distance_spct': ['M1', 'M2_corr', 'decision_corr', 'decision_error','hexagon','correct_error',

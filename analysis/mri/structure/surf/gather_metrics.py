@@ -22,6 +22,8 @@ def read_aseg(subjects_list,smeasure='Right-Hippocampus'):
                 measures.append(measure)
                 break
     return measures
+
+
 #%%
 # gather the metrics into one files
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
@@ -54,6 +56,7 @@ for stats_name in stats_names:
 
             column_name = f'{hemi}.{roi}.{stats_name}'
             new_data[column_name] = stats
+
 
 #%%
 # load DTI metrics
@@ -101,6 +104,7 @@ for index, row in dti_metric.iterrows():
     value = row['value']
     new_data.loc[new_data['Participant_ID'] == sub_id, f'{roi}.{dti_metric_name}'] = value
 
+
 #%%
 # load hippocampus metrics (volume and FA)
 # load volume
@@ -109,6 +113,7 @@ lhc = read_aseg(subject_list,'Left-Hippocampus')
 new_data['rHC.volume'] = rhc
 new_data['lHC.volume'] = lhc
 new_data['HC.volume'] = new_data['rHC.volume'] + new_data['lHC.volume']
+
 
 #%%
 from nilearn import image
@@ -121,6 +126,8 @@ func_templates = {'Distance code (Game1)':r'/mnt/data/DCM/result_backup/2023.5.1
                                           r'distance_spct/Setall/6fold/{}/zmap/distance_zmap.nii.gz',
                   'Grid-like code (Game1)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
                                            r'grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_zscore_img_coarse_6fold.nii.gz',
+                  'CV_grid-like code (Game1)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
+                                              'cv_test_hexagon_spct/Setall/6fold/{}/zmap/alignPhi_even_zmap.nii.gz',
                   'Map-alignment (Game2)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2'
                                           r'/cv_hexagon_spct/Setall/6fold/{}/cmap/alignPhi_cmap.nii.gz'}
 
@@ -132,6 +139,7 @@ for subjid in subject_list:
         if not os.path.exists(func_path):
             # print(subjid, "doesn't exist.")
             new_data.loc[new_data['Participant_ID'] == sub_id, rep] = np.nan
+            print(func_path)
         else:
             func_data = image.load_img(func_path)
             if 'Distance' in rep:
@@ -143,5 +151,8 @@ for subjid in subject_list:
             new_data.loc[new_data['Participant_ID'] == subjid, rep] = np.mean(func_data)
 
 #%%
+# load the connectome metrics
+
+#%%
 new_data['Age'] = data['Age']
-new_data.to_csv(r'/mnt/workdir/DCM/Result/analysis/brain_metrics_game1_20230914.csv', index=False)
+new_data.to_csv(r'/mnt/workdir/DCM/Result/analysis/brain_metrics_game1_20230923.csv', index=False)

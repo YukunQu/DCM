@@ -13,30 +13,7 @@ from joblib import Parallel, delayed
 
 def load_ev_spat(event_path):
     event = pd.read_csv(event_path, sep='\t')
-    event_condition = event.query("trial_type in ['M1','M2','decision']")
-
-    cos_mod = event.query("trial_type =='cos'")['modulation'].to_list()
-    sin_mod = event.query("trial_type =='sin'")['modulation'].to_list()
-
-    # generate parametric modulation for M2
-    m2xcos = event.query("trial_type == 'M2'").copy()
-    m2xcos.loc[:, 'modulation'] = cos_mod
-    m2xcos['trial_type'] = 'cos'
-
-    m2xsin = event.query("trial_type == 'M2'").copy()
-    m2xsin.loc[:, 'modulation'] = sin_mod
-    m2xsin['trial_type'] = 'sin'
-
-    # generate parametric modulation for decision
-    decisionxcos = event.query("trial_type == 'decision'").copy()
-    decisionxcos.loc[:, 'modulation'] = cos_mod
-    decisionxcos['trial_type'] = 'cos'
-
-    decisionxsin = event.query("trial_type == 'decision'").copy()
-    decisionxsin.loc[:, 'modulation'] = sin_mod
-    decisionxsin['trial_type'] = 'sin'
-
-    event_condition = event_condition.append([m2xcos,m2xsin,decisionxcos,decisionxsin])
+    event_condition = event.query("trial_type in ['M1','M2','decision','sin','cos']")
     event_condition = event_condition[['onset', 'duration', 'trial_type', 'modulation']]
     return event_condition
 
@@ -63,8 +40,7 @@ def run_glm(task,subj):
                    'run_list': [1, 2, 3, 4, 5, 6],
                    'func_dir': r'/mnt/workdir/DCM/BIDS/derivatives/fmriprep_volume_fmapless/fmriprep',
                    'event_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events',
-                   #'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
-                   'func_name': 'fsl/sub-{}_task-game1_run-{}_space-T1w_desc-preproc_bold_trimmed.ica/filtered_func_data_clean_space-MNI152NLin2009cAsym_res-2.nii.gz',
+                   'func_name': 'func/sub-{}_task-game1_run-{}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold_trimmed.nii.gz',
                    'events_name': r'sub-{}_task-game1_run-{}_events.tsv',
                    'regressor_name': r'sub-{}_task-game1_run-{}_desc-confounds_timeseries_trimmed.tsv'}
     elif task == 'game2':
@@ -90,7 +66,7 @@ def run_glm(task,subj):
     else:
         print("-------{} start!--------".format(subj))
         functional_imgs, design_matrices = prepare_data(subj, ifold, configs,load_ev_spat,True)
-        first_level_glm(datasink, functional_imgs, design_matrices,set_contrasts_spat)
+        first_level_glm(datasink, functional_imgs, design_matrices, set_contrasts_spat)
 
 
 if __name__ == "__main__":

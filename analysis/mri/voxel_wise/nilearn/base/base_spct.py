@@ -65,7 +65,7 @@ def run_glm(task,subj, ifold):
 
 
 if __name__ == "__main__":
-    task = 'game1'
+    task = 'game2'
     # specify subjects
     participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
     participants_data = pd.read_csv(participants_tsv, sep='\t')
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     pid = data['Participant_ID'].to_list()
     subjects = [p.split('-')[-1] for p in pid]
 
-    subjects_chunk = list_to_chunk(subjects,30)
+    subjects_chunk = list_to_chunk(subjects,70)
     for ifold in [6]:
         for chunk in subjects_chunk:
-            results_list = Parallel(n_jobs=50)(delayed(run_glm)(task,subj,ifold) for subj in chunk)
+            results_list = Parallel(n_jobs=70)(delayed(run_glm)(task,subj,ifold) for subj in chunk)

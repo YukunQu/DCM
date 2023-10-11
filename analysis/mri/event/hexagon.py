@@ -128,10 +128,12 @@ class GAME1EV_hexagon_spat(GAME1EV_base_spat, EV_hexagon):
         m1ev = self.genM1ev()
         m2ev = self.genM2ev()
         deev = self.genDeev()
-        pmod_sin, pmod_cos = self.genpm(m2ev, ifold)
+        m2_pmod_sin, m2_pmod_cos = self.genpm(m2ev, ifold)
+        decision_pmod_sin, decision_pmod_cos = self.genpm(deev, ifold)
+        sin = pd.concat([m2_pmod_sin, decision_pmod_sin], axis=0).sort_values('onset', ignore_index=True)
+        cos = pd.concat([m2_pmod_cos, decision_pmod_cos], axis=0).sort_values('onset', ignore_index=True)
         # concat all events
-        event_data = pd.concat([m1ev, m2ev, deev,
-                                pmod_sin, pmod_cos], axis=0)
+        event_data = pd.concat([m1ev, m2ev, deev, sin, cos], axis=0)
         return event_data
 
 

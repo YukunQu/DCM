@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from os.path import join
 from analysis.mri.event.base import GAME1EV_base_spct,GAME2EV_base_spct
-from analysis.mri.event.hexagon import GAME1EV_hexagon_spct,GAME2EV_hexagon_spct,GAME2EV_hexagon_center_spct
+from analysis.mri.event.hexagon import GAME1EV_hexagon_spct,GAME2EV_hexagon_spct,GAME2EV_hexagon_center_spct,GAME1EV_hexagon_spat
 from analysis.mri.event.distance import GAME1EV_2distance_spct,GAME1EV_distance_spct,GAME2EV_2distance_spct,\
     GAME2EV_distance_spct,GAME2EV_distance_center_spct,GAME1EV_3distance_spct
 from analysis.mri.event.value import GAME1EV_value_spct,GAME1EV_m2value_spct,GAME1EV_pure_value_spct,GAME1EV_ap_spct,GAME1EV_dp_spct,GAME1EV_apdp_spct,GAME2EV_value_spct
@@ -11,8 +11,8 @@ from analysis.mri.event.joint import GAME1EV_distance_value_spct
 
 
 ifolds = range(6,7)
-task = 'game1'
-glm_type = 'm2value_spct'
+task = 'game2'
+glm_type = 'base_spct'
 drop_stalemate = False
 print(glm_type)
 template = {'save_dir': r'/mnt/workdir/DCM/BIDS/derivatives/Events/{}/'+glm_type+'/sub-{}/{}fold',
@@ -43,8 +43,10 @@ for subj in subjects:
         for idx in runs:
             run_id = str(idx)
             behav_path = template['behav_path'].format(subj, subj, task, run_id)
-            if 'hexagon' in glm_type:
+            if 'hexagon_spct' in glm_type:
                 event_data = getattr(eval(f'{task.upper()}EV_{glm_type}')(behav_path), f'{task.lower()}ev_{glm_type}')(ifold,drop_stalemate)
+            elif 'hexagon_spat' in glm_type:
+                event_data = getattr(eval(f'{task.upper()}EV_{glm_type}')(behav_path), f'{task.lower()}ev_{glm_type}')(ifold)
             else:
                 if drop_stalemate:
                     event_data = getattr(eval(f'{task.upper()}EV_{glm_type}')(behav_path), f'{task.lower()}ev_{glm_type}')(True)

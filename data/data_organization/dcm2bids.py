@@ -18,6 +18,10 @@ def dcm2bids_helper(subjects):
         # ori_dir = r'/mnt/data/AIM/Development/sourcedata/MRI_T1/20230325_K207_R1{}'.format(subj)
         # out_dir = r'/mnt/data/AIM/Development/tmp/R1{}'.format(subj)
         command = r'dcm2bids_helper -d {} -o {}'.format(ori_dir, out_dir)
+
+        d = '/mnt/data/AIM/Development/sourcedata/sub-R1001/NeuroData/MRI/20230325_K207_R1001'
+        o = '/mnt/data/AIM/Development/sourcedata/sub-R1005/NeuroData/MRI/1001'
+        command = r'dcm2bids_helper -d {} -o {}'.format(d, o)
         print("Command:", command)
         subprocess.call(command, shell=True)
 
