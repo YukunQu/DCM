@@ -26,7 +26,9 @@ def set_contrasts(design_matrix):
     # advanced contrast
     if 'decision_error' in contrasts_set.keys():
         contrasts_set['m2_accurate'] = contrasts_set['M2_corr'] - contrasts_set['M2_error']
-        contrasts_set['decision_accurate'] = contrasts_set['decision_corr'] - contrasts_set['decision_error' ]
+        contrasts_set['decision_accurate'] = contrasts_set['decision_corr'] - contrasts_set['decision_error']
+        contrasts_set['m2'] = contrasts_set['M2_corr'] + contrasts_set['M2_error']
+
     return contrasts_set
 
 

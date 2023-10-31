@@ -13,7 +13,7 @@ rhc = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/hippocampus/rHC_MNI152NL.nii.g
 hc = image.math_img('np.logical_or(img1,img2)', img1=lhc, img2=rhc).get_fdata()
 
 ec_img  = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
-ec_img = image.binarize_img(ec_img,5)
+ec_img = image.binarize_img(ec_img,20)
 ec = ec_img.get_fdata()
 
 mpfc = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/VMPFC_MNI152NL_new.nii.gz').get_fdata()
@@ -32,7 +32,7 @@ for ron, rol in zip(rois_names,rois_label):
     atlas[mask==1] = rol
 
 atlas_img = image.new_img_like(ec_img,atlas)
-atlas_img.to_filename(r'/mnt/workdir/DCM/Docs/Mask/DMN/DMN_atlas.nii.gz')
+atlas_img.to_filename(r'/mnt/workdir/DCM/Docs/Mask/DMN/DMN_atlas/DMN_atlas_V2.nii.gz')
 
 
 #%%

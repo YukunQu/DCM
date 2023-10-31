@@ -114,22 +114,27 @@ new_data['rHC.volume'] = rhc
 new_data['lHC.volume'] = lhc
 new_data['HC.volume'] = new_data['rHC.volume'] + new_data['lHC.volume']
 
-
 #%%
 from nilearn import image
 from nilearn import masking
 
 # load cognitive map representation
-func_templates = {'Distance code (Game1)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
+func_templates = {'Distance code (Game1-mPFC)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
                                           r'distance_spct/Setall/6fold/{}/zmap/distance_zmap.nii.gz',
-                  'Distance code (Game2)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/'
+                  'Distance code (Game2-mPFC)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2/'
                                           r'distance_spct/Setall/6fold/{}/zmap/distance_zmap.nii.gz',
-                  'Grid-like code (Game1)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
+                  'Grid-like code (Game1-EC)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
                                            r'grid_rsa_corr_trials/Setall/6fold/{}/rsa/rsa_zscore_img_coarse_6fold.nii.gz',
-                  'CV_grid-like code (Game1)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
+                  'CV_grid-like code (Game1-EC)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game1/'
                                               'cv_test_hexagon_spct/Setall/6fold/{}/zmap/alignPhi_even_zmap.nii.gz',
-                  'Map-alignment (Game2)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2'
-                                          r'/cv_hexagon_spct/Setall/6fold/{}/cmap/alignPhi_cmap.nii.gz'}
+                  'Map-alignment (Game2-EC)':r'/mnt/data/DCM/result_backup/2023.5.14/Nilearn/game2'
+                                          r'/cv_hexagon_spct/Setall/6fold/{}/cmap/alignPhi_cmap.nii.gz',
+                  'CV2_Grid-like code (Game1-mPFC)':r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/'
+                                                    r'cv_test_dmPFC_hexagon_spct/Setall/6fold/{}/cmap/alignPhi_cmap.nii.gz',
+                  'CV2_Grid-like code (Game1-EC)':r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game1/'
+                                                  r'cv_test_dmPFC_hexagon_spct/Setall/6fold/{}/cmap/alignPhi_cmap.nii.gz',
+                  'Map-alignment2 (Game2-mPFC)':r'/mnt/workdir/DCM/BIDS/derivatives/Nilearn/game2/'
+                                                r'cv_mpfc_hexagon_spct/Setall/6fold/{}/cmap/alignPhi_cmap.nii.gz'}
 
 for subjid in subject_list:
     for rep,cmap_tmp in func_templates.items():
@@ -142,7 +147,7 @@ for subjid in subject_list:
             print(func_path)
         else:
             func_data = image.load_img(func_path)
-            if 'Distance' in rep:
+            if 'mPFC' in rep:
                 mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/VMPFC/VMPFC_MNI152NL_new.nii.gz')
             else:
                 mask = image.load_img(r'/mnt/workdir/DCM/Docs/Mask/EC/juelich_EC_MNI152NL_prob.nii.gz')
@@ -150,9 +155,7 @@ for subjid in subject_list:
             func_data = masking.apply_mask(func_data,mask)
             new_data.loc[new_data['Participant_ID'] == subjid, rep] = np.mean(func_data)
 
-#%%
-# load the connectome metrics
 
 #%%
 new_data['Age'] = data['Age']
-new_data.to_csv(r'/mnt/workdir/DCM/Result/analysis/brain_metrics_game1_20230923.csv', index=False)
+new_data.to_csv(r'/mnt/workdir/DCM/Result/analysis/brain_metrics_game1_20231025.csv', index=False)

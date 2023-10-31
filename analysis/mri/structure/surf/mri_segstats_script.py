@@ -34,7 +34,6 @@ for subjid in subject_list:
     print(subjid,'finsihed.')
 
 #%%
-
 participants_tsv = r'/mnt/workdir/DCM/BIDS/participants.tsv'
 participants_data = pd.read_csv(participants_tsv, sep='\t')
 data = participants_data.query('game1_fmri>=0.5')  # look out
